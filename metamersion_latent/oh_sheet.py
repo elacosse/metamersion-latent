@@ -14,6 +14,15 @@ SCOPES = ['https://www.googleapis.com/auth/spreadsheets.readonly']
 
 
 def google_sheet_to_dataframe(spreadsheet_id: str, range_name: str) -> pd.DataFrame:
+    """Turns a google sheet into a pandas dataframe
+    
+    Args:
+        spreadsheet_id (str): The id of the google sheet
+        range_name (str): The range of the sheet to read
+        
+    Returns:
+        pd.DataFrame: The sheet as a dataframe
+    """
 
     creds = None
     # The file token.json stores the user's access and refresh tokens, and is
