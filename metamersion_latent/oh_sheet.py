@@ -43,11 +43,11 @@ def google_sheet_to_dataframe(spreadsheet_id: str, range_name: str) -> pd.DataFr
         values = result.get('values', [])
 
         if not values:
-            logging.error('No data found.')
+            logger.error('No data found.')
             return pd.Dataframe()
 
         df = pd.DataFrame(values[1:], columns=values[0])
         return df
 
     except HttpError as err:
-        logging.error(err)
+        logger.error(err)
