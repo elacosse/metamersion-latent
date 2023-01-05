@@ -199,7 +199,7 @@ class ChatGUI():
 
         
     def init_parameters(self):
-        self.fp_font = '/usr/share/fonts/kongtext.ttf'
+        self.fp_font = 'kongtext.ttf'
         self.font_size = 20
         self.display_height = 900
         self.display_width = 1500
@@ -413,9 +413,20 @@ class ChatGUI():
             pygame.draw.rect(self.screen, self.col_cursor_human, (self.cursor_human_x, self.cursor_human_y, self.width_cursor_human, self.cursor_height_human))
 
 
+    # def get_chat_history(self):
+    #     history = ""
+    #     nmb_items = max(len(self.history_ai), len(self.history_human))
+    #     for i in range(nmb_items):
+    #         history += self.history_ai[i]
+    #         history += "\n"
+    #         if i < len(self.history_human):
+    #             history += self.history_human[i]
+    #             history += "\n"
+    #     return history
+
 if __name__ == "__main__":
 
-    self = ChatGUI(use_ai_chat=True)
+    self = ChatGUI(fp_config="../metamersion_latent/configs/chat/girard_therapist.py", use_ai_chat=True)
     
     while True:
         
