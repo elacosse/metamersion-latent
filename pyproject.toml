@@ -10,10 +10,23 @@ google-api-python-client = "^2.70.0"
 google-auth-httplib2 = "^0.1.0"
 google-auth-oauthlib = "^0.8.0"
 pandas = "^1.5.2"
+langchain = "^0.0.56"
+openai = "^0.25.0"
+python-dotenv = "^0.21.0"
+addict = "^2.4.0"
+yapf = "^0.32.0"
+click = "^8.1.3"
 
 [tool.poetry.dev-dependencies]
 pytest = "^5.2"
+pre-commit = "^2.20.0"
+black = "^22.10.0"
+ruff = "^0.0.209"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
 build-backend = "poetry.core.masonry.api"
+
+
+[tool.ruff]
+line-length = 120
