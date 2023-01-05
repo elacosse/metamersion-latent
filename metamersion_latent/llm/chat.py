@@ -63,6 +63,9 @@ class Chat:
             str: The AI's response.
         """
         self.inputs.append(user_message)
-        output = self.conversation.predict(input=user_message)
+        try:
+            output = self.conversation.predict(input=user_message)
+        except Exception as e:
+            output = "Oops, something went wrong. I'm sorry. What did you say?"
         self.outputs.append(output)
         return output
