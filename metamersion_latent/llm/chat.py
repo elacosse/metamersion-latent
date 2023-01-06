@@ -1,5 +1,5 @@
 from dotenv import find_dotenv, load_dotenv
-from langchain.chains import ConversationChain
+from langchain.chains import ConversationChain, LLMChain
 from langchain.chains.conversation.memory import (
     ConversationBufferMemory,
     ConversationSummaryMemory,
@@ -54,6 +54,10 @@ class Chat:
             prompt=self.prompt, llm=self.llm, verbose=verbose, memory=self.memory
         )
 
+        self.analysis_prompt = PromptTemplate(
+            input_variables=["history"], template=self.config.analysis_template
+        )
+
     def __call__(self, user_message: str):
         """This is the main function that is called to handle a user message.
         It returns the AI's response.
@@ -68,4 +72,16 @@ class Chat:
         except Exception as e:
             output = "Oops, something went wrong. I'm sorry. What did you say?"
         self.outputs.append(output)
+        return output
+
+    def analyze_buffer(self):
+        """Generate a summary of the conversation for later analysis."""
+        llm = load_llm_from_config(self.config.analysis_model)
+        chain = LLMChain(llm=llm, prompt=self.analysis_prompt)
+        # Run the chain only specifying the input variable.
+        history = self.memory.buffer
+        try:
+            output = chain.run(history=history)
+        except Exception as e:
+            return None
         return output

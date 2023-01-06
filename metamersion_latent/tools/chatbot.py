@@ -49,13 +49,28 @@ def main(config, verbose):
     while True:
         human_input = input("User: ")
         if human_input == "goodbye":
-            print(chat.memory.buffer)
             break
         elif human_input == "":
             human_input = "I don't know what to say."
             continue
         output = chat(human_input)
         print(output)
+
+    # Analyze the conversation
+    print("Analyzing the conversation...")
+    while True:
+        try:
+            analysis_output = chat.analyze_buffer()
+        except Exception as e:
+            pass
+        if output is not None:
+            break
+
+    print("Extracting concepts from analysis summary...")
+    from metamersion_latent.utils.master_prompter import extract_concepts_from_analysis
+
+    concepts = extract_concepts_from_analysis(analysis_output, config)
+    print(concepts)
 
 
 if __name__ == "__main__":
