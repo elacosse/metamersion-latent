@@ -74,3 +74,14 @@ def beautify_concepts_to_stable_diffusion_prompts(concepts: list) -> list:
         output = output.replace(".", ",")[:-1]
         prompts.append(output)
     return prompts
+
+
+def prompts_to_txt_file(prompts: list, filepath: str):
+    """Save prompts to a txt file.
+    Args:
+        prompts (list): A list of prompts.
+        filename (str): The filename to save the prompts to.
+    """
+    with open(filepath, "w") as f:
+        for prompt in prompts:
+            f.write(prompt + "\n")

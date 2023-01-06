@@ -65,6 +65,7 @@ def main(config, verbose):
             pass
         if output is not None:
             break
+    print(analysis_output)
 
     print("Extracting concepts from analysis summary...")
     from metamersion_latent.utils.master_prompter import extract_concepts_from_analysis

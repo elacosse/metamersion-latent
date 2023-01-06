@@ -117,3 +117,6 @@ poetry.lock
 
 # credentials for google api
 credentials.json
+
+# data directory
+data/*
