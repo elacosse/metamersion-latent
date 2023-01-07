@@ -4,8 +4,9 @@ import time
 
 import numpy as np
 import pygame
+import datetime
 
-sys.path.append("../")
+sys.path.append("../..")
 
 from metamersion_latent.llm.chat import Chat
 from metamersion_latent.llm.config import Config
@@ -53,6 +54,39 @@ def wrap_text(font, text, max_width):
             lines.append(line)
     return lines
 
+def txt_load(fp_txt):
+    with open(fp_txt, "r") as myfile:
+        lines = myfile.readlines()
+    lines= [l.split("\n")[0] for l in lines]
+        
+    return lines
+
+def txt_save(fp_txt, list_blabla, append=False):
+    if append:
+        mode = "a+"
+    else:
+        mode = "w"
+    with open(fp_txt, mode) as fa:
+        for item in list_blabla:
+            fa.write("%s\n" % item)
+            
+            
+def get_time(resolution=None):
+    if resolution==None:
+        resolution="second"
+    if resolution == "day":
+        t = time.strftime('%y%m%d', time.localtime())
+    elif resolution == "minute":
+        t = time.strftime('%y%m%d_%H%M', time.localtime())
+    elif resolution == "second":
+        t = time.strftime('%y%m%d_%H%M%S', time.localtime())
+    elif resolution == "millisecond":
+        t = time.strftime('%y%m%d_%H%M%S', time.localtime())
+        t += "_"
+        t += str("{:03d}".format(int(int(datetime.utcnow().strftime('%f'))/1000)))
+    else:
+        raise ValueError("bad resolution provided: %s" %resolution)
+    return t
 
 def get_key(pg_keycode):
     r"""This function takes a pygame keycode and returns the corresponding character.
@@ -180,12 +214,14 @@ class ChatGUI:
 
     def __init__(
         self,
-        fp_config: str = "../metamersion_latent/configs/chat/mad_bot.py",
+        fp_config: str,
         use_ai_chat: bool = True,
+        verbose_ai: bool = False,
     ):
 
         pygame.init()
         self.use_ai_chat = use_ai_chat
+        self.verbose_ai = verbose_ai
         self.init_parameters()
         self.init_vars()
         if use_ai_chat:
@@ -196,8 +232,10 @@ class ChatGUI:
         self.screen = pygame.display.set_mode((self.display_width, self.display_height))
         pygame.display.set_caption("Metamersion Chat")
         self.clock = pygame.time.Clock()
+        
 
     def init_parameters(self):
+        self.escape_and_save = "x" #when this is submitted by human, then save chat
         self.fp_font = "kongtext.ttf"
         self.font_size = 20
         self.display_height = 900
@@ -237,11 +275,18 @@ class ChatGUI:
         self.width_cursor_human = 3  # px
         self.fract_cursor_height_human = 1.2  # Relative to text field height
         self.cursor_xdist_human = 10
-        self.cursor_height_human = int(
-            self.fract_cursor_height_human * self.line_height_typing
-        )
+        self.cursor_height_human = int(self.fract_cursor_height_human*self.line_height_typing)
         self.cursor_human_y = 0
         self.cursor_human_x = 0
+        
+        self.col_cursor_ai =  (0, 150, 0)
+        self.width_cursor_ai = 3  # px
+        self.fract_cursor_height_ai = 1.2  # Relative to text field height
+        self.cursor_xdist_ai = 10
+        self.cursor_height_ai = int(self.fract_cursor_height_ai*self.line_height_typing)
+        self.cursor_ai_y = 0
+        self.cursor_ai_x = 0
+        
 
     def init_vars(self):
         self.history_ai = []
@@ -252,7 +297,7 @@ class ChatGUI:
 
     def init_ai_chat(self, fp_config, verbose=False):
         config = Config.fromfile(fp_config)
-        self.chat = Chat(config, False)
+        self.chat = Chat(config, self.verbose_ai)
         self.history_ai.append(self.chat.first_message)
         self.send_message_timer = 3
 
@@ -261,9 +306,14 @@ class ChatGUI:
             print("hit_enter: last input was not AI!")
             return
         if len(self.text_typing) > 0:
-            self.history_human.append(self.text_typing)
-            self.text_typing = ""
-            self.send_message = True
+            if self.text_typing == self.escape_and_save:
+                print("SAVING AND QUITTING!")
+                self.save_protocol()
+                pygame.quit()
+            else:
+                self.history_human.append(self.text_typing)
+                self.text_typing = ""
+                self.send_message = True
 
     def send_message_check(self):
         if not self.use_ai_chat and self.send_message:
@@ -425,23 +475,32 @@ class ChatGUI:
                 ),
             )
 
-    # def get_chat_history(self):
-    #     history = ""
-    #     nmb_items = max(len(self.history_ai), len(self.history_human))
-    #     for i in range(nmb_items):
-    #         history += self.history_ai[i]
-    #         history += "\n"
-    #         if i < len(self.history_human):
-    #             history += self.history_human[i]
-    #             history += "\n"
-    #     return history
+    def get_chat_history(self):
+        history = ""
+        nmb_items = max(len(self.history_ai), len(self.history_human))
+        for i in range(nmb_items):
+            history += self.history_ai[i]
+            history += "\n"
+            if i < len(self.history_human):
+                history += self.history_human[i]
+                history += "\n"
+        return history
+    
+    
+    def save_protocol(self):
+        history = self.get_chat_history()
+        dp_save = '/home/lugo/latentspace1/'
+        fp_save = os.path.join(dp_save, f"chat_{get_time('second')}.txt")
+        txt_save(fp_save, [history])
+        print(f"save_protocol: {fp_save}")
 
 
 if __name__ == "__main__":
 
     self = ChatGUI(
-        fp_config="metamersion_latent/configs/chat/girard_therapist.py",
+        fp_config="../configs/chat/zach1_j1.py",
         use_ai_chat=True,
+        verbose_ai=True,
     )
 
     while True:
