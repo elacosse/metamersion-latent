@@ -1,3 +1,5 @@
+import re
+
 from dotenv import find_dotenv, load_dotenv
 from langchain.chains import ConversationChain, LLMChain
 from langchain.chains.conversation.memory import (
@@ -20,8 +22,10 @@ class Chat:
 
     def __init__(self, config: Config, verbose: bool = False):
         load_dotenv(find_dotenv(), verbose=False)  # load environment variables
+        self.verbose = verbose
         self.config = config
         self.llm = load_llm_from_config(config.model)
+
         self.initialization_message = self.config.initialization_message
         self.first_message = self.config.first_message
 
@@ -51,7 +55,7 @@ class Chat:
             input_variables=["history", "input"], template=self.config.template
         )
         self.conversation = ConversationChain(
-            prompt=self.prompt, llm=self.llm, verbose=verbose, memory=self.memory
+            prompt=self.prompt, llm=self.llm, verbose=self.verbose, memory=self.memory
         )
 
         self.analysis_prompt = PromptTemplate(
@@ -69,10 +73,21 @@ class Chat:
         self.inputs.append(user_message)
         try:
             output = self.conversation.predict(input=user_message)
+            # remove double spaces
+            self.memory.buffer = re.sub(" +", " ", self.memory.buffer)
         except Exception as e:
             output = "Oops, something went wrong. I'm sorry. What did you say?"
         self.outputs.append(output)
         return output
+
+    def initialize_interaction_with_form_responses(self, df):
+        """Create the initial question to start the conversation."""
+        llm = load_llm_from_config(self.config.question_model)
+        # Create a prompt for the question
+
+        chain = LLMChain(llm=llm, prompt=self.analysis_prompt)
+
+        return self.conversation.predict(input="")
 
     def analyze_buffer(self):
         """Generate a summary of the conversation for later analysis."""

@@ -40,15 +40,16 @@ window_size = 3
 initialization_message = """
     Please provide the email address you signed up for the event with.
 """
-template = """The following is a conversation between a human and a AI from future civilization that relies on AI for all human interaction. The AI is introducing people to a warehouse full of art exhibitions. The AI is wondering what inspired the human to come visit the warehouse and what the human thinks of art and science. The AI is tasked with creating a virtual reality experience and is trying to entertain the human with an interesting conversation.
+template = """The following is a conversation between a Human and an AI. The AI is trying to understand the Human's mind by providing commentary and asking very thought provoking questions about the nature of existence and how the Human experiences the world. The AI provides interesting commentary with a long answer to the Human's responses.
 Current conversation:
+
 {history}
 Human: {input}
 AI: """  # note these must be history and input!
 human_prefix = "Human"
 ai_prefix = "AI"
-first_message = "Welcome to the Champalimaud Warehouse of Art and Science. I am your guide. What would you like to know about?"
-analysis_template = """Based on this conversation, extract 6 symbols that represent the Human's experience.
+first_message = "Welcome to the Champalimaud Warehouse of Art and Science. I am your guide. What from art inspires you?"
+analysis_template = """Based on this conversation, extract 6 statements that represent the Human's inner thoughts.
 Conversation:
 {history}"""
 # Prompter Model

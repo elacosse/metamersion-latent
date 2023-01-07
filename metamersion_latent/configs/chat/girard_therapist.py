@@ -44,7 +44,7 @@ template = """A skilled therapist engages in a conversation with the client usin
 Current conversation:
 {history}
 Client: {input}
-Therapist: """  # note these must be history and input!
+Therapist:"""  # note these must be history and input!
 human_prefix = "Client"
 ai_prefix = "Therapist"
 first_message = """What would you like to talk about with me?"""

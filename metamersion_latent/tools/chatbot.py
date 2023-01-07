@@ -1,10 +1,13 @@
+import os
+
 import click
 
 from metamersion_latent.llm.chat import Chat
 from metamersion_latent.llm.config import Config
+from metamersion_latent.utils.oh_sheet import google_sheet_to_dataframe
 
 
-def fetch_username_from_email(user_email: str) -> str:
+def fetch_row_from_dataframe_from_sheet(user_email: str) -> str:
     """Check if user email is valid.
 
     Args:
@@ -16,8 +19,17 @@ def fetch_username_from_email(user_email: str) -> str:
     # if fails, return None
     # ToDo: Implement this function
     # lookup in google sheets from typeform
+    df = google_sheet_to_dataframe(os.getenv("GOOGLE_SHEET_ID"), "A1:Z")
+    # get row of user email
+    try:
+        row = df.loc[
+            df["{{field:01GNJ5JY9J262RCFX0D0CPJAEF}}, please provide your email."]
+            == user_email
+        ]
+    except Exception as e:
+        return None
 
-    return "John Doe"
+    return row
 
 
 @click.command()
@@ -37,10 +49,14 @@ def main(config, verbose):
     # Check if user input is valid and get name
     while True:
         user_email = input("Email: ")
-        username = fetch_username_from_email(user_email)
+        # df = fetch_row_from_dataframe_from_sheet(user_email)
+        # username = df["Hello, what's your name?"].values[0]
+        username = "test"
         if username is not None:
             break
-        print("Invalid email address. Please contact appropriate personel.")
+        print(
+            "Invalid email address. If you are a new user, please register first or try giving me your email again."
+        )
     # Display welcome message
     print(f"Welcome {username}! And welcome to Metamersion!")
     print(chat.first_message)
