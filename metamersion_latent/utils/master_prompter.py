@@ -17,7 +17,6 @@ def extract_concepts_from_analysis(analysis_summary: str, config: Config) -> lis
     Returns:
         list: A list of concepts.
     """
-    load_dotenv(find_dotenv(), verbose=False)  # load environment variables
 
     example_prompt = PromptTemplate(
         input_variables=["statement", "concept"],
@@ -33,8 +32,16 @@ def extract_concepts_from_analysis(analysis_summary: str, config: Config) -> lis
 
     llm = load_llm_from_config(config.prompter_model)
     chain = LLMChain(llm=llm, prompt=prompt)
-    # Get sentences as list of strings
-    list_summary = [x[3:] for x in analysis_summary.split("\n") if x != ""]
+    # Get sentences as list of strings from numbered summary
+    split_text = analysis_summary.split("\n")
+    list_summary = []
+    for text in split_text:
+        if len(text) > 30:  # stupid heuristic
+            # get rid of everything behind the colon
+            text = text.split(":")[-1]
+            # get rid of leading space
+            text = text[1:]
+            list_summary.append(text)
     # Extract concepts from each sentence
     concepts = []
     for sentence in list_summary:

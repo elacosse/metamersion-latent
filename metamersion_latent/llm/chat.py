@@ -1,6 +1,5 @@
 import re
 
-from dotenv import find_dotenv, load_dotenv
 from langchain.chains import ConversationChain, LLMChain
 from langchain.chains.conversation.memory import (
     ConversationBufferMemory,
@@ -21,7 +20,7 @@ class Chat:
     """
 
     def __init__(self, config: Config, verbose: bool = False):
-        load_dotenv(find_dotenv(), verbose=False)  # load environment variables
+
         self.verbose = verbose
         self.config = config
         self.llm = load_llm_from_config(config.model)
