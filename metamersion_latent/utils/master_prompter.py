@@ -89,6 +89,10 @@ def prompts_to_txt_file(prompts: list, filepath: str):
         prompts (list): A list of prompts.
         filename (str): The filename to save the prompts to.
     """
+
+    # make a directory if it doesn't exist
+    os.makedirs(os.path.dirname(filepath), exist_ok=True)
+
     with open(filepath, "w") as f:
         for prompt in prompts:
             f.write(prompt + "\n")

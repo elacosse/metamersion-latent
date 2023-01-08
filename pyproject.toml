@@ -5,7 +5,7 @@ description = ""
 authors = ["elacosse <eric.lacosse@research.fchampalimaud.org>"]
 
 [tool.poetry.dependencies]
-python = "^3.9"
+python = "^3.8"
 google-api-python-client = "^2.70.0"
 google-auth-httplib2 = "^0.1.0"
 google-auth-oauthlib = "^0.8.0"

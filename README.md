@@ -12,9 +12,15 @@ First, ensure that a **.env** file is present in the root directory with appropr
 
 For instance, if using OpenAI models, the following must be present:
 ```bash
-OPENAI_API_KEY="INSERT YOUR API KEY"
+OPENAI_API_KEY=""
 ```
-
+Using Huggingface and other
+```bash
+HUGGINGFACE_API_KEY=""
+GOOGLE_SHEET_ID=""
+STABILITY_HOST="grpc.stability.ai:443"
+STABILITY_KEY=""
+```
 ##### Running an example 
 ```bash 
 python metamersion_latent/tools/chatbot.py -c metamersion_latent/configs/chat/example.py -v
