@@ -102,10 +102,8 @@ def main(config, verbose):
         print(i, prompt)
     from metamersion_latent.image_generation.stability import (
         generate_images_from_prompts_and_save,
-        prompts_to_txt_file,
     )
 
-    prompts_to_txt_file
     generate_images_from_prompts_and_save(stability_prompts)
 
 
