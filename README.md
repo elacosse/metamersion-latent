@@ -1,12 +1,5 @@
 # Metamersion Latent
 
-## Installation
-Install all requirements via pip:
-```bash
-pip install -r requirements.txt
-```
-
-
 ## Creating a Chatbot
 First, ensure that a **.env** file is present in the root directory with appropriate environment variables.
 
