@@ -16,7 +16,7 @@ STABILITY_KEY=""
 ```
 ##### Running an example 
 ```bash 
-python metamersion_latent/tools/chatbot.py -c metamersion_latent/configs/chat/example.py -v
+python metamersion_latent/tools/chatbot.py -c metamersion_latent/configs/chat/minimal_working_example.py -v
 ``` 
 
 ##### Customizing the configuration
