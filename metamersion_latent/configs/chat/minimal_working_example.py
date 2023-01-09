@@ -11,6 +11,18 @@ model = {
     "request_timeout": None,
     "_type": "openai",
 }
+conversation_model = {
+    "model_name": "text-davinci-003",
+    "temperature": 0.7,
+    "max_tokens": 256,
+    "top_p": 1.0,
+    "frequency_penalty": 0.0,
+    "presence_penalty": 0.0,
+    "n": 1,
+    "best_of": 1,
+    "request_timeout": None,
+    "_type": "openai",
+}
 analysis_model = {
     "model_name": "text-davinci-003",
     "temperature": 0.7,
@@ -51,34 +63,37 @@ AI:"""  # note these must be history and input!
 human_prefix = "Client"
 ai_prefix = "AI"
 first_message = """Who are you?"""
-analysis_template = """Below is a conversation between Client and AI. Based on the conversation with the Client, tell this story in 6 scenes, with each scene having a setting in the form of a landscape or other scene. Do not include information about the installation itself.
+conversation_summary_template = """Below is a conversation between Client and AI. Based on the conversation with the Client, tell me a story about the life of the Client.
 
 Conversation:
 {history}"""
-# Prompter Model
+analysis_template = """Tell this story in 6 scenes, with each scene having a setting in the form of a landscape or other scene.
+
+Story:
+{history}"""
 concept_examples = [
     {
-        "statement": "Client dreamt of a woman who was crying.",
+        "statement": "Client is at home, watching a Benfica match on his television. The red colors of the team's kit remind him of the glory days of the communist party.",
         "concept": """
-a woman crying in the rain with a sad look on her face
+A person in an open field of grass watching a television, red colors, eerie light, dark clouds on the horizon, Richter.
 """,
     },
     {
-        "statement": "Client and woman had a relationship in the past.",
+        "statement": "Client is at a bar with his friends, discussing the match and drinking Sagres beer.",
         "concept": """
 two people, who were in love with each other, long ago
 """,
     },
     {
-        "statement": "Therapist asked questions to gain further details of the dream.",
+        "statement": "Client is in his bedroom, looking at a picture of his father and reflecting on their strained relationship.",
         "concept": """
-a psychologist sitting in an office, analyzing a person's dreams
+Painting of an older man in a field, Lucien Freud.
 """,
     },
     {
-        "statement": "Client enjoys playing piano for an audience.",
+        "statement": "Client is on a hill overlooking a valley, looking up at the stars and reflecting on his life.",
         "concept": """
-a beautiful grand piano in a concert hall
+A person on a hill overlooking a valley, looking up at the stars in the night sky, impressionist master.
 """,
     },
 ]

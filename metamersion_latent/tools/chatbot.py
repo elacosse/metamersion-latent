@@ -5,10 +5,6 @@ from dotenv import find_dotenv, load_dotenv
 
 from metamersion_latent.llm.chat import Chat
 from metamersion_latent.llm.config import Config
-from metamersion_latent.utils.master_prompter import (
-    beautify_concepts_to_stable_diffusion_prompts,
-    extract_concepts_from_analysis,
-)
 from metamersion_latent.utils.oh_sheet import google_sheet_to_dataframe
 
 GOOGLE_SHEET_EMAIL_COLUMN_NAME = (
@@ -87,15 +83,33 @@ def main(config, verbose):
     print("Analyzing the conversation...\n")
     while True:
         try:
-            analysis_output = chat.analyze_buffer()
+            chat.analyze_conversation_buffer()
         except Exception as e:
             pass
         if output is not None:
             break
-    print(analysis_output)
+    print(chat.conversation_summary)
+
+    # Analyze the summary
+    print("Analyzing the summary...\n")
+    while True:
+        try:
+            chat.analyze_conversation_summary()
+        except Exception as e:
+            pass
+        if output is not None:
+            break
+    print(chat.conversation_summary_analysis)
+
+    from metamersion_latent.utils.master_prompter import (
+        beautify_concepts_to_stable_diffusion_prompts,
+        extract_concepts_from_analysis,
+    )
 
     print("Extracting concepts from analysis summary...\n")
-    concepts = extract_concepts_from_analysis(analysis_output, config)
+    concepts = extract_concepts_from_analysis(
+        chat.conversation_summary_analysis, config
+    )
     print("Generating prompts...\n")
     stability_prompts = beautify_concepts_to_stable_diffusion_prompts(concepts)
     for i, prompt in enumerate(stability_prompts):

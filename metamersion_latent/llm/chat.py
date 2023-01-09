@@ -27,6 +27,8 @@ class Chat:
 
         self.initialization_message = self.config.initialization_message
         self.first_message = self.config.first_message
+        self.conversation_summary = ""
+        self.conversation_summary_analysis = ""
 
         # keep a list of all input and outputs this handled
         self.inputs = []
@@ -56,7 +58,10 @@ class Chat:
         self.conversation = ConversationChain(
             prompt=self.prompt, llm=self.llm, verbose=self.verbose, memory=self.memory
         )
-
+        self.conversation_summary_prompt = PromptTemplate(
+            input_variables=["history"],
+            template=self.config.conversation_summary_template,
+        )
         self.analysis_prompt = PromptTemplate(
             input_variables=["history"], template=self.config.analysis_template
         )
@@ -88,7 +93,19 @@ class Chat:
 
         return self.conversation.predict(input="")
 
-    def analyze_buffer(self):
+    def analyze_conversation_buffer(self):
+        """Generate a summary of the conversation for later analysis."""
+        llm = load_llm_from_config(self.config.conversation_model)
+        chain = LLMChain(llm=llm, prompt=self.conversation_summary_prompt)
+        # Run the chain only specifying the input variable.
+        history = self.memory.buffer
+        try:
+            output = chain.run(history=history)
+        except Exception as e:
+            return None
+        self.conversation_summary = output
+
+    def analyze_conversation_summary(self):
         """Generate a summary of the conversation for later analysis."""
         llm = load_llm_from_config(self.config.analysis_model)
         chain = LLMChain(llm=llm, prompt=self.analysis_prompt)
@@ -98,4 +115,4 @@ class Chat:
             output = chain.run(history=history)
         except Exception as e:
             return None
-        return output
+        self.conversation_summary_analysis = output
