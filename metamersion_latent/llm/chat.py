@@ -11,6 +11,21 @@ from langchain.prompts.prompt import PromptTemplate
 from metamersion_latent.llm.config import Config
 
 
+def gpt_vanilla_call(prompt: str, config: dict) -> str:
+    """Call GPT-3 with a prompt and return the output.
+
+    Args:
+        prompt (str): The prompt to send to GPT-3.
+        config (dict): The config for GPT-3.
+
+    Returns:
+        str: The output from GPT-3.
+    """
+    llm = load_llm_from_config(config)
+    output = llm(prompt)
+    return output
+
+
 class Chat:
     """Initialize a chat to experiment with
 
