@@ -6,6 +6,8 @@ import numpy as np
 import pygame
 import datetime
 
+import deepl #pip install deepl
+
 sys.path.append("../..")
 
 from metamersion_latent.llm.chat import Chat
@@ -221,6 +223,7 @@ class ChatGUI:
 
         pygame.init()
         self.use_ai_chat = use_ai_chat
+        self.portugese_mode = True
         self.verbose_ai = verbose_ai
         self.init_parameters()
         self.init_vars()
@@ -233,6 +236,13 @@ class ChatGUI:
         pygame.display.set_caption("Metamersion Chat")
         self.clock = pygame.time.Clock()
         
+        self.translator = deepl.Translator("74eaf309-014b-612e-1391-9bb15ae8f611")
+        
+    def translate_EN2PT(self, text):
+        return self.translator.translate_text(text, target_lang="EN-US").text
+    
+    def translate_PT2EN(self, text):
+        return self.translator.translate_text(text, target_lang="PT-PT").text
 
     def init_parameters(self):
         self.escape_and_save = "x" #when this is submitted by human, then save chat
@@ -311,7 +321,10 @@ class ChatGUI:
                 self.save_protocol()
                 pygame.quit()
             else:
-                self.history_human.append(self.text_typing)
+                text = self.text_typing
+                if self.portugese_mode:
+                    text = self.translate_PT2EN(text)
+                self.history_human.append(text)
                 self.text_typing = ""
                 self.send_message = True
 
@@ -329,6 +342,8 @@ class ChatGUI:
                 output = self.chat(self.history_human[-1])
                 output = output.strip()
                 print(f"GOT: {output}")
+                if self.portugese_mode:
+                    output = self.translate_EN2PT(output)
                 self.history_ai.append(output)
                 self.send_message = False
 
