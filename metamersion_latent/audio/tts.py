@@ -77,7 +77,4 @@ def assemble_audio_files(filepaths, silence_duration, output_filepath):
         output_audio_file.setsampwidth(sample_width)
         output_audio_file.setnchannels(channels)
         # Write the audio data to the output file
-        output_audio_file.writeframes(
-            audio_data.tobytes()
-        )  # Write the audio data to the output file
         output_audio_file.writeframes(audio_data.tobytes())
