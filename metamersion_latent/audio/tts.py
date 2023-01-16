@@ -81,4 +81,3 @@ def assemble_audio_files(filepaths, silence_duration, output_filepath):
             audio_data.tobytes()
         )  # Write the audio data to the output file
         output_audio_file.writeframes(audio_data.tobytes())
-        output_audio_file.writeframes(audio_data.tobytes())
