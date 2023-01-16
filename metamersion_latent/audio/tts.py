@@ -11,14 +11,19 @@ def generate_tts_audio_from_list(narration_list, tts_model, speaker_indx, output
         narration_list (list): List of narration strings.
         tts_model (str): Name of TTS model.
         output_path (str): Path to output file.
+    Returns:
+        list: List of paths to generated audio files.
     """
     # Initialize the TTS model
     tts = TTS(tts_model)
+    filepaths = []
     # Generate audio for each conversation string
     for i, narration in enumerate(narration_list):
         wav = tts.tts(narration, speaker=tts.speakers[speaker_indx])
         filepath = os.path.join(output_path, f"narration_seg_{i}.wav")
         tts.synthesizer.save_wav(wav=wav, path=filepath)
+        filepaths.append(filepath)
+    return filepaths
 
 
 def audio_length(file_path):
@@ -34,7 +39,7 @@ def audio_length(file_path):
     return frames / float(rate)
 
 
-def assemble_audio_files(file_paths, silence_duration, output_filepath):
+def assemble_audio_files(filepaths, silence_duration, output_filepath):
     """Assemble audio files into a single audio file with silence between each file.
     Args:
         file_paths (list): List of paths to audio files.
@@ -42,7 +47,7 @@ def assemble_audio_files(file_paths, silence_duration, output_filepath):
         output_filepath (str): Path to output file.
     """
     # Open the first audio file
-    with wave.open(file_paths[0], "rb") as audio_file:
+    with wave.open(filepaths[0], "rb") as audio_file:
         # Get the audio parameters
         sample_rate = audio_file.getframerate()
         sample_width = audio_file.getsampwidth()
@@ -50,7 +55,7 @@ def assemble_audio_files(file_paths, silence_duration, output_filepath):
         # Create a numpy array to hold the audio data
         audio_data = np.frombuffer(audio_file.readframes(-1), np.int16)
         # Iterate through the remaining audio files
-        for file_path in file_paths[1:]:
+        for file_path in filepaths[1:]:
             # Open the next audio file
             with wave.open(file_path, "rb") as next_audio_file:
                 # Check that the audio parameters match
