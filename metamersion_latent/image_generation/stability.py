@@ -1,21 +1,13 @@
 import io
 import os
+import warnings
 
 import stability_sdk.interfaces.gooseai.generation.generation_pb2 as generation
-from dotenv import find_dotenv, load_dotenv
 from PIL import Image
 from stability_sdk import client
 
-EXAMPLE = [
-    "A man standing on a beach at sunset, the waves crashing against the shore, a feeling of freedom and peace in the air, By Makoto Shinkai, Stanley Artgerm Lau, WLOP, Rossdraws, James Jean, Andr",
-    " a cozy cafe filled with laughter, conversations, and warm smiles, as Eric takes in the sense of community and connection he feels with the people around him, artwork by artgerm, Donato Giancola, Craig Mullins and Alena ",
-    "a majestic mountain peak, surrounded by lush forests and rolling hills, with a view of the horizon and a peaceful feeling of tranquility and serenity, digital painting, concept art, very cozy, fantasy, 4K, character design sheet, paintin",
-    "a classroom full of students, all eyes on Eric as he speaks about the power of creativity and how it can be used to express oneself, artwork by artgerm, centered subject, wide angle, full frame, simple, solid shapes, texture",
-    " is today,a man standing on a stage with a microphone, delivering a powerful speech to a large audience dressed in shades and a gold crown | greg rutkowski, sung choi, mitchell mohrhauser, maciej ",
-]
 
-
-def generate_images_from_prompts_and_save(prompts: list) -> list:
+def generate_images_from_prompts(prompts: list) -> list:
     """Generate images from prompts.
     Args:
         prompts (list): A list of prompts.
@@ -27,9 +19,7 @@ def generate_images_from_prompts_and_save(prompts: list) -> list:
         verbose=True,
     )
 
-    # create a new directory in data/
-    os.makedirs(os.path.join("data", "stability"), exist_ok=True)
-
+    images = []
     for i, prompt in enumerate(prompts):
         # the object returned is a python generator
         answers = stability_api.generate(
@@ -38,26 +28,40 @@ def generate_images_from_prompts_and_save(prompts: list) -> list:
             steps=20,  # defaults to 30 if not specified
             safety=False,  # defaults to True if not specified
         )
-
         # iterating over the generator produces the api response
         for j, resp in enumerate(answers):
             for k, artifact in enumerate(resp.artifacts):
-                # if artifact.finish_reason == generation.FILTER:
-                #     warnings.warn(
-                #         "Your request activated the API's safety filters and could not be processed."
-                #         "Please modify the prompt and try again."
-                #     )
+                if artifact.finish_reason == generation.FILTER:
+                    warnings.warn(
+                        "Your request activated the API's safety filters and could not be processed."
+                        "Please modify the prompt and try again."
+                    )
                 if artifact.type == generation.ARTIFACT_IMAGE:
                     img = Image.open(io.BytesIO(artifact.binary))
-                    img.save(
-                        "data/stability/image_{i}_{j}_{k}.png".format(i=i, j=j, k=k)
-                    )
+                    images.append(img)
+    return images
 
 
-def main():
-    load_dotenv(find_dotenv(), verbose=False)  # load environment variables
-    generate_images_from_prompts_and_save(EXAMPLE)
+def create_collage(images: list) -> Image:
+    """
+    Create a collage from a list of images and captions.
+    Args:
+        images (list): List of images.
+        captions (list): List of captions.
 
+    Returns:
+        PIL.Image: Collage image.
+    """
+    widths, heights = zip(*(i.size for i in images))
 
-if __name__ == "__main__":
-    main()
+    total_width = sum(widths)
+    max_height = max(heights)
+
+    collage = Image.new("RGB", (total_width, max_height))
+
+    # Add each image to the collage
+    x_offset = 0
+    for i, img in enumerate(images):
+        collage.paste(img, (x_offset, 0))
+        x_offset += img.size[0]
+    return collage

@@ -5,12 +5,9 @@ description = ""
 authors = ["elacosse <eric.lacosse@research.fchampalimaud.org>"]
 
 [tool.poetry.dependencies]
-python = "^3.8"
-google-api-python-client = "^2.70.0"
-google-auth-httplib2 = "^0.1.0"
-google-auth-oauthlib = "^0.8.0"
+python = "^3.8.1"
 pandas = "^1.5.2"
-langchain = "^0.0.56"
+langchain = "^0.0.61"
 openai = "^0.25.0"
 python-dotenv = "^0.21.0"
 addict = "^2.4.0"
