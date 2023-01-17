@@ -17,6 +17,8 @@
 # pip install pytorch_lightning
 # pip install transformers
 
+# general setup
+mkdir movies
 
 # Get latent blending
 git clone https://github.com/lunarring/latentblending.git
@@ -29,6 +31,9 @@ pip install numpy==1.21
 # TTS installs
 pip install TTS
 sudo apt-get -y install espeak-ng
+
+# Vimeo
+pip install PyVimeo
 
 # Get diffusion weights
 #wget https://huggingface.co/stabilityai/stable-diffusion-2-1-base/resolve/main/v2-1_512-ema-pruned.ckpt v2-1_512-ema-pruned.ckpt
