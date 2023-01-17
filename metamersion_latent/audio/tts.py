@@ -41,17 +41,15 @@ def audio_length(file_path):
 
 def assemble_audio_files_with_silence_and_save(
     filepaths,
-    initial_silence_duration,
-    silence_duration,
-    end_silence_duration,
+    audio_duration,
+    start_times,
     output_filepath,
 ):
     """Assemble audio files into a single audio file with silence between each file.
     Args:
         file_paths (list): List of paths to audio files.
-        initial_silence_duration (float): Duration of initial silence.
-        silence_duration (float): Duration of silence between audio files.
-        end_silence_duration (float): Duration of silence at the end of the audio.
+        audio_duration (float): Duration of audio in seconds.
+        start_times (list): List of start times for each audio file.
         output_filepath (str): Path to output file.
     """
     # Open the first audio file
@@ -60,33 +58,27 @@ def assemble_audio_files_with_silence_and_save(
         sample_rate = audio_file.getframerate()
         sample_width = audio_file.getsampwidth()
         channels = audio_file.getnchannels()
-        # Create a numpy array to hold the audio data
-        audio_data = np.frombuffer(audio_file.readframes(-1), np.int16)
-        # Create initial silence data
-        silence_data = np.zeros(int(sample_rate * initial_silence_duration), np.int16)
-        # Concatenate the audio data and silence
-        audio_data = np.concatenate((silence_data, audio_data))
-        # Iterate through the remaining audio files
-        for file_path in filepaths[1:]:
-            # Open the next audio file
-            with wave.open(file_path, "rb") as next_audio_file:
-                # Check that the audio parameters match
-                assert next_audio_file.getframerate() == sample_rate
-                assert next_audio_file.getsampwidth() == sample_width
-                assert next_audio_file.getnchannels() == channels
-                # Read the audio data
-                next_audio_data = np.frombuffer(
-                    next_audio_file.readframes(-1), np.int16
-                )
-                # Create silence data
-                silence_data = np.zeros(int(sample_rate * silence_duration), np.int16)
-                # Concatenate the audio data and silence
-                audio_data = np.concatenate((audio_data, silence_data, next_audio_data))
-
-    # Create initial silence data
-    silence_data = np.zeros(int(sample_rate * end_silence_duration), np.int16)
-    # Concatenate the audio data and silence
-    audio_data = np.concatenate((audio_data, silence_data))
+    # Create audio_data
+    audio_data = np.zeros(int(sample_rate * audio_duration), np.int16)
+    # Iterate through the audio files
+    for i, file_path in enumerate(filepaths):
+        # Open the next audio file
+        with wave.open(file_path, "rb") as next_audio_file:
+            # Check that the audio parameters match
+            assert next_audio_file.getframerate() == sample_rate
+            assert next_audio_file.getsampwidth() == sample_width
+            assert next_audio_file.getnchannels() == channels
+            # Get the audio data
+            next_audio_data = np.frombuffer(next_audio_file.readframes(-1), np.int16)
+            # Get the start time
+            start_time_indx = int(sample_rate * start_times[i])
+            # Get the end time
+            end_time_indx = start_time_indx + len(next_audio_data)
+            # make sure they are same length
+            if end_time_indx - start_time_indx != len(next_audio_data):
+                next_audio_data = next_audio_data[: end_time_indx - start_time_indx]
+            # Insert the audio data into the audio_data array
+            audio_data[start_time_indx:end_time_indx] = next_audio_data
     # Open the output file for writing
     with wave.open(output_filepath, "wb") as output_audio_file:
         # Set the audio parameters
