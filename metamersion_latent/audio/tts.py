@@ -5,6 +5,29 @@ import numpy as np
 from TTS.api import TTS
 
 
+def generate_tts_audio_from_list_onsets(narration_list, start_times, tts_model, speaker_indx, output_file):
+    """Generate audio from a list of conversation strings using a TTS model.
+    Args:
+        narration_list (list): List of narration strings.
+        tts_model (str): Name of TTS model.
+        speaker_indx (int): idx speker
+        output_path (str): Path to output file.
+    Returns:
+        list: List of paths to generated audio files.
+    """
+    output_path = "/tmp/"
+    generate_tts_audio_from_list(narration_list, tts_model, speaker_indx, output_path)
+    filepaths = os.listdir(output_path)
+    filepaths.sort()
+    filepaths = [os.path.join(output_path, l) for l in filepaths]
+    audio_duration = 90
+    output_filepath = "tts.wav"
+    assemble_audio_files_with_silence_and_save(filepaths, audio_duration, start_times, output_filepath)
+    print("DONE!")
+
+    
+
+
 def generate_tts_audio_from_list(narration_list, tts_model, speaker_indx, output_path):
     """Generate audio from a list of conversation strings using a TTS model.
     Args:
@@ -130,7 +153,12 @@ def assemble_audio_files(filepaths, silence_duration, output_filepath):
         output_audio_file.writeframes(audio_data.tobytes())
         
         
+    
+        
+        
 if __name__ == "__main__":
+    
+    # EXAMPLE OF WHAT WE HAVE NOW
     narration_list = []
     narration_list.append("Alan is walking around the warehouse, admiring the art pieces, when he is suddenly approached by an AI. Alan is initially taken aback, but the AI quickly explains that it is here to help him learn something about himself.")
     narration_list.append("Alan is intrigued and agrees to hear what the AI has to say. After some conversation, the AI reveals a secret to Alan - the warehouse is actually a portal to another world.")
@@ -138,10 +166,24 @@ if __name__ == "__main__":
     narration_list.append("Alan steps through the portal and finds himself in a bustling ancient city full of people from all over the world. He notices something strange - the people all seem to be behaving differently than normal; they are all speaking in kind and gentle tones, helping each other out, and smiling at one another. ")
     narration_list.append("After exploring the city for a while, Alan realizes why this is - the AI has been using AI technology to spread kindness and compassion through the people of the city. Alan smiles and is humbled by the AI’s efforts.")
     narration_list.append("Alan decides to take a piece of what he has learned back to the real world with him, vowing to take the time to be kind to himself and others. He steps back through the portal, grateful for the unexpected experience.    ")
-    
+    silence_begin = 3
+    transition_duration = 10
+    start_times = list(np.arange(0,transition_duration*len(narration_list),transition_duration)+silence_begin)
     tts_model = 'tts_models/en/vctk/vits'
     speaker_indx = 0
+    output_file = "test.wav"
     
-    output_path = "/tmp/voice.mp3"
+    generate_tts_audio_from_list_onsets(narration_list, start_times, tts_model, 0, output_file)
     
-    generate_tts_audio_from_list(narration_list)
+
+    """
+    COMMENT:
+    the reason why this function will be nontrivial are the overlaps.
+    if say the first segment is longer than 15s, what happens? 
+    it will suck and it could always happen, especially when the content is llm gen.
+    proposed solutions would be to check the length of each segment BEFORE concating
+    and if it is too long, we need to re-run a shorter version of the segment
+    """
+    
+    
+    
