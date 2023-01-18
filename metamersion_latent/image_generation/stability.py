@@ -7,7 +7,7 @@ from PIL import Image
 from stability_sdk import client
 
 
-def generate_images_from_prompts(prompts: list) -> list:
+def generate_images_from_prompts(prompts: list, seed=420) -> list:
     """Generate images from prompts.
     Args:
         prompts (list): A list of prompts.
@@ -24,7 +24,7 @@ def generate_images_from_prompts(prompts: list) -> list:
         # the object returned is a python generator
         answers = stability_api.generate(
             prompt=prompt,
-            seed=420,  # if provided, specifying a random seed makes results deterministic
+            seed=seed,  # if provided, specifying a random seed makes results deterministic
             steps=20,  # defaults to 30 if not specified
             safety=False,  # defaults to True if not specified
         )

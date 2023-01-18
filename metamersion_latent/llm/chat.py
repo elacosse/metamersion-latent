@@ -94,7 +94,7 @@ class Chat:
             output = self.conversation.predict(input=user_message)
             # remove double spaces
             self.memory.buffer = re.sub(" +", " ", self.memory.buffer)
-        except Exception as e:
+        except Exception:
             output = "Oops, something went wrong. I'm sorry. What did you say?"
         self.outputs.append(output)
         return output
@@ -104,7 +104,7 @@ class Chat:
         llm = load_llm_from_config(self.config.question_model)
         # Create a prompt for the question
 
-        chain = LLMChain(llm=llm, prompt=self.analysis_prompt)
+        LLMChain(llm=llm, prompt=self.analysis_prompt)
 
         return self.conversation.predict(input="")
 
@@ -116,7 +116,7 @@ class Chat:
         history = self.memory.buffer
         try:
             output = chain.run(history=history)
-        except Exception as e:
+        except Exception:
             return None
         self.conversation_summary = output
 
@@ -128,6 +128,6 @@ class Chat:
         history = self.memory.buffer
         try:
             output = chain.run(history=history)
-        except Exception as e:
+        except Exception:
             return None
         self.conversation_summary_analysis = output
