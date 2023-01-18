@@ -7,7 +7,7 @@ from PIL import Image
 from stability_sdk import client
 
 
-def generate_images_from_prompts(prompts: list, seed=420) -> list:
+def generate_images_from_prompts(prompts: list, config: dict) -> list:
     """Generate images from prompts.
     Args:
         prompts (list): A list of prompts.
@@ -16,6 +16,7 @@ def generate_images_from_prompts(prompts: list, seed=420) -> list:
     """
     stability_api = client.StabilityInference(
         key=os.environ["STABILITY_KEY"],
+        engine=config["engine"],
         verbose=True,
     )
 
@@ -24,9 +25,14 @@ def generate_images_from_prompts(prompts: list, seed=420) -> list:
         # the object returned is a python generator
         answers = stability_api.generate(
             prompt=prompt,
-            seed=seed,  # if provided, specifying a random seed makes results deterministic
-            steps=20,  # defaults to 30 if not specified
-            safety=False,  # defaults to True if not specified
+            seed=config["seed"],
+            steps=config["steps"],
+            cfg_scale=config["cfg_scale"],
+            width=config["width"],
+            height=config["height"],
+            sampler=config["sampler"],
+            guidance_preset=config["guidance_preset"],
+            safety=config["safety"],
         )
         # iterating over the generator produces the api response
         for j, resp in enumerate(answers):
