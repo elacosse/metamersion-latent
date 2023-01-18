@@ -128,3 +128,20 @@ def assemble_audio_files(filepaths, silence_duration, output_filepath):
         output_audio_file.setnchannels(channels)
         # Write the audio data to the output file
         output_audio_file.writeframes(audio_data.tobytes())
+        
+        
+if __name__ == "__main__":
+    narration_list = []
+    narration_list.append("Alan is walking around the warehouse, admiring the art pieces, when he is suddenly approached by an AI. Alan is initially taken aback, but the AI quickly explains that it is here to help him learn something about himself.")
+    narration_list.append("Alan is intrigued and agrees to hear what the AI has to say. After some conversation, the AI reveals a secret to Alan - the warehouse is actually a portal to another world.")
+    narration_list.append("Alan is amazed and hesitant, but the AI encourages him to try it and assures him that the portal will return him to the warehouse in the same condition as he left.")
+    narration_list.append("Alan steps through the portal and finds himself in a bustling ancient city full of people from all over the world. He notices something strange - the people all seem to be behaving differently than normal; they are all speaking in kind and gentle tones, helping each other out, and smiling at one another. ")
+    narration_list.append("After exploring the city for a while, Alan realizes why this is - the AI has been using AI technology to spread kindness and compassion through the people of the city. Alan smiles and is humbled by the AI’s efforts.")
+    narration_list.append("Alan decides to take a piece of what he has learned back to the real world with him, vowing to take the time to be kind to himself and others. He steps back through the portal, grateful for the unexpected experience.    ")
+    
+    tts_model = 'tts_models/en/vctk/vits'
+    speaker_indx = 0
+    
+    output_path = "/tmp/voice.mp3"
+    
+    generate_tts_audio_from_list(narration_list)
