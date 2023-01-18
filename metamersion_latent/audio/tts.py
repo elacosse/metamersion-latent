@@ -18,11 +18,12 @@ def generate_tts_audio_from_list_onsets(narration_list, start_times, tts_model, 
     output_path = "/tmp/"
     generate_tts_audio_from_list(narration_list, tts_model, speaker_indx, output_path)
     filepaths = os.listdir(output_path)
+    filepaths = [l for l in filepaths if "narration_seg" in l]
     filepaths.sort()
+    filepaths = filepaths[0:len(narration_list)]
     filepaths = [os.path.join(output_path, l) for l in filepaths]
     audio_duration = 90
-    output_filepath = "tts.wav"
-    assemble_audio_files_with_silence_and_save(filepaths, audio_duration, start_times, output_filepath)
+    assemble_audio_files_with_silence_and_save(filepaths, audio_duration, start_times, output_file)
     print("DONE!")
 
     
@@ -171,7 +172,7 @@ if __name__ == "__main__":
     start_times = list(np.arange(0,transition_duration*len(narration_list),transition_duration)+silence_begin)
     tts_model = 'tts_models/en/vctk/vits'
     speaker_indx = 0
-    output_file = "test.wav"
+    output_file = "/tmp/test.wav"
     
     generate_tts_audio_from_list_onsets(narration_list, start_times, tts_model, 0, output_file)
     
