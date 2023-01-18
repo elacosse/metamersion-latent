@@ -5,7 +5,9 @@ import numpy as np
 from TTS.api import TTS
 
 
-def generate_tts_audio_from_list_onsets(narration_list, start_times, tts_model, speaker_indx, output_file):
+def generate_tts_audio_from_list_onsets(
+    narration_list, start_times, tts_model, speaker_indx, output_file
+):
     """Generate audio from a list of conversation strings using a TTS model.
     Args:
         narration_list (list): List of narration strings.
@@ -20,13 +22,13 @@ def generate_tts_audio_from_list_onsets(narration_list, start_times, tts_model, 
     filepaths = os.listdir(output_path)
     filepaths = [l for l in filepaths if "narration_seg" in l]
     filepaths.sort()
-    filepaths = filepaths[0:len(narration_list)]
+    filepaths = filepaths[0 : len(narration_list)]
     filepaths = [os.path.join(output_path, l) for l in filepaths]
     audio_duration = 90
-    assemble_audio_files_with_silence_and_save(filepaths, audio_duration, start_times, output_file)
+    assemble_audio_files_with_silence_and_save(
+        filepaths, audio_duration, start_times, output_file
+    )
     print("DONE!")
-
-    
 
 
 def generate_tts_audio_from_list(narration_list, tts_model, speaker_indx, output_path):
@@ -41,6 +43,8 @@ def generate_tts_audio_from_list(narration_list, tts_model, speaker_indx, output
     # Initialize the TTS model
     tts = TTS(tts_model)
     filepaths = []
+    # get directory of output_path
+    output_path = os.path.dirname(output_path)
     # Generate audio for each conversation string
     for i, narration in enumerate(narration_list):
         wav = tts.tts(narration, speaker=tts.speakers[speaker_indx])
@@ -152,30 +156,80 @@ def assemble_audio_files(filepaths, silence_duration, output_filepath):
         output_audio_file.setnchannels(channels)
         # Write the audio data to the output file
         output_audio_file.writeframes(audio_data.tobytes())
-        
-        
-    
-        
-        
+
+
+def assemble_tts_for_video(
+    narration_list: list,
+    transition_duration: float,
+    start_times: list,
+    output_filepath: str,
+    tts_model: str,
+    speaker_indx: int,
+) -> None:
+    """Assemble TTS audio files into a single audio file with silence between each file.
+    Args:
+        narration_list (list): List of narration strings.
+        transition_duration (float): Duration of video segments (fixed)
+        start_times (list): List of start times for each transition.
+        output_filepath (str): Path to output file.
+    """
+    MAX_CHAR_LENGTH = 220
+    # Get length of narrations and truncate if too long
+    new_narration_list = []
+    for i, narration in enumerate(narration_list):
+        while len(narration) > MAX_CHAR_LENGTH:
+            # Get rid of the last sentence assuming formatting with \n
+            narration = narration[: narration.rfind("\n") + 1]
+        new_narration_list.append(narration)
+
+    segment_filepaths = generate_tts_audio_from_list(
+        new_narration_list, tts_model, speaker_indx, os.path.dirname(output_filepath)
+    )
+    audio_duration = transition_duration * len(start_times)
+    assemble_audio_files_with_silence_and_save(
+        segment_filepaths, audio_duration, start_times, output_filepath
+    )
+
+
 if __name__ == "__main__":
-    
+
     # EXAMPLE OF WHAT WE HAVE NOW
     narration_list = []
-    narration_list.append("Alan is walking around the warehouse, admiring the art pieces, when he is suddenly approached by an AI. Alan is initially taken aback, but the AI quickly explains that it is here to help him learn something about himself.")
-    narration_list.append("Alan is intrigued and agrees to hear what the AI has to say. After some conversation, the AI reveals a secret to Alan - the warehouse is actually a portal to another world.")
-    narration_list.append("Alan is amazed and hesitant, but the AI encourages him to try it and assures him that the portal will return him to the warehouse in the same condition as he left.")
-    narration_list.append("Alan steps through the portal and finds himself in a bustling ancient city full of people from all over the world. He notices something strange - the people all seem to be behaving differently than normal; they are all speaking in kind and gentle tones, helping each other out, and smiling at one another. ")
-    narration_list.append("After exploring the city for a while, Alan realizes why this is - the AI has been using AI technology to spread kindness and compassion through the people of the city. Alan smiles and is humbled by the AI’s efforts.")
-    narration_list.append("Alan decides to take a piece of what he has learned back to the real world with him, vowing to take the time to be kind to himself and others. He steps back through the portal, grateful for the unexpected experience.    ")
+    narration_list.append(
+        "Alan is walking around the warehouse, admiring the art pieces, when he is suddenly approached by an AI. Alan is initially taken aback, but the AI quickly explains that it is here to help him learn something about himself."
+    )
+    narration_list.append(
+        "Alan is intrigued and agrees to hear what the AI has to say. After some conversation, the AI reveals a secret to Alan - the warehouse is actually a portal to another world."
+    )
+    narration_list.append(
+        "Alan is amazed and hesitant, but the AI encourages him to try it and assures him that the portal will return him to the warehouse in the same condition as he left."
+    )
+    narration_list.append(
+        "Alan steps through the portal and finds himself in a bustling ancient city full of people from all over the world. He notices something strange - the people all seem to be behaving differently than normal; they are all speaking in kind and gentle tones, helping each other out, and smiling at one another. "
+    )
+    narration_list.append(
+        "After exploring the city for a while, Alan realizes why this is - the AI has been using AI technology to spread kindness and compassion through the people of the city. Alan smiles and is humbled by the AI’s efforts."
+    )
+    narration_list.append(
+        "Alan decides to take a piece of what he has learned back to the real world with him, vowing to take the time to be kind to himself and others. He steps back through the portal, grateful for the unexpected experience.    "
+    )
     silence_begin = 3
     transition_duration = 10
-    start_times = list(np.arange(0,transition_duration*len(narration_list),transition_duration)+silence_begin)
-    tts_model = 'tts_models/en/vctk/vits'
+    start_times = list(
+        np.arange(0, transition_duration * len(narration_list), transition_duration)
+        + silence_begin
+    )
+    tts_model = "tts_models/en/vctk/vits"
     speaker_indx = 0
     output_file = "/tmp/test.wav"
-    
-    generate_tts_audio_from_list_onsets(narration_list, start_times, tts_model, 0, output_file)
-    
+
+    generate_tts_audio_from_list_onsets(
+        narration_list, start_times, tts_model, 0, output_file
+    )
+
+    text = ""
+    # get rid of last sentence in text
+    text = text[: text.rfind(".") + 1]
 
     """
     COMMENT:
@@ -185,6 +239,3 @@ if __name__ == "__main__":
     proposed solutions would be to check the length of each segment BEFORE concating
     and if it is too long, we need to re-run a shorter version of the segment
     """
-    
-    
-    
