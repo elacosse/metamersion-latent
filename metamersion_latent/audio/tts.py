@@ -31,7 +31,9 @@ def generate_tts_audio_from_list_onsets(
     print("DONE!")
 
 
-def generate_tts_audio_from_list(narration_list, tts_model, speaker_indx, output_path):
+def generate_tts_audio_from_list(
+    narration_list, tts_model, speaker_indx, output_path, length_scale=1.0
+):
     """Generate audio from a list of conversation strings using a TTS model.
     Args:
         narration_list (list): List of narration strings.
@@ -42,6 +44,7 @@ def generate_tts_audio_from_list(narration_list, tts_model, speaker_indx, output
     """
     # Initialize the TTS model
     tts = TTS(tts_model)
+    tts.synthesizer.tts_model.length_scale = length_scale
     filepaths = []
     # get directory of output_path
     output_path = os.path.dirname(output_path)
