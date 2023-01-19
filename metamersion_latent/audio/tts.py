@@ -6,7 +6,7 @@ from TTS.api import TTS
 
 
 def generate_tts_audio_from_list_onsets(
-    narration_list, start_times, tts_model, speaker_indx, output_file
+    narration_list, start_times, audio_duration, tts_model, speaker_indx, output_file
 ):
     """Generate audio from a list of conversation strings using a TTS model.
     Args:
@@ -24,7 +24,6 @@ def generate_tts_audio_from_list_onsets(
     filepaths.sort()
     filepaths = filepaths[0 : len(narration_list)]
     filepaths = [os.path.join(output_path, l) for l in filepaths]
-    audio_duration = 90
     assemble_audio_files_with_silence_and_save(
         filepaths, audio_duration, start_times, output_file
     )
