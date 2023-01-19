@@ -6,7 +6,7 @@ from TTS.api import TTS
 
 
 def generate_tts_audio_from_list_onsets(
-    narration_list, start_times, audio_duration, tts_model, speaker_indx, output_file
+    narration_list, start_times, total_length, tts_model, speaker_indx, output_file
 ):
     """Generate audio from a list of conversation strings using a TTS model.
     Args:
@@ -24,10 +24,12 @@ def generate_tts_audio_from_list_onsets(
     filepaths.sort()
     filepaths = filepaths[0 : len(narration_list)]
     filepaths = [os.path.join(output_path, l) for l in filepaths]
+    segment_duration = [audio_length(l) for l in filepaths]
     assemble_audio_files_with_silence_and_save(
-        filepaths, audio_duration, start_times, output_file
+        filepaths, total_length, start_times, output_file
     )
     print("DONE!")
+    return segment_duration
 
 
 def generate_tts_audio_from_list(narration_list, tts_model, speaker_indx, output_path):
@@ -79,6 +81,9 @@ def assemble_audio_files_with_silence_and_save(
         start_times (list): List of start times for each audio file.
         output_filepath (str): Path to output file.
     """
+    list_onsets = []
+    list_durations = []
+    
     # Open the first audio file
     with wave.open(filepaths[0], "rb") as audio_file:
         # Get the audio parameters
@@ -99,8 +104,10 @@ def assemble_audio_files_with_silence_and_save(
             next_audio_data = np.frombuffer(next_audio_file.readframes(-1), np.int16)
             # Get the start time
             start_time_indx = int(sample_rate * start_times[i])
+            list_onsets.append(start_time_indx / sample_rate)
             # Get the end time
             end_time_indx = start_time_indx + len(next_audio_data)
+            list_durations.append((end_time_indx-start_time_indx) / sample_rate)
             # make sure they are same length
             if end_time_indx - start_time_indx != len(next_audio_data):
                 next_audio_data = next_audio_data[: end_time_indx - start_time_indx]
@@ -114,7 +121,8 @@ def assemble_audio_files_with_silence_and_save(
         output_audio_file.setnchannels(channels)
         # Write the audio data to the output file
         output_audio_file.writeframes(audio_data.tobytes())
-
+    
+    return list_onsets, list_durations
 
 def assemble_audio_files(filepaths, silence_duration, output_filepath):
     """Assemble audio files into a single audio file with silence between each file.
