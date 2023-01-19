@@ -40,6 +40,7 @@ def generate_tts_audio_from_list(
         narration_list (list): List of narration strings.
         tts_model (str): Name of TTS model.
         output_path (str): Path to output file.
+        length_scale (float): Length scale for TTS model.
     Returns:
         list: List of paths to generated audio files.
     """
@@ -184,23 +185,27 @@ def assemble_tts_for_video(
         transition_duration (float): Duration of video segments (fixed)
         start_times (list): List of start times for each transition.
         output_filepath (str): Path to output file.
+        tts_model (str): Path to TTS model.
+        speaker_indx (int): Index of speaker to use.
+        length_scale (float): Scale the length of the audio segments.
     """
-    MAX_CHAR_LENGTH = 220
-    # Get length of narrations and truncate if too long
-    new_narration_list = []
-    for i, narration in enumerate(narration_list):
-        while len(narration) > MAX_CHAR_LENGTH:
-            # Get rid of the last sentence assuming formatting with \n
-            narration = narration[: narration.rfind("\n") + 1]
-        new_narration_list.append(narration)
+    # MAX_CHAR_LENGTH = 220
+    # # Get length of narrations and truncate if too long
+    # new_narration_list = []
+    # for i, narration in enumerate(narration_list):
+    #     while len(narration) > MAX_CHAR_LENGTH:
+    #         # Get rid of the last sentence assuming formatting with \n
+    #         narration = narration[: narration.rfind("\n") + 1]
+    #     new_narration_list.append(narration)
 
     segment_filepaths = generate_tts_audio_from_list(
-        new_narration_list,
+        narration_list,
         tts_model,
         speaker_indx,
         os.path.dirname(output_filepath),
         length_scale,
     )
+
     audio_duration = transition_duration * len(start_times)
     assemble_audio_files_with_silence_and_save(
         segment_filepaths, audio_duration, start_times, output_filepath
