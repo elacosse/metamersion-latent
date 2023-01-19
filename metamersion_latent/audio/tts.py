@@ -86,7 +86,7 @@ def assemble_audio_files_with_silence_and_save(
     """
     list_onsets = []
     list_durations = []
-    
+
     # Open the first audio file
     with wave.open(filepaths[0], "rb") as audio_file:
         # Get the audio parameters
@@ -110,7 +110,7 @@ def assemble_audio_files_with_silence_and_save(
             list_onsets.append(start_time_indx / sample_rate)
             # Get the end time
             end_time_indx = start_time_indx + len(next_audio_data)
-            list_durations.append((end_time_indx-start_time_indx) / sample_rate)
+            list_durations.append((end_time_indx - start_time_indx) / sample_rate)
             # make sure they are same length
             if end_time_indx - start_time_indx != len(next_audio_data):
                 next_audio_data = next_audio_data[: end_time_indx - start_time_indx]
@@ -124,8 +124,9 @@ def assemble_audio_files_with_silence_and_save(
         output_audio_file.setnchannels(channels)
         # Write the audio data to the output file
         output_audio_file.writeframes(audio_data.tobytes())
-    
+
     return list_onsets, list_durations
+
 
 def assemble_audio_files(filepaths, silence_duration, output_filepath):
     """Assemble audio files into a single audio file with silence between each file.
@@ -175,6 +176,7 @@ def assemble_tts_for_video(
     output_filepath: str,
     tts_model: str,
     speaker_indx: int,
+    length_scale: float = 1.0,
 ) -> None:
     """Assemble TTS audio files into a single audio file with silence between each file.
     Args:
@@ -193,7 +195,11 @@ def assemble_tts_for_video(
         new_narration_list.append(narration)
 
     segment_filepaths = generate_tts_audio_from_list(
-        new_narration_list, tts_model, speaker_indx, os.path.dirname(output_filepath)
+        new_narration_list,
+        tts_model,
+        speaker_indx,
+        os.path.dirname(output_filepath),
+        length_scale,
     )
     audio_duration = transition_duration * len(start_times)
     assemble_audio_files_with_silence_and_save(
