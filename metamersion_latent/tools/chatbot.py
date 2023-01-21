@@ -1,3 +1,4 @@
+import signal
 import time
 
 import click
@@ -199,6 +200,7 @@ def main(config, verbose, time_limit):
 if __name__ == "__main__":
     main()
 if __name__ == "__main__":
+    main()
     main()
     main()
     main()
