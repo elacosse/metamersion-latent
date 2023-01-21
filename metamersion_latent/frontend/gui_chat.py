@@ -239,7 +239,12 @@ class ChatGUI:
         pygame.display.set_caption("Metamersion Chat")
         self.clock = pygame.time.Clock()
         load_dotenv(find_dotenv(), verbose=False) 
-        self.translator = deepl.Translator(os.getenv("DEEPL_API_KEY"))
+        try:
+            self.translator = deepl.Translator(os.getenv("DEEPL_API_KEY"))
+        except Exception as e:
+            print(f"deepl failed! {e}")
+            self.portugese_mode = False
+            
         
     def translate_EN2PT(self, text):
         return self.translator.translate_text(text, target_lang="PT-PT").text
@@ -253,7 +258,7 @@ class ChatGUI:
         self.font_size = 20
         
         
-        self.display_height = pygame.display.Info().current_h
+        self.display_height = int(0.9*pygame.display.Info().current_h)
         self.display_width = pygame.display.Info().current_w
 
         self.x_begin_text = 50
@@ -337,7 +342,8 @@ class ChatGUI:
 
     def send_message_check(self):
         if not self.use_ai_chat and self.send_message:
-            output = f"Fake message, real random content: {uuid.uuid4()}"
+            randstuff = "bobox bobox bobox bobox bobox bobox bobox bobox"
+            output = f"Fake message, real random content: {randstuff}"
             if self.portugese_mode:
                 output = self.translate_EN2PT(output)
             self.history_ai.append(output)
@@ -526,13 +532,13 @@ if __name__ == "__main__":
         fp_config="../configs/chat/ls1_version_1.py",
         use_ai_chat=False,
         verbose_ai=True,
-        portugese_mode=True,
+        portugese_mode=False,
     )
 
     while True:
 
         # Set clock speedim
-        self.clock.tick(60)
+        self.clock.tick(30)
 
         # Fill screen with background color
         self.screen.fill(self.background_color)
@@ -545,3 +551,5 @@ if __name__ == "__main__":
 
         # Update display
         pygame.display.update()
+        
+        # print(f"bing: {time.time()}")
