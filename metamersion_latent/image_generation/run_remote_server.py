@@ -132,6 +132,14 @@ class Server():
             return None
 
 
+def yml_save(fp_yml, dict_stuff):
+    """
+    Helper function for saving yaml files
+    """
+    with open(fp_yml, 'w') as f:
+        data = yaml.dump(dict_stuff, f, sort_keys=False, default_flow_style=False)
+    print("yml_save: saved {}".format(fp_yml))
+
 
 
 def download_music():
@@ -406,8 +414,6 @@ def download_file(filename, url_folder, local_folder):
     
 
 
-
-
 # SOUND TEST
 download_music()
 # ChosenSet = random.randint(1, 14) 
@@ -445,15 +451,16 @@ while True:
         time.sleep(0.1)
         continue
     try:
-        if msg['meta']['call']=='run_movie':
+        dict_meta = msg['meta']
+        if dict_meta['call']=='run_movie':
             print("GOT MESSAGE")
             # Output files
-            code_subject = msg['meta']['code_subject']
-            server_ip = msg['meta']['server_ip']  
+            code_subject = safe_dict_read(dict_meta, 'code_subject', 'NONAME')
             name_base = f"{get_time('second')}_{code_subject}"
             dp_subj = f"/home/ubuntu/movies/{name_base}"
             os.makedirs(dp_subj)
 
+            server_ip = safe_dict_read(dict_meta, 'server_ip', 'IP NOT PROVIDED')
 
             fp_movie = f"{dp_subj}/current_nofading.mp4"
             fp_movie_wfading = f"{dp_subj}/current_nosound.mp4"
@@ -462,23 +469,29 @@ while True:
             fp_voice = f"{dp_subj}/voice.wav"
             fp_music = f"{dp_subj}/music.mp3"
             fp_mixed = f"{dp_subj}/current.mp3"
+            fp_yml = f"{dp_subj}/info.txt"
 
             # VIDEO
-            list_prompts = msg['meta']['list_prompts']
+            list_prompts = safe_dict_read(dict_meta, 'list_prompts', 6*["painting of the moon"])
             list_prompts = [l for l in list_prompts if len(l) > 10]
-            neg_prompt = msg['meta']['neg_prompt']
-            width = int(msg['meta']['width'])
-            height = int(msg['meta']['height'])
-            duration_single_trans = int(msg['meta']['duration_single_trans'])
-            depth_strength = float(msg['meta']['depth_strength'])
-            quality = msg['meta']['quality']
-            seeds = msg['meta']['seeds']
+            neg_prompt = safe_dict_read(dict_meta, 'neg_prompt', "")
 
+            width = int(safe_dict_read(dict_meta, 'width', 768))
+            height = int(safe_dict_read(dict_meta, 'height', 768))
+            duration_single_trans = safe_dict_read(dict_meta, 'duration_single_trans', 20)
+            depth_strength = safe_dict_read(dict_meta, 'depth_strength', 0.5)
+            quality = safe_dict_read(dict_meta, 'quality', 'medium')
+            seed = safe_dict_read(dict_meta, 'seed', 420)
+            duration_fade = safe_dict_read(dict_meta, 'duration_fade', 10)
+            if seed is None:
+                list_seeds = 6*[np.random.randint(999999999999)]
+            else:
+                list_seeds = 6*[seed]
 
             # MUSIC
             print("GENERATING MUSIC...")
             try:
-                ChosenSet = msg['meta']['ChosenSet']
+                ChosenSet = safe_dict_read(dict_meta, 'ChosenSet', 1)
                 if ChosenSet < 1 or ChosenSet > 14:
                     print("WARNING! BAD ChosenSet! FORCING ChosenSet=1")
                     ChosenSet=1
@@ -491,13 +504,13 @@ while True:
             # VOICE
             print("GENERATING VOICE...")
             try:
-                silence_begin = msg['meta']['silence_begin']
-                speaker_indx = msg['meta']['speaker_indx']
-                narration_list = msg['meta']['narration_list']
-                tts_length_scale = msg['meta']['tts_length_scale']
+                silence_begin = safe_dict_read(dict_meta, 'silence_begin', 1)
+                speaker_indx = safe_dict_read(dict_meta, 'speaker_indx', 1)
+                narration_list = safe_dict_read(dict_meta, 'narration_list', len(list_prompts)*["nothing to say"])
+                tts_length_scale = safe_dict_read(dict_meta, 'tts_length_scale', 1.0)
                 tts_model = 'tts_models/en/vctk/vits'
                 audio_duration = (len(list_prompts)+1)*duration_single_trans
-                offset = duration_single_trans/2
+                offset = duration_fade
                 start_times = list(np.arange(0,duration_single_trans*len(narration_list),duration_single_trans)+silence_begin+offset)
                 print(f"audio_duration={audio_duration} start_times={start_times}")
 
@@ -538,11 +551,10 @@ while True:
                 for prompt in list_prompts:
                     print(prompt)
 
-                list_seeds = None
                 lb.run_multi_transition(
                         fp_movie, 
                         list_prompts, 
-                        list_seeds=None, 
+                        list_seeds=list_seeds, 
                         fps=fps, 
                         duration_single_trans=duration_single_trans
                     )
@@ -553,7 +565,7 @@ while True:
             print("STARTING FADING...")
             try:
                 # Fading: black -> first image in the beginning, last_image -> black in the end
-                duration_fade = duration_single_trans/2
+                
                 nmb_frames_fade = int(duration_fade * fps)
                 img_first = lb.multi_transition_img_first
                 img_last = lb.multi_transition_img_last
@@ -585,8 +597,17 @@ while True:
                 subprocess.run(['ffmpeg', '-i', f'{dp_subj}/current_nosound.mp4', '-i', f'{dp_subj}/current.mp3', '-c', 'copy', '-map', '0:v:0', '-map', '1:a:0', f'{dp_subj}/current.mp4'], cwd=dp_subj)
             except Exception as e:
                 print(f"EXCEPTION! {e}")
+            print("DONE MERGING SOUND")
 
-            print("DONE MERGING SOUND...")
+            print("START SAVING INFO FILE...")
+            try:
+               # Put sound to movie
+                yml_save(fp_yml, dict_meta)
+            except Exception as e:
+                print(f"EXCEPTION! {e}")
+            print("DONE SAVING INFO FILE")
+
+
 
             print("ALL DONE! SENDING BACK SCP COMMANDS")
             # str_base = f"/home/ubuntu/movies/{name_base}"
@@ -600,6 +621,8 @@ while True:
             meta["code_sending"] = str(uuid.uuid4())[:5]
             meta["scp_cmd"] = scp_cmd
             server.publish_thread(meta, img)
+
+
 
 
 
