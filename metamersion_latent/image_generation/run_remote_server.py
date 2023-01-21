@@ -594,11 +594,19 @@ while True:
             try:
                # Put sound to movie
                 subprocess.run(['ffmpeg', '-i', f'{dp_subj}/current_nosound.mp4', '-i', f'{dp_subj}/current.mp3', '-c', 'copy', '-map', '0:v:0', '-map', '1:a:0', f'{dp_subj}/current.mp4'], cwd=dp_subj)
+            except Exception as e:
+                print(f"EXCEPTION! {e}")
+            print("DONE MERGING SOUND")
+
+            print("START SAVING INFO FILE...")
+            try:
+               # Put sound to movie
                 yml_save(fp_yml, dict_meta)
             except Exception as e:
                 print(f"EXCEPTION! {e}")
+            print("DONE SAVING INFO FILE")
 
-            print("DONE MERGING SOUND...")
+
 
             print("ALL DONE! SENDING BACK SCP COMMANDS")
             # str_base = f"/home/ubuntu/movies/{name_base}"
