@@ -12,6 +12,8 @@ sys.path.append("../..")
 
 from metamersion_latent.llm.chat import Chat
 from metamersion_latent.llm.config import Config
+from dotenv import find_dotenv, load_dotenv
+import uuid
 
 """
 TODO: 
@@ -219,12 +221,13 @@ class ChatGUI:
         fp_config: str,
         use_ai_chat: bool = True,
         verbose_ai: bool = False,
+        portugese_mode: bool = False,
     ):
 
         pygame.init()
         self.use_ai_chat = use_ai_chat
-        self.portugese_mode = True
-        self.verbose_ai = verbose_ai
+        self.portugese_mode = portugese_mode
+        self.verbose_ai = portugese_mode
         self.init_parameters()
         self.init_vars()
         if use_ai_chat:
@@ -235,21 +238,28 @@ class ChatGUI:
         self.screen = pygame.display.set_mode((self.display_width, self.display_height))
         pygame.display.set_caption("Metamersion Chat")
         self.clock = pygame.time.Clock()
-        
-        self.translator = deepl.Translator("74eaf309-014b-612e-1391-9bb15ae8f611")
+        load_dotenv(find_dotenv(), verbose=False) 
+        try:
+            self.translator = deepl.Translator(os.getenv("DEEPL_API_KEY"))
+        except Exception as e:
+            print(f"deepl failed! {e}")
+            self.portugese_mode = False
+            
         
     def translate_EN2PT(self, text):
-        return self.translator.translate_text(text, target_lang="EN-US").text
+        return self.translator.translate_text(text, target_lang="PT-PT").text
     
     def translate_PT2EN(self, text):
-        return self.translator.translate_text(text, target_lang="PT-PT").text
+        return self.translator.translate_text(text, target_lang="EN-US").text
 
     def init_parameters(self):
         self.escape_and_save = "x" #when this is submitted by human, then save chat
         self.fp_font = "kongtext.ttf"
         self.font_size = 20
-        self.display_height = 900
-        self.display_width = 1500
+        
+        
+        self.display_height = int(0.9*pygame.display.Info().current_h)
+        self.display_width = pygame.display.Info().current_w
 
         self.x_begin_text = 50
         self.x_end_text = self.display_width - self.x_begin_text
@@ -303,6 +313,7 @@ class ChatGUI:
         self.history_human = []
         self.text_typing = ""
         self.send_message = False
+        self.last_text_human = ""
         # self.history_sham()
 
     def init_ai_chat(self, fp_config, verbose=False):
@@ -322,15 +333,20 @@ class ChatGUI:
                 pygame.quit()
             else:
                 text = self.text_typing
+                self.history_human.append(text)
                 if self.portugese_mode:
                     text = self.translate_PT2EN(text)
-                self.history_human.append(text)
+                self.last_text_human = text
                 self.text_typing = ""
                 self.send_message = True
 
     def send_message_check(self):
         if not self.use_ai_chat and self.send_message:
-            self.history_ai.append("FAKE MESSAGE ...")
+            randstuff = "bobox bobox bobox bobox bobox bobox bobox bobox"
+            output = f"Fake message, real random content: {randstuff}"
+            if self.portugese_mode:
+                output = self.translate_EN2PT(output)
+            self.history_ai.append(output)
             self.send_message = False
 
         if self.send_message:
@@ -339,7 +355,7 @@ class ChatGUI:
                 print("SENDING MESSAGE!")
                 self.send_message_timer = 3
                 self.send_message = False
-                output = self.chat(self.history_human[-1])
+                output = self.chat(self.last_text_human)
                 output = output.strip()
                 print(f"GOT: {output}")
                 if self.portugese_mode:
@@ -513,15 +529,16 @@ class ChatGUI:
 if __name__ == "__main__":
 
     self = ChatGUI(
-        fp_config="../configs/chat/zach1_j1.py",
-        use_ai_chat=True,
+        fp_config="../configs/chat/ls1_version_1.py",
+        use_ai_chat=False,
         verbose_ai=True,
+        portugese_mode=False,
     )
 
     while True:
 
-        # Set clock speed
-        self.clock.tick(60)
+        # Set clock speedim
+        self.clock.tick(30)
 
         # Fill screen with background color
         self.screen.fill(self.background_color)
@@ -534,3 +551,5 @@ if __name__ == "__main__":
 
         # Update display
         pygame.display.update()
+        
+        # print(f"bing: {time.time()}")
