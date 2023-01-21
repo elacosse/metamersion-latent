@@ -34,16 +34,16 @@ class Chat:
         verbose (bool): prints out buffer text highlighted
     """
 
-    def __init__(self, config: Config, verbose: bool = False):
+    def __init__(
+        self, config: Config, verbose: bool = False, exit_conversation: bool = False
+    ):
 
         self.verbose = verbose
         self.config = config
         self.llm = load_llm_from_config(config.model)
-
-        self.initialization_message = self.config.initialization_message
-        self.first_message = self.config.first_message
-        self.conversation_summary = ""
-        self.conversation_summary_analysis = ""
+        self.template = self.config.template
+        if exit_conversation:
+            self.template = self.config.exit_conversation_template
 
         # keep a list of all input and outputs this handled
         self.inputs = []
@@ -68,20 +68,13 @@ class Chat:
             )
 
         self.prompt = PromptTemplate(
-            input_variables=["history", "input"], template=self.config.template
+            input_variables=["history", "input"], template=self.template
         )
         self.conversation = ConversationChain(
             prompt=self.prompt, llm=self.llm, verbose=self.verbose, memory=self.memory
         )
-        self.conversation_summary_prompt = PromptTemplate(
-            input_variables=["history"],
-            template=self.config.conversation_summary_template,
-        )
-        self.analysis_prompt = PromptTemplate(
-            input_variables=["history"], template=self.config.analysis_template
-        )
 
-    def __call__(self, user_message: str):
+    def __call__(self, user_message: str) -> str:
         """This is the main function that is called to handle a user message.
         It returns the AI's response.
         Args:
@@ -99,14 +92,9 @@ class Chat:
         self.outputs.append(output)
         return output
 
-    def initialize_interaction_with_form_responses(self, df):
-        """Create the initial question to start the conversation."""
-        llm = load_llm_from_config(self.config.question_model)
-        # Create a prompt for the question
-
-        LLMChain(llm=llm, prompt=self.analysis_prompt)
-
-        return self.conversation.predict(input="")
+    def get_history(self) -> str:
+        """Get the chat history."""
+        return self.memory.buffer
 
     def analyze_conversation_buffer(self):
         """Generate a summary of the conversation for later analysis."""

@@ -1,39 +1,26 @@
-import os
-
 import click
 from dotenv import find_dotenv, load_dotenv
 
-from metamersion_latent.llm.chat import Chat
+from metamersion_latent.llm.analysis import prompt
 from metamersion_latent.llm.config import Config
-from metamersion_latent.utils.oh_sheet import google_sheet_to_dataframe
-
-GOOGLE_SHEET_EMAIL_COLUMN_NAME = (
-    "{{field:01GNJ5JY9J262RCFX0D0CPJAEF}}, please provide your email."
-)
 
 
-def fetch_row_from_dataframe_from_sheet(user_email: str) -> str:
-    """Check if user email is valid.
+def select_language() -> int:
+    while True:
+        user_input = input(
+            "Please select language - Por favor, seleccione a língua \n1: English/Inglês \n2: Portuguese/Português\nNumber/Número: "
+        )
+        if user_input in ["1", "2"]:
+            break
+        else:
+            print(
+                "Invalid input - Entrada inválida.\n1: Portuguese/Português\n2: English/Inglês\n"
+            )
+    return int(user_input)
 
-    Args:
-        user_email (str): User email.
 
-    Returns:
-        str: Username.
-    """
-    # if fails, return None
-    # ToDo: Implement this function
-    # lookup in google sheets from typeform
-    spreadsheet_id = os.getenv("GOOGLE_SHEET_ID")
-
-    df = google_sheet_to_dataframe(spreadsheet_id, "A1:Z")
-    # get row of user email
-    try:
-        row = df.loc[df[GOOGLE_SHEET_EMAIL_COLUMN_NAME] == user_email]
-    except Exception as e:
-        return None
-
-    return row
+def timeout_handler(signum, frame):
+    raise TimeoutError("Timeout")
 
 
 @click.command()
@@ -41,84 +28,168 @@ def fetch_row_from_dataframe_from_sheet(user_email: str) -> str:
     "-c", "--config", type=click.Path(exists=True), help="Configuration file path."
 )
 @click.option("-v", "--verbose", is_flag=True, help="Verbose mode.")
-def main(config, verbose):
+@click.option(
+    "-t", "--time_limit", is_flag=True, help="Run bot with time limits on chat."
+)
+def main(config, verbose, time_limit):
     load_dotenv(find_dotenv(), verbose=False)  # load environment variables
     config_path = config
     config = Config.fromfile(config_path)
-
-    # display initial message
-    print(config.initialization_message)
-    # Check if user input is valid and get name
-    while True:
-        user_email = input("Email: ")
-        df_form = fetch_row_from_dataframe_from_sheet(user_email)
-        username = df_form["Hello, what's your name?"].values[0]
-        if username is not None:
-            config.template = config.template.format(
-                form_item_0=username, history="{history}", input="{input}"
-            )
-            break
-        print(
-            "Invalid email address. If you are a new user, please register first or try giving me your email again."
-        )
-    # Display welcome message
-    print(f"Welcome {username}! And welcome to Metamersion!\n")
+    #######################################################################################################################
+    # Select Language
+    #######################################################################################################################
+    language_selection = select_language()
+    if language_selection == 2:
+        bool_translate = True
+    else:
+        bool_translate = False
+    #######################################################################################################################
+    # Display initialization message
+    #######################################################################################################################
+    if bool_translate:
+        text = translate(config.initialization_message)
+        print(text)
+    else:
+        print(config.initialization_message)
+    #######################################################################################################################
+    # Perform chat
+    #######################################################################################################################
+    start_time = time.time()
+    # Format the template with the initial message
+    config.template = config.template.format(
+        initial_bot_message=config.initial_bot_message,
+        history="{history}",
+        input="{input}",
+    )
     chat = Chat(config, verbose)
-    # Generate first interaction and messasge
-    output = chat(config.first_message)
-    print(output)
-    ########################################
-
+    if bool_translate:
+        human_input = input(translate(config.initial_bot_message, "pt") + "\n")
+        human_input = translate(human_input, "en")
+        output = chat(human_input)
+        print(translate(output, "pt"))
+    else:
+        human_input = input(config.initial_bot_message + "\n")
+        output = chat(human_input)
+        print(output)
+    # Start chat loop
     while True:
-        human_input = input("User: ")
-        if human_input == "goodbye":
-            break
-        elif human_input == "":
-            human_input = "I don't know what to say."
+        signal.signal(signal.SIGALRM, timeout_handler)
+        signal.alarm(60)
+        try:
+            human_input = input("Visitor: ")
+            if bool_translate:
+                human_input = translate(human_input, "en")
+            signal.alarm(0)
+        except TimeoutError:
+            human_input = "bye"
+        if human_input == "":  # Maybe place also other checks
+            human_input = config.default_chat_input
             continue
+        elif time_limit and time.time() - start_time > config.initial_chat_time_limit:
+            if bool_translate:
+                print(config.default_time_limit_message)
+            else:
+                print(config.default_time_limit_message)
+            break
         output = chat(human_input)
         print(output)
 
-    # Analyze the conversation
-    print("Analyzing the conversation...\n")
-    while True:
-        try:
-            chat.analyze_conversation_buffer()
-        except Exception as e:
-            pass
-        if output is not None:
+        if human_input == "bye":
             break
-    print(chat.conversation_summary)
 
-    # Analyze the summary
-    print("Analyzing the summary...\n")
-    while True:
-        try:
-            chat.analyze_conversation_summary()
-        except Exception as e:
-            pass
-        if output is not None:
-            break
-    print(chat.conversation_summary_analysis)
-
-    from metamersion_latent.utils.master_prompter import (
-        beautify_concepts_to_stable_diffusion_prompts,
-        extract_concepts_from_analysis,
+    #######################################################################################################################
+    # Perform Analysis
+    #######################################################################################################################
+    # Format chat history properly
+    chat_history = (
+        config.ai_prefix + ": " + config.initial_bot_message + chat.get_history()
     )
-
-    print("Extracting concepts from analysis summary...\n")
-    concepts = extract_concepts_from_analysis(
-        chat.conversation_summary_analysis, config
+    # Short analysis
+    personal_analysis = "1." + prompt(
+        config.short_analysis_template.format(chat_history=chat_history),
+        config.short_analysis_model,
     )
-    print("Generating prompts...\n")
-    stability_prompts = beautify_concepts_to_stable_diffusion_prompts(concepts)
-    for i, prompt in enumerate(stability_prompts):
-        print(i, prompt)
-    from metamersion_latent.image_generation.stability import (
-        generate_images_from_prompts_and_save,
+    if verbose:
+        print("Personal analysis:\n" + personal_analysis)
+    # Story analysis
+    amusing_story = "1:" + prompt(
+        config.story_analysis_template.format(
+            chat_history=chat_history,
+            personal_analysis=personal_analysis,
+            N_story_steps=config.N_story_steps,
+        ),
+        config.story_analysis_model,
     )
+    if verbose:
+        print("Amusing story:\n" + amusing_story)
+    # Scene analysis
+    story_scenes = "1:" + prompt(
+        config.scene_analysis_template.format(
+            N_story_steps=config.N_story_steps, amusing_story=amusing_story
+        ),
+        config.scene_analysis_model,
+    )
+    if verbose:
+        print("Story scenes:\n" + story_scenes)
+    # Landscape analysis
+    created_landscapes = "1:" + prompt(
+        config.landscape_analysis_template.format(story_scenes=story_scenes),
+        config.landscape_analysis_model,
+    )
+    if verbose:
+        print("Created landscapes:\n" + created_landscapes)
+    # Object analysis
+    created_objects = "1:" + prompt(
+        config.object_analysis_template.format(
+            story_scenes=story_scenes, N_story_steps=config.N_story_steps
+        ),
+        config.object_analysis_model,
+    )
+    if verbose:
+        print("Created objects:\n" + created_objects)
+    # Objects in landscape analysis
+    surreal_landscapes = "1:" + prompt(
+        config.object_in_landscape_analysis_template.format(
+            created_landscapes=created_landscapes, created_objects=created_objects
+        ),
+        config.object_in_landscape_analysis_model,
+    )
+    if verbose:
+        print("Surreal landscapes:\n" + surreal_landscapes)
+    # Poem analysis
+    poem = "1:" + prompt(
+        config.poem_analysis_template.format(
+            N_story_steps=config.N_story_steps,
+            story_scenes=story_scenes,
+            created_objects=created_objects,
+            poem_style=config.poem_style,
+            verse_length=config.verse_length,
+        ),
+        config.poem_analysis_model,
+    )
+    if verbose:
+        print("Poem:\n" + poem)
+    #######################################################################################################################
+    draft_prompts = surreal_landscapes
 
-    generate_images_from_prompts_and_save(stability_prompts)
+    draft_prompts = [
+        line.split(":", 1)[1][1:].replace(". ", "")
+        for line in draft_prompts.split("\n")
+    ]
+    # draft_prompts = [line.split(":", 1)[1][1:] for line in draft_prompts.split("\n")]
+
+    prompts = [
+        config.prefix + prompt.rstrip(".") + ", " + config.postfix
+        for prompt in draft_prompts
+    ]
+    for p in prompts:
+        print(p)
+
+    # ToDo
+
+    # TTS
+
+    # Latent-blending
 
 
 if __name__ == "__main__":
