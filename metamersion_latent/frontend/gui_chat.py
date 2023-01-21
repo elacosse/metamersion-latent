@@ -12,6 +12,8 @@ sys.path.append("../..")
 
 from metamersion_latent.llm.chat import Chat
 from metamersion_latent.llm.config import Config
+from dotenv import find_dotenv, load_dotenv
+
 
 """
 TODO: 
@@ -235,8 +237,8 @@ class ChatGUI:
         self.screen = pygame.display.set_mode((self.display_width, self.display_height))
         pygame.display.set_caption("Metamersion Chat")
         self.clock = pygame.time.Clock()
-        
-        self.translator = deepl.Translator("74eaf309-014b-612e-1391-9bb15ae8f611")
+        load_dotenv(find_dotenv(), verbose=False) 
+        self.translator = deepl.Translator(os.getenv("DEEPL_API_KEY"))
         
     def translate_EN2PT(self, text):
         return self.translator.translate_text(text, target_lang="EN-US").text
@@ -513,7 +515,7 @@ class ChatGUI:
 if __name__ == "__main__":
 
     self = ChatGUI(
-        fp_config="../configs/chat/zach1_j1.py",
+        fp_config="../configs/chat/ls1_version_1.py",
         use_ai_chat=True,
         verbose_ai=True,
     )
