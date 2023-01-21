@@ -1,3 +1,5 @@
+import time
+
 import click
 from dotenv import find_dotenv, load_dotenv
 
@@ -192,5 +194,7 @@ def main(config, verbose, time_limit):
     # Latent-blending
 
 
+if __name__ == "__main__":
+    main()
 if __name__ == "__main__":
     main()
