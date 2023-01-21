@@ -4,7 +4,9 @@ import click
 from dotenv import find_dotenv, load_dotenv
 
 from metamersion_latent.llm.analysis import prompt
+from metamersion_latent.llm.chat import Chat
 from metamersion_latent.llm.config import Config
+from metamersion_latent.utils.translation import translate
 
 
 def select_language() -> int:
@@ -197,4 +199,6 @@ def main(config, verbose, time_limit):
 if __name__ == "__main__":
     main()
 if __name__ == "__main__":
+    main()
+    main()
     main()
