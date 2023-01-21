@@ -469,7 +469,7 @@ while True:
             fp_voice = f"{dp_subj}/voice.wav"
             fp_music = f"{dp_subj}/music.mp3"
             fp_mixed = f"{dp_subj}/current.mp3"
-            fp_yaml = f"{dp_subj}/info.txt"
+            fp_yml = f"{dp_subj}/info.txt"
 
             # VIDEO
             list_prompts = safe_dict_read(dict_meta, 'list_prompts', 6*["painting of the moon"])
@@ -482,6 +482,7 @@ while True:
             depth_strength = safe_dict_read(dict_meta, 'depth_strength', 0.5)
             quality = safe_dict_read(dict_meta, 'quality', 'medium')
             seed = safe_dict_read(dict_meta, 'seed', 420)
+            duration_fade = safe_dict_read(dict_meta, 'duration_fade', 10)
             if seed is None:
                 list_seeds = 6*[np.random.randint(999999999999)]
             else:
@@ -490,7 +491,7 @@ while True:
             # MUSIC
             print("GENERATING MUSIC...")
             try:
-                ChosenSet = safe_dict_read(dict_meta, 'seed', 1)
+                ChosenSet = safe_dict_read(dict_meta, 'ChosenSet', 1)
                 if ChosenSet < 1 or ChosenSet > 14:
                     print("WARNING! BAD ChosenSet! FORCING ChosenSet=1")
                     ChosenSet=1
@@ -509,7 +510,7 @@ while True:
                 tts_length_scale = safe_dict_read(dict_meta, 'tts_length_scale', 1.0)
                 tts_model = 'tts_models/en/vctk/vits'
                 audio_duration = (len(list_prompts)+1)*duration_single_trans
-                offset = duration_single_trans/2
+                offset = duration_fade
                 start_times = list(np.arange(0,duration_single_trans*len(narration_list),duration_single_trans)+silence_begin+offset)
                 print(f"audio_duration={audio_duration} start_times={start_times}")
 
@@ -564,7 +565,7 @@ while True:
             print("STARTING FADING...")
             try:
                 # Fading: black -> first image in the beginning, last_image -> black in the end
-                duration_fade = safe_dict_read(dict_meta, 'duration_fade', 10)
+                
                 nmb_frames_fade = int(duration_fade * fps)
                 img_first = lb.multi_transition_img_first
                 img_last = lb.multi_transition_img_last
