@@ -52,7 +52,7 @@ def main(config, verbose, time_limit):
     # Display initialization message
     #######################################################################################################################
     if bool_translate:
-        text = translate(config.initialization_message)
+        text = translate(config.initialization_message, "PT")
         print(text)
     else:
         print(config.initialization_message)
@@ -68,10 +68,10 @@ def main(config, verbose, time_limit):
     )
     chat = Chat(config, verbose)
     if bool_translate:
-        human_input = input(translate(config.initial_bot_message, "pt") + "\n")
-        human_input = translate(human_input, "en")
+        human_input = input(translate(config.initial_bot_message, "PT") + "\n")
+        human_input = translate(human_input, "EN")
         output = chat(human_input)
-        print(translate(output, "pt"))
+        print(translate(output, "PT"))
     else:
         human_input = input(config.initial_bot_message + "\n")
         output = chat(human_input)
@@ -83,7 +83,7 @@ def main(config, verbose, time_limit):
         try:
             human_input = input("Visitor: ")
             if bool_translate:
-                human_input = translate(human_input, "en")
+                human_input = translate(human_input, "EN")
             signal.alarm(0)
         except TimeoutError:
             human_input = "bye"
