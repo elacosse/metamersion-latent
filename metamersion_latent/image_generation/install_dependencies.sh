@@ -27,6 +27,7 @@ cd latentblending
 # VARIANT B: AUTO INSTALL
 pip install -r requirements.txt
 pip install numpy==1.21
+pip install PyYAML
 
 # TTS installs
 pip install TTS

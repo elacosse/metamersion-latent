@@ -24,6 +24,7 @@ import os
 import wget
 import requests
 import subprocess
+import yaml
 
 IMAGE_DIMS = (512,512,3)
 EMO_STRING_LEN = 2 # In bytes
@@ -484,9 +485,9 @@ while True:
             seed = safe_dict_read(dict_meta, 'seed', 420)
             duration_fade = safe_dict_read(dict_meta, 'duration_fade', 10)
             if seed is None:
-                list_seeds = 6*[np.random.randint(999999999999)]
+                list_seeds = len(list_prompts)*[np.random.randint(999999999999)]
             else:
-                list_seeds = 6*[seed]
+                list_seeds = len(list_prompts)*[seed]
 
             # MUSIC
             print("GENERATING MUSIC...")
@@ -514,6 +515,11 @@ while True:
                 start_times = list(np.arange(0,duration_single_trans*len(narration_list),duration_single_trans)+silence_begin+offset)
                 print(f"audio_duration={audio_duration} start_times={start_times}")
 
+                print("BEFORE STARTING TTS:")
+                print(f"narration_list {narration_list}")
+                print(f"duration_single_trans {duration_single_trans}")
+                print(f"start_times {start_times}")
+                print(f"tts_length_scale {tts_length_scale}")
                 # segment_duration = generate_tts_audio_from_list_onsets(narration_list, start_times, audio_duration, tts_model, speaker_indx, fp_voice)
                 assemble_tts_for_video(narration_list, duration_single_trans, start_times, fp_voice, tts_model, speaker_indx, tts_length_scale)
 
