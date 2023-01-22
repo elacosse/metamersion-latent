@@ -30,15 +30,14 @@ def timeout_handler(signum, frame):
 
 @click.command()
 @click.option(
-    "-c", "--config", type=click.Path(exists=True), help="Configuration file path."
+    "-c", "--config_path", type=click.Path(exists=True), help="Configuration file path."
 )
 @click.option("-v", "--verbose", is_flag=True, help="Verbose mode.")
 @click.option(
     "-t", "--time_limit", is_flag=True, help="Run bot with time limits on chat."
 )
-def main(config, verbose, time_limit):
+def main(config_path, verbose, time_limit):
     load_dotenv(find_dotenv(), verbose=False)  # load environment variables
-    config_path = config
     config = Config.fromfile(config_path)
     #######################################################################################################################
     # Select Language
@@ -102,13 +101,13 @@ def main(config, verbose, time_limit):
         if human_input == "bye":
             break
 
-    #######################################################################################################################
-    # Perform Analysis
-    #######################################################################################################################
     # Format chat history properly
     chat_history = (
         config.ai_prefix + ": " + config.initial_bot_message + chat.get_history()
     )
+    #######################################################################################################################
+    # Perform Analysis
+    #######################################################################################################################
     # Short analysis
     personal_analysis = "1." + prompt(
         config.short_analysis_template.format(chat_history=chat_history),
@@ -177,6 +176,7 @@ def main(config, verbose, time_limit):
     #######################################################################################################################
     draft_prompts = surreal_landscapes
 
+    ### Put this into a function!
     draft_prompts = [
         line.split(":", 1)[1][1:].replace(". ", "")
         for line in draft_prompts.split("\n")
@@ -189,12 +189,6 @@ def main(config, verbose, time_limit):
     ]
     for p in prompts:
         print(p)
-
-    # ToDo
-
-    # TTS
-
-    # Latent-blending
 
 
 if __name__ == "__main__":
