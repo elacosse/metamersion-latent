@@ -10,8 +10,8 @@ import deepl #pip install deepl
 
 sys.path.append("../..")
 
-from metamersion_latent.llm.chat import Chat
-from metamersion_latent.llm.config import Config
+#from metamersion_latent.llm.chat import Chat
+#from metamersion_latent.llm.config import Config
 from dotenv import find_dotenv, load_dotenv
 import uuid
 
@@ -255,24 +255,34 @@ class ChatGUI:
     def init_parameters(self):
         self.escape_and_save = "x" #when this is submitted by human, then save chat
         self.fp_font = "kongtext.ttf"
-        self.font_size = 20
+        self.font_size = 15
         
-        
+        # Display props
         self.display_height = int(0.9*pygame.display.Info().current_h)
         self.display_width = pygame.display.Info().current_w
-
-        self.x_begin_text = 50
+        
+        self.x_begin_text = 150
         self.x_end_text = self.display_width - self.x_begin_text
         self.y_begin_text_history = 10
         self.y_end_text_history = self.display_height - 200
         self.y_end_text_typing = self.display_height - 50
 
-        self.line_distance = 10
-        self.person_separation = 15
+        self.line_distance = 15
+        self.person_separation = 35
 
         self.text_color_human = (200, 200, 200)
         self.text_color_ai = (0, 200, 0)
         self.background_color = (0, 0, 0)
+        
+        # AI fake typing
+        self.ai_fake_typing = True
+        
+        # Little images next to human/AI
+        self.show_imgs = True
+        self.x_fract_img = 0.7
+        self.fp_img_human = "img_human.png"
+        self.fp_img_ai = "img_ai.png"
+        
 
         # Fonts
         if not os.path.isfile(self.fp_font):
@@ -308,12 +318,23 @@ class ChatGUI:
         self.cursor_ai_x = 0
         
 
+        
+
     def init_vars(self):
         self.history_ai = []
         self.history_human = []
         self.text_typing = ""
         self.send_message = False
         self.last_text_human = ""
+        self.img_human = pygame.image.load(self.fp_img_human)
+        self.img_ai = pygame.image.load(self.fp_img_ai)
+        assert self.img_human.get_size()[0] == self.img_ai.get_size()[0], "the images need to have the same size"
+        self.x_begin_imgs = int(self.x_begin_text*self.x_fract_img) - self.img_human.get_size()[0]//2
+        self.y_offset_imgs = self.img_human.get_size()[0]//2 + self.line_distance//2
+        self.show_ai_fake_typing = False
+        self.idx_render = 0
+        self.idx_render_lastsend = 0
+        self.y_text_top_ai = 0
         # self.history_sham()
 
     def init_ai_chat(self, fp_config, verbose=False):
@@ -342,12 +363,13 @@ class ChatGUI:
 
     def send_message_check(self):
         if not self.use_ai_chat and self.send_message:
-            randstuff = "bobox bobox bobox bobox bobox bobox bobox bobox"
+            randstuff = "Well OK let us just pretend that this a real answer actually coming from an AI. It is not, because this text is predefined. OK. Whatever."
             output = f"Fake message, real random content: {randstuff}"
             if self.portugese_mode:
                 output = self.translate_EN2PT(output)
             self.history_ai.append(output)
             self.send_message = False
+            self.check_if_init_ai_typing()
 
         if self.send_message:
             self.send_message_timer -= 1
@@ -362,6 +384,8 @@ class ChatGUI:
                     output = self.translate_EN2PT(output)
                 self.history_ai.append(output)
                 self.send_message = False
+                self.check_if_init_ai_typing()
+
 
     def last_input_ai(self):
         nmb_items = max(len(self.history_ai), len(self.history_human))
@@ -370,6 +394,14 @@ class ChatGUI:
         else:
             last_input_ai = True
         return last_input_ai
+    
+    def check_if_init_ai_typing(self):
+        if not self.ai_fake_typing:
+            return
+        self.nbm_chars_ai_typed = 0
+        self.idx_render_lastsend = self.idx_render
+        self.show_ai_fake_typing = True
+        
 
     def history_sham(self):
         self.history_ai.append("AI i am AI")
@@ -399,10 +431,12 @@ class ChatGUI:
                 if person_type == 0:
                     font = self.font_history_human
                     color = self.text_color_human
+                    img = self.img_human
                 else:
                     font = self.font_history_ai
                     color = self.text_color_ai
-
+                    img = self.img_ai
+                    
                 text_lines = wrap_text(font, text, self.x_end_text)
 
                 for line in text_lines[::-1]:
@@ -419,16 +453,30 @@ class ChatGUI:
                     text_rect.bottomleft = (self.x_begin_text, y_current)
 
                     # Blit text
-                    self.screen.blit(text_render, text_rect)
+                    # Skip it if its the last line and AI if ai_fake_typing
+                    if self.show_ai_fake_typing:
+                        if person_type == 1 and idx_item==nmb_items-1:
+                            self.y_text_top_ai = y_current
+                        else:
+                            self.screen.blit(text_render, text_rect)
+                    else:
+                        self.screen.blit(text_render, text_rect)
+                        
                     y_current -= text_size[1] + self.line_distance
 
                     # Don't draw if above FOV
                     if y_current < self.y_begin_text_history:
                         continue
-
+                
+                if y_current > 0 and self.show_imgs:
+#                    print(y_current)
+                    self.screen.blit(img, (self.x_begin_imgs, y_current)) #-self.y_offset_imgs
+                
+                
                 # print(f"{idx_item} {y_current}")
                 y_current -= self.person_separation
-
+            
+        
     def render_text_typing(self):
         if not self.last_input_ai():
             return
@@ -463,6 +511,10 @@ class ChatGUI:
         # Measure out total ydim
         y_total = len(text_lines) * (self.line_height_typing + self.line_distance)
         y_begin = self.y_end_text_typing - y_total
+        
+        if self.show_imgs:
+            self.screen.blit(self.img_human, (self.x_begin_imgs, y_begin - self.y_offset_imgs))
+        
         for j, line in enumerate(text_lines):
             # Render text
             text_render = self.font_typing.render(line, True, self.text_color_human)
@@ -479,9 +531,7 @@ class ChatGUI:
 
             # Set the cursor
             self.cursor_human_y = y_begin - self.cursor_height_human
-            self.cursor_human_x = (
-                text_size[0] + self.x_begin_text
-            )  # + self.cursor_xdist_human
+            self.cursor_human_x = (text_size[0] + self.x_begin_text)
 
             # Blit text
             self.screen.blit(text_render, text_rect)
@@ -506,6 +556,56 @@ class ChatGUI:
                 ),
             )
 
+    def render_ai_fake_typing(self):
+        if self.idx_render < self.idx_render_lastsend + 3:
+            return
+        
+        # loop over all items
+#        self.nbm_chars_ai_typed += np.random.randint(7)
+        if self.nbm_chars_ai_typed > 6:
+            if np.random.rand() > 0.85:
+                thinking_duration = 0.2*np.random.rand() + 0.1
+                time.sleep(thinking_duration)
+        self.nbm_chars_ai_typed += int(np.abs(np.random.randn())*3)+1
+        
+        text_full = self.history_ai[-1]
+        text = text_full[0:self.nbm_chars_ai_typed]
+
+        font = self.font_history_ai
+        color = self.text_color_ai
+            
+        text_lines = wrap_text(font, text, self.x_end_text)
+        # get line height
+        text_render = font.render(text_lines[0], True, color)
+        text_size = text_render.get_size()
+        y_current = self.y_text_top_ai
+#        y_current -= (text_size[1] + self.line_distance)*len(text_lines)
+        
+        for line in text_lines:
+            # Render text
+            text_render = font.render(line, True, color)
+
+            # Get text size
+            text_size = text_render.get_size()
+
+            # Get text rect
+            text_rect = text_render.get_rect()
+
+            # Set text rect center
+            text_rect.bottomleft = (self.x_begin_text, y_current)
+
+            # Blit text
+            self.screen.blit(text_render, text_rect)
+            y_current += text_size[1] + self.line_distance
+
+        
+        if len(text_full) == self.nbm_chars_ai_typed:
+            self.show_ai_fake_typing = False
+        
+    def update_render(self):
+        pygame.display.update()
+        self.idx_render += 1
+    
     def get_chat_history(self):
         history = ""
         nmb_items = max(len(self.history_ai), len(self.history_human))
@@ -527,22 +627,34 @@ class ChatGUI:
 
 
 if __name__ == "__main__":
-
+    
+    
+    # Change Parameters below
+    fp_config="../configs/chat/ls1_version_1.py"
+    use_ai_chat=False
+    verbose_ai=True
+    portugese_mode=False
+    
+    # Let's instantiate the ChatGUI object and conveniantly name it self...
     self = ChatGUI(
-        fp_config="../configs/chat/ls1_version_1.py",
-        use_ai_chat=False,
-        verbose_ai=True,
-        portugese_mode=False,
+        fp_config=fp_config,
+        use_ai_chat=use_ai_chat,
+        verbose_ai=verbose_ai,
+        portugese_mode=portugese_mode,
     )
 
     while True:
 
         # Set clock speedim
-        self.clock.tick(30)
-
+        self.clock.tick(60)
+        
         # Fill screen with background color
         self.screen.fill(self.background_color)
 
+        # In case we have not done the fake ai tpying, lets do it now!
+        if self.show_ai_fake_typing:
+            self.render_ai_fake_typing()
+            
         self.render_text_history()
         self.render_text_typing()
         self.render_cursor_human()
@@ -550,6 +662,6 @@ if __name__ == "__main__":
         self.send_message_check()
 
         # Update display
-        pygame.display.update()
-        
-        # print(f"bing: {time.time()}")
+        self.update_render()
+
+        #print(f"bing: {time.time()}")
