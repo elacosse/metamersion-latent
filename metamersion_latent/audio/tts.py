@@ -2,7 +2,29 @@ import os
 import wave
 
 import numpy as np
+import torchaudio
+from tortoise.utils.audio import load_voice
 from TTS.api import TTS
+
+from metamersion_latent.audio.tortoise import TextToSpeech
+
+
+def create_tts_from_text(text: str, output_path: str, voice: str, preset="fast", device: str ="cuda:0") -> None:
+    """ Generate audio from text using a TTS model.
+    Args:
+        text (str): Text to generate audio from.
+        output_path (str): Path to output file.
+        voice (str): Name of TTS voice.
+        preset (str): TTS preset.
+        device (str): Device to use for TTS.
+    """
+    
+
+    tts = TextToSpeech(device=device)
+    voice_samples, conditioning_latents = load_voice(voice)
+    gen = tts.tts_with_preset(text, voice_samples=voice_samples, conditioning_latents=conditioning_latents, 
+                            preset=preset)
+    torchaudio.save(output_path, gen.squeeze(0).cpu(), 24000)
 
 
 def generate_tts_audio_from_list_onsets(
@@ -259,4 +281,5 @@ if __name__ == "__main__":
     it will suck and it could always happen, especially when the content is llm gen.
     proposed solutions would be to check the length of each segment BEFORE concating
     and if it is too long, we need to re-run a shorter version of the segment
+    """
     """
