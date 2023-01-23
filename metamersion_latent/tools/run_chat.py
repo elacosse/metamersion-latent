@@ -1,14 +1,13 @@
 import logging
-import uuid
+from datetime import datetime
 from pathlib import Path
 
 import click
 from dotenv import find_dotenv, load_dotenv
 
-from metamersion_latent.llm.analysis import prompt
+from metamersion_latent.llm.analysis import perform_analysis
 from metamersion_latent.llm.config import Config
 from metamersion_latent.utils import save_to_yaml
-
 
 # from metamersion_latent.image_generation.stability import create_collage
 # from metamersion_latent.image_generation.stability import write_text_under_image
@@ -37,92 +36,23 @@ def main(config_path, example_path, output_path, verbose):
     config = Config.fromfile(config_path)
     logger.info("Loading example conversation file from %s", example_path)
     example = Config.fromfile(example_path)
-    token = str(uuid.uuid4())
+
+    # Format the datetime as a string
+    now = datetime.now()
+    date = now.strftime("%Y%m%d_%H%M")
+    token = f"{date}_{example.username}"
+
     logger.info("Chat token: %s", token)
     logger.info("Saving to %s", output_path)
 
     chat_history = example.chat_history
-    #######################################################################################################################
+
     # Perform Analysis
-    #######################################################################################################################
-    # Short analysis
-    personal_analysis = "1." + prompt(
-        config.short_analysis_template.format(chat_history=chat_history),
-        config.short_analysis_model,
-    )
-    if verbose:
-        print("Personal analysis:\n" + personal_analysis)
-    # Story analysis
-    amusing_story = "1:" + prompt(
-        config.story_analysis_template.format(
-            chat_history=chat_history,
-            personal_analysis=personal_analysis,
-            N_story_steps=config.N_story_steps,
-        ),
-        config.story_analysis_model,
-    )
-    if verbose:
-        print("Amusing story:\n" + amusing_story)
-    # Scene analysis
-    story_scenes = "1:" + prompt(
-        config.scene_analysis_template.format(
-            N_story_steps=config.N_story_steps, amusing_story=amusing_story
-        ),
-        config.scene_analysis_model,
-    )
-    if verbose:
-        print("Story scenes:\n" + story_scenes)
-    # Landscape analysis
-    created_landscapes = "1:" + prompt(
-        config.landscape_analysis_template.format(story_scenes=story_scenes),
-        config.landscape_analysis_model,
-    )
-    if verbose:
-        print("Created landscapes:\n" + created_landscapes)
-    # Object analysis
-    created_objects = "1:" + prompt(
-        config.object_analysis_template.format(
-            story_scenes=story_scenes, N_story_steps=config.N_story_steps
-        ),
-        config.object_analysis_model,
-    )
-    if verbose:
-        print("Created objects:\n" + created_objects)
-    # Objects in landscape analysis
-    surreal_landscapes = "1:" + prompt(
-        config.object_in_landscape_analysis_template.format(
-            created_landscapes=created_landscapes, created_objects=created_objects
-        ),
-        config.object_in_landscape_analysis_model,
-    )
-    if verbose:
-        print("Surreal landscapes:\n" + surreal_landscapes)
-    # Poem analysis
-    poem = "1:" + prompt(
-        config.poem_analysis_template.format(
-            N_story_steps=config.N_story_steps,
-            story_scenes=story_scenes,
-            created_objects=created_objects,
-            poem_style=config.poem_style,
-            verse_length=config.verse_length,
-        ),
-        config.poem_analysis_model,
-    )
-    if verbose:
-        print("Poem:\n" + poem)
+    logger.info("Performing analysis on chat history...")
+    analysis_dict = perform_analysis(chat_history, config)
 
-    analysis_dict = dict(
-        personal_analysis=personal_analysis,
-        amusing_story=amusing_story,
-        story_scenes=story_scenes,
-        created_landscapes=created_landscapes,
-        created_objects=created_objects,
-        surreal_landscapes=surreal_landscapes,
-        poem=poem,
-    )
-    #######################################################################################################################
-
-    draft_prompts = surreal_landscapes
+    # Craft prompts
+    draft_prompts = analysis_dict["surreal_landscapes"]
     draft_prompts = [
         line.split(":", 1)[1][1:].replace(". ", "")
         for line in draft_prompts.split("\n")
@@ -143,12 +73,13 @@ def main(config_path, example_path, output_path, verbose):
             prompts=prompts_dict,
         )
     ]
+
     filepath = save_to_yaml(items, token, output_path)
     logger.info("Saved to %s", filepath)
 
     #######################################################################################################################
     # Format poem into phrase
-    [phrase[:-1] for phrase in poem.split(":")[1:]]
+    # [phrase[:-1] for phrase in poem.split(":")[1:]]
 
     # TTS
 
