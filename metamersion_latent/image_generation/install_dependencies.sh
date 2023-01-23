@@ -30,6 +30,8 @@ pip install numpy==1.21
 pip install PyYAML
 
 # TTS installs
+git clone https://github.com/elacosse/metamersion-latent
+mv metamersion-latent metamersion_latent
 pip install TTS
 sudo apt-get -y install espeak-ng
 
