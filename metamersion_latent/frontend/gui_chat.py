@@ -9,19 +9,16 @@ import datetime
 import deepl #pip install deepl
 
 sys.path.append("../..")
-
-#from metamersion_latent.llm.chat import Chat
-#from metamersion_latent.llm.config import Config
+sys.path.append("..")
+sys.path.append("/Users/jjj/git/metamersion_latent")
+from metamersion_latent.llm.chat import Chat
+from metamersion_latent.llm.config import Config
 from dotenv import find_dotenv, load_dotenv
-import uuid
 
 """
 TODO: 
     wrap_text has a bug: if the user types a super long word it will hang.
     render different bg colors -- wait with design
-    AI text popping up one by one. openai does this word-wise
-    AI cursor blinking like a square for the AI
-    pictures in front of text
 """
 
 #%% Show the chat history
@@ -332,6 +329,7 @@ class ChatGUI:
         self.x_begin_imgs = int(self.x_begin_text*self.x_fract_img) - self.img_human.get_size()[0]//2
         self.y_offset_imgs = self.img_human.get_size()[0]//2 + self.line_distance//2
         self.show_ai_fake_typing = False
+        self.active_ai_fake_typing = False
         self.idx_render = 0
         self.idx_render_lastsend = 0
         self.y_text_top_ai = 0
@@ -339,8 +337,13 @@ class ChatGUI:
 
     def init_ai_chat(self, fp_config, verbose=False):
         config = Config.fromfile(fp_config)
+        config.template = config.template.format(
+        initial_bot_message=config.initial_bot_message,
+        history="{history}",
+        input="{input}",
+        )
         self.chat = Chat(config, self.verbose_ai)
-        self.history_ai.append(self.chat.first_message)
+        self.history_ai.append(config.initial_bot_message)
         self.send_message_timer = 3
 
     def hit_enter(self):
@@ -557,9 +560,11 @@ class ChatGUI:
             )
 
     def render_ai_fake_typing(self):
-        if self.idx_render < self.idx_render_lastsend + 3:
-            return
         
+        if self.idx_render < self.idx_render_lastsend + 3:
+            self.active_ai_fake_typing = False
+            return
+        self.active_ai_fake_typing = True
         # loop over all items
 #        self.nbm_chars_ai_typed += np.random.randint(7)
         if self.nbm_chars_ai_typed > 6:
@@ -599,8 +604,9 @@ class ChatGUI:
             y_current += text_size[1] + self.line_distance
 
         
-        if len(text_full) == self.nbm_chars_ai_typed:
+        if self.nbm_chars_ai_typed +3 >= len(text_full):
             self.show_ai_fake_typing = False
+            self.active_ai_fake_typing = False
         
     def update_render(self):
         pygame.display.update()
@@ -630,8 +636,8 @@ if __name__ == "__main__":
     
     
     # Change Parameters below
-    fp_config="../configs/chat/ls1_version_1.py"
-    use_ai_chat=False
+    fp_config="../configs/chat/ls1_jz1.py"
+    use_ai_chat=True
     verbose_ai=True
     portugese_mode=False
     
@@ -646,7 +652,7 @@ if __name__ == "__main__":
     while True:
 
         # Set clock speedim
-        self.clock.tick(60)
+        self.clock.tick(30)
         
         # Fill screen with background color
         self.screen.fill(self.background_color)
@@ -654,12 +660,12 @@ if __name__ == "__main__":
         # In case we have not done the fake ai tpying, lets do it now!
         if self.show_ai_fake_typing:
             self.render_ai_fake_typing()
-            
         self.render_text_history()
-        self.render_text_typing()
-        self.render_cursor_human()
-
-        self.send_message_check()
+        
+        if not self.active_ai_fake_typing:
+            self.render_text_typing()
+            self.render_cursor_human()
+            self.send_message_check()
 
         # Update display
         self.update_render()
