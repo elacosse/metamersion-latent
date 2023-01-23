@@ -10,6 +10,10 @@ from metamersion_latent.llm.config import Config
 from metamersion_latent.utils import save_to_yaml
 
 
+# from metamersion_latent.image_generation.stability import create_collage
+# from metamersion_latent.image_generation.stability import write_text_under_image
+
+
 @click.command()
 @click.option(
     "-c", "--config_path", type=click.Path(exists=True), help="Configuration file path."
@@ -38,7 +42,6 @@ def main(config_path, example_path, output_path, verbose):
     logger.info("Saving to %s", output_path)
 
     chat_history = example.chat_history
-
     #######################################################################################################################
     # Perform Analysis
     #######################################################################################################################
@@ -144,9 +147,23 @@ def main(config_path, example_path, output_path, verbose):
     logger.info("Saved to %s", filepath)
 
     #######################################################################################################################
+    # Format poem into phrase
+    [phrase[:-1] for phrase in poem.split(":")[1:]]
+
     # TTS
 
-    # Latent Blending
+    # TODO
+
+    ### Get Latent Blending to assemble 6 images
+
+    # assign to list_imgs
+
+    ######### Create cards
+    # collage = create_collage(list_imgs)
+    # card_output = Path(output_path) / f"{token}.png"
+    # write_text_under_image(collage, split_poem)
+    # collage = write_text_under_image(collage, split_poem)
+    # collage.save(card_output)
 
 
 if __name__ == "__main__":

@@ -1,9 +1,10 @@
 import io
 import os
 import warnings
+from pathlib import Path
 
 import stability_sdk.interfaces.gooseai.generation.generation_pb2 as generation
-from PIL import Image
+from PIL import Image, ImageDraw, ImageFont
 from stability_sdk import client
 
 
@@ -71,3 +72,27 @@ def create_collage(images: list) -> Image:
         collage.paste(img, (x_offset, 0))
         x_offset += img.size[0]
     return collage
+
+
+def write_text_under_image(image, text_list):
+    # Get the width and height of the image
+    width, height = image.size
+    # Create a new image with the same width and double the height
+    new_image = Image.new("RGB", (width, int(height * 1.5)), "white")
+    # Paste the original image on top of the new image
+    new_image.paste(image, (0, 0))
+    # Create a draw object to draw on the new image
+    draw = ImageDraw.Draw(new_image)
+    # Define the font to use for the text
+    font_resource_path = (
+        Path(__file__).resolve().parents[1] / "frontend" / "kongtext.ttf"
+    )
+    font = ImageFont.truetype(str(font_resource_path), 18)
+    # Calculate the vertical spacing between each phrase
+    spacing = width / len(text_list)
+    # Draw the text on the new image
+    for i in range(len(text_list)):
+        draw.text(
+            (0 + spacing * i, height + 10), text_list[i], font=font, fill=(0, 0, 0)
+        )
+    return new_image
