@@ -219,12 +219,15 @@ class ChatGUI:
         use_ai_chat: bool = True,
         verbose_ai: bool = False,
         portugese_mode: bool = False,
+        ai_fake_typing: bool = False,
     ):
 
         pygame.init()
         self.use_ai_chat = use_ai_chat
         self.portugese_mode = portugese_mode
         self.verbose_ai = portugese_mode
+        self.ai_fake_typing = ai_fake_typing
+        
         self.init_parameters()
         self.init_vars()
         if use_ai_chat:
@@ -271,8 +274,7 @@ class ChatGUI:
         self.text_color_ai = (0, 200, 0)
         self.background_color = (0, 0, 0)
         
-        # AI fake typing
-        self.ai_fake_typing = True
+       
         
         # Little images next to human/AI
         self.show_imgs = True
@@ -640,6 +642,7 @@ if __name__ == "__main__":
     use_ai_chat=True
     verbose_ai=True
     portugese_mode=False
+    ai_fake_typing=True
     
     # Let's instantiate the ChatGUI object and conveniantly name it self...
     self = ChatGUI(
@@ -647,6 +650,7 @@ if __name__ == "__main__":
         use_ai_chat=use_ai_chat,
         verbose_ai=verbose_ai,
         portugese_mode=portugese_mode,
+        ai_fake_typing=ai_fake_typing,
     )
 
     while True:
