@@ -35,7 +35,7 @@ def create_tts_from_text(
 
 def assemble_tts_for_video(
     narration_list: list,
-    transition_duration: float,
+    audio_duration: float,
     start_times: list,
     output_filepath: str,
     preset: str,
@@ -45,7 +45,7 @@ def assemble_tts_for_video(
     """Assemble TTS audio files into a single audio file with silence between each file.
     Args:
         narration_list (list): List of narration strings.
-        transition_duration (float): Duration of video segments (fixed)
+        audio_duration (float): length of total audio clip
         start_times (list): List of start times for each transition.
         output_filepath (str): Path to output file.
         preset (str): Quality of TTS audio.
@@ -71,7 +71,7 @@ def assemble_tts_for_video(
     #     device = devices[i % len(devices)]
     #     thread_list.append(threading.Thread(target=create_tts_from_thread,args=(narration_list[0], segment_filepaths[0], voice, preset, device)))
     #     thread_list[-1].start()
-    audio_duration = transition_duration * len(start_times)
+
     assemble_audio_files_with_silence_and_save(
         segment_filepaths, audio_duration, start_times, output_filepath
     )
