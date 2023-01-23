@@ -18,7 +18,7 @@ import vimeo
 import random
 from pydub import AudioSegment
 import librosa
-from metamersion_latent.audio.tts import generate_tts_audio_from_list_onsets, assemble_tts_for_video
+from metamersion_latent.audio.tts import assemble_tts_for_video
 
 import os
 import wget
@@ -521,7 +521,11 @@ while True:
                 print(f"start_times {start_times}")
                 print(f"tts_length_scale {tts_length_scale}")
                 # segment_duration = generate_tts_audio_from_list_onsets(narration_list, start_times, audio_duration, tts_model, speaker_indx, fp_voice)
-                assemble_tts_for_video(narration_list, duration_single_trans, start_times, fp_voice, tts_model, speaker_indx, tts_length_scale)
+                preset = "fast"
+                voice = "train_dreams"
+                devices = ["cuda:0"]
+
+                assemble_tts_for_video(narration_list, duration_single_trans, start_times, fp_voice, preset, voice, devices)
 
             except Exception as e:
                 print(f"EXCEPTION! {e}")
