@@ -1,6 +1,5 @@
 import signal
 import time
-from datetime import datetime
 
 import click
 from dotenv import find_dotenv, load_dotenv
@@ -8,8 +7,11 @@ from dotenv import find_dotenv, load_dotenv
 from metamersion_latent.llm.analysis import prompt
 from metamersion_latent.llm.chat import Chat
 from metamersion_latent.llm.config import Config
+from metamersion_latent.utils import (
+    create_output_directory_with_identifier,
+    save_to_yaml,
+)
 from metamersion_latent.utils.translation import translate
-from metamersion_latent.utils.utils import save_to_yaml
 
 CHAT_HISTORY_OUTPUT_DIR = "data/chat_history"
 
@@ -72,7 +74,7 @@ def main(config_path, verbose, time_limit):
     chat = Chat(config, verbose)
     if bool_translate:
         human_input = input(translate(config.initial_bot_message, "PT") + "\n")
-        human_input = translate(human_input, "EN")
+        # human_input = translate(human_input, "EN")
         output = chat(human_input)
         print(translate(output, "PT"))
     else:
@@ -110,16 +112,18 @@ def main(config_path, verbose, time_limit):
     chat_history = (
         config.ai_prefix + ": " + config.initial_bot_message + chat.get_history()
     )
-
-    # Save chat history to yaml file
-    # Format the datetime as a string
-    now = datetime.now()
-    date = now.strftime("%Y%m%d_%H%M")
-    # remove any special characters from the username
-    username = "".join(e for e in username if e.isalnum())
-    token = f"{date}_{username}"
-    items = {"chat_history": chat_history, "token": token}
-    save_to_yaml(items, token, output_dir=CHAT_HISTORY_OUTPUT_DIR)
+    output_dir = create_output_directory_with_identifier(
+        CHAT_HISTORY_OUTPUT_DIR, username
+    )
+    items = {
+        "chat_history": chat_history,
+        "username": username,
+        "language": language_selection,
+        "time": time.time(),
+    }
+    label = "chat_history"
+    save_to_yaml(items, label, output_dir=output_dir)
+    # Create directory if it does not exist
 
     #######################################################################################################################
     # Perform Analysis
@@ -208,5 +212,4 @@ def main(config_path, verbose, time_limit):
 
 
 if __name__ == "__main__":
-    main()
     main()
