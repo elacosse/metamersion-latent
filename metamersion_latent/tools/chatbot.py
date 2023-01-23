@@ -4,10 +4,16 @@ import time
 import click
 from dotenv import find_dotenv, load_dotenv
 
-from metamersion_latent.llm.analysis import prompt
+from metamersion_latent.llm.analysis import perform_analysis
 from metamersion_latent.llm.chat import Chat
 from metamersion_latent.llm.config import Config
+from metamersion_latent.utils import (
+    create_output_directory_with_identifier,
+    save_to_yaml,
+)
 from metamersion_latent.utils.translation import translate
+
+CHAT_HISTORY_OUTPUT_DIR = "data/chat_history"
 
 
 def select_language() -> int:
@@ -68,13 +74,14 @@ def main(config_path, verbose, time_limit):
     chat = Chat(config, verbose)
     if bool_translate:
         human_input = input(translate(config.initial_bot_message, "PT") + "\n")
-        human_input = translate(human_input, "EN")
+        # human_input = translate(human_input, "EN")
         output = chat(human_input)
         print(translate(output, "PT"))
     else:
         human_input = input(config.initial_bot_message + "\n")
         output = chat(human_input)
         print(output)
+    username = human_input
     # Start chat loop
     while True:
         signal.signal(signal.SIGALRM, timeout_handler)
@@ -105,76 +112,32 @@ def main(config_path, verbose, time_limit):
     chat_history = (
         config.ai_prefix + ": " + config.initial_bot_message + chat.get_history()
     )
+    output_dir = create_output_directory_with_identifier(
+        CHAT_HISTORY_OUTPUT_DIR, username
+    )
+    items = {
+        "chat_history": chat_history,
+        "username": username,
+        "language": language_selection,
+    }
+    label = "chat_history"
+    save_to_yaml(items, label, output_dir=output_dir)
+    # Create directory if it does not exist
+
     #######################################################################################################################
     # Perform Analysis
     #######################################################################################################################
-    # Short analysis
-    personal_analysis = "1." + prompt(
-        config.short_analysis_template.format(chat_history=chat_history),
-        config.short_analysis_model,
-    )
+    analysis_dict = perform_analysis(chat_history, config)
     if verbose:
-        print("Personal analysis:\n" + personal_analysis)
-    # Story analysis
-    amusing_story = "1:" + prompt(
-        config.story_analysis_template.format(
-            chat_history=chat_history,
-            personal_analysis=personal_analysis,
-            N_story_steps=config.N_story_steps,
-        ),
-        config.story_analysis_model,
-    )
-    if verbose:
-        print("Amusing story:\n" + amusing_story)
-    # Scene analysis
-    story_scenes = "1:" + prompt(
-        config.scene_analysis_template.format(
-            N_story_steps=config.N_story_steps, amusing_story=amusing_story
-        ),
-        config.scene_analysis_model,
-    )
-    if verbose:
-        print("Story scenes:\n" + story_scenes)
-    # Landscape analysis
-    created_landscapes = "1:" + prompt(
-        config.landscape_analysis_template.format(story_scenes=story_scenes),
-        config.landscape_analysis_model,
-    )
-    if verbose:
-        print("Created landscapes:\n" + created_landscapes)
-    # Object analysis
-    created_objects = "1:" + prompt(
-        config.object_analysis_template.format(
-            story_scenes=story_scenes, N_story_steps=config.N_story_steps
-        ),
-        config.object_analysis_model,
-    )
-    if verbose:
-        print("Created objects:\n" + created_objects)
-    # Objects in landscape analysis
-    surreal_landscapes = "1:" + prompt(
-        config.object_in_landscape_analysis_template.format(
-            created_landscapes=created_landscapes, created_objects=created_objects
-        ),
-        config.object_in_landscape_analysis_model,
-    )
-    if verbose:
-        print("Surreal landscapes:\n" + surreal_landscapes)
-    # Poem analysis
-    poem = "1:" + prompt(
-        config.poem_analysis_template.format(
-            N_story_steps=config.N_story_steps,
-            story_scenes=story_scenes,
-            created_objects=created_objects,
-            poem_style=config.poem_style,
-            verse_length=config.verse_length,
-        ),
-        config.poem_analysis_model,
-    )
-    if verbose:
-        print("Poem:\n" + poem)
+        print("Personal analysis:\n" + analysis_dict["personal_analysis"])
+        print("Amusing story:\n" + analysis_dict["amusing_story"])
+        print("Story scenes:\n" + analysis_dict["story_scenes"])
+        print("Created landscapes:\n" + analysis_dict["created_landscapes"])
+        print("Created objects:\n" + analysis_dict["created_objects"])
+        print("Surreal landscapes:\n" + analysis_dict["surreal_landscapes"])
+        print("Poem:\n" + analysis_dict["poem"])
     #######################################################################################################################
-    draft_prompts = surreal_landscapes
+    draft_prompts = analysis_dict["surreal_landscapes"]
 
     ### Put this into a function!
     draft_prompts = [

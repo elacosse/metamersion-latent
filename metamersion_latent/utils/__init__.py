@@ -1,6 +1,21 @@
+from datetime import datetime
 from pathlib import Path
 
 import yaml
+
+
+def create_output_directory_with_identifier(
+    output_dir_parent="data/WHATISTHIS", identifier="sample"
+) -> None:
+    # Format the datetime as a string
+    now = datetime.now()
+    date = now.strftime("%Y%m%d_%H%M")
+    # remove any special characters from the username
+    identifier = "".join(e for e in identifier if e.isalnum())
+    token = f"{date}_{identifier}"
+    output_dir = Path(output_dir_parent) / token
+    Path(output_dir).mkdir(parents=True, exist_ok=True)
+    return output_dir
 
 
 def load_yaml(filepath):

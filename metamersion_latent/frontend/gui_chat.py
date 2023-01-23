@@ -13,6 +13,7 @@ sys.path.append("..")
 sys.path.append("/Users/jjj/git/metamersion_latent")
 from metamersion_latent.llm.chat import Chat
 from metamersion_latent.llm.config import Config
+from metamersion_latent.utils import create_output_directory_with_identifier, save_to_yaml
 from dotenv import find_dotenv, load_dotenv
 
 """
@@ -220,6 +221,7 @@ class ChatGUI:
         verbose_ai: bool = False,
         portugese_mode: bool = False,
         ai_fake_typing: bool = False,
+        run_fullscreen: bool = False,
     ):
 
         pygame.init()
@@ -228,29 +230,48 @@ class ChatGUI:
         self.verbose_ai = portugese_mode
         self.ai_fake_typing = ai_fake_typing
         
+
+        
         self.init_parameters()
         self.init_vars()
-        if use_ai_chat:
-            self.init_ai_chat(fp_config=fp_config)
-        else:
-            self.history_sham()
         self.tm = TimeMan()
-        self.screen = pygame.display.set_mode((self.display_width, self.display_height))
+        self.time_start = time.time()
+        if run_fullscreen:
+            self.screen = pygame.display.set_mode((self.display_width, self.display_height), pygame.FULLSCREEN)
+        else:
+            self.screen = pygame.display.set_mode((self.display_width, self.display_height))
         pygame.display.set_caption("Metamersion Chat")
         self.clock = pygame.time.Clock()
         load_dotenv(find_dotenv(), verbose=False) 
         try:
-            self.translator = deepl.Translator(os.getenv("DEEPL_API_KEY"))
+            deepl_api_key = os.getenv("DEEPL_API_KEY")
+            print(f"deepl_api_key {deepl_api_key}")
+            self.translator = deepl.Translator(deepl_api_key)
         except Exception as e:
             print(f"deepl failed! {e}")
             self.portugese_mode = False
+        if use_ai_chat:
+            self.init_ai_chat(fp_config=fp_config)
+        else:
+            self.history_sham()
             
+        self.init_chat_session()
         
     def translate_EN2PT(self, text):
-        return self.translator.translate_text(text, target_lang="PT-PT").text
+        try:
+            return self.translator.translate_text(text, target_lang="PT-PT").text
+        except Exception as e:
+            print(f"FAIL translate_EN2PT: {e}")
+            return text
     
     def translate_PT2EN(self, text):
-        return self.translator.translate_text(text, target_lang="EN-US").text
+        try:
+            return self.translator.translate_text(text, target_lang="EN-US").text
+        except Exception as e:
+            print(f"FAIL translate_EN2PT: {e}")
+            return text
+    
+        
 
     def init_parameters(self):
         self.escape_and_save = "x" #when this is submitted by human, then save chat
@@ -278,7 +299,7 @@ class ChatGUI:
         
         # Little images next to human/AI
         self.show_imgs = True
-        self.x_fract_img = 0.7
+        self.x_fract_img = 0.5
         self.fp_img_human = "img_human.png"
         self.fp_img_ai = "img_ai.png"
         
@@ -316,6 +337,11 @@ class ChatGUI:
         self.cursor_ai_y = 0
         self.cursor_ai_x = 0
         
+        
+        # Faketyping AI
+        self.p_faketyping_break = 0.2
+        self.maxdur_faketyping_break = 0.4
+        
 
         
 
@@ -324,6 +350,7 @@ class ChatGUI:
         self.history_human = []
         self.text_typing = ""
         self.send_message = False
+        self.chat_active = True
         self.last_text_human = ""
         self.img_human = pygame.image.load(self.fp_img_human)
         self.img_ai = pygame.image.load(self.fp_img_ai)
@@ -336,6 +363,7 @@ class ChatGUI:
         self.idx_render_lastsend = 0
         self.y_text_top_ai = 0
         # self.history_sham()
+        
 
     def init_ai_chat(self, fp_config, verbose=False):
         config = Config.fromfile(fp_config)
@@ -344,27 +372,36 @@ class ChatGUI:
         history="{history}",
         input="{input}",
         )
+        self.config = config
         self.chat = Chat(config, self.verbose_ai)
-        self.history_ai.append(config.initial_bot_message)
+        initial_bot_message = config.initial_bot_message
+        if self.portugese_mode:
+            initial_bot_message = self.translate_EN2PT(initial_bot_message)
+        self.history_ai.append(initial_bot_message)
         self.send_message_timer = 3
+        
+    def init_chat_session(self, username="NONE"):
+        self.dp_out = os.path.join("/mnt/ls1_data/test_sessions/", f"{get_time('second')}_{username}")
+        self.username = username
+        os.makedirs(self.dp_out)
+        
 
     def hit_enter(self):
         if not self.last_input_ai():
             print("hit_enter: last input was not AI!")
             return
         if len(self.text_typing) > 0:
-            if self.text_typing == self.escape_and_save:
-                print("SAVING AND QUITTING!")
-                self.save_protocol()
-                pygame.quit()
-            else:
-                text = self.text_typing
-                self.history_human.append(text)
-                if self.portugese_mode:
-                    text = self.translate_PT2EN(text)
-                self.last_text_human = text
-                self.text_typing = ""
-                self.send_message = True
+
+            text = self.text_typing
+            if len(self.history_human) == 0:
+                print("STARTING TIME SET!")
+                self.time_start = time.time()
+            self.history_human.append(text)
+            if self.portugese_mode:
+                text = self.translate_PT2EN(text)
+            self.last_text_human = text
+            self.text_typing = ""
+            self.send_message = True
 
     def send_message_check(self):
         if not self.use_ai_chat and self.send_message:
@@ -382,7 +419,12 @@ class ChatGUI:
                 print("SENDING MESSAGE!")
                 self.send_message_timer = 3
                 self.send_message = False
-                output = self.chat(self.last_text_human)
+                
+                # Check if this was the last chat statement -- inject stop text if so
+                if time.time() > self.time_start + self.config.initial_chat_time_limit:
+                    output = self.wrap_up_and_save()
+                else:
+                    output = self.chat(self.last_text_human)
                 output = output.strip()
                 print(f"GOT: {output}")
                 if self.portugese_mode:
@@ -390,6 +432,29 @@ class ChatGUI:
                 self.history_ai.append(output)
                 self.send_message = False
                 self.check_if_init_ai_typing()
+
+    def wrap_up_and_save(self):
+        output = self.chat(self.last_text_human+self.config.last_bot_pre_message_injection)
+        self.chat_active = False
+        self.time_finish = time.time()
+        
+        chat_history = (self.config.ai_prefix + ": " + self.config.initial_bot_message + self.chat.get_history())
+        
+        if self.portugese_mode:
+            language_selection = "PT"
+        else:
+            language_selection = "EN"
+        
+        items = {
+            "chat_history": chat_history,
+            "username": self.username,
+            "language": language_selection,
+            "time": time.time(),
+        }
+        label = "chat_history"
+        save_to_yaml(items, label, output_dir=self.dp_out)
+        
+        return output
 
 
     def last_input_ai(self):
@@ -570,8 +635,8 @@ class ChatGUI:
         # loop over all items
 #        self.nbm_chars_ai_typed += np.random.randint(7)
         if self.nbm_chars_ai_typed > 6:
-            if np.random.rand() > 0.85:
-                thinking_duration = 0.2*np.random.rand() + 0.1
+            if np.random.rand() > (1-self.p_faketyping_break): # 
+                thinking_duration = self.maxdur_faketyping_break*np.random.rand() + 0.1 # 
                 time.sleep(thinking_duration)
         self.nbm_chars_ai_typed += int(np.abs(np.random.randn())*3)+1
         
@@ -643,6 +708,7 @@ if __name__ == "__main__":
     verbose_ai=True
     portugese_mode=False
     ai_fake_typing=True
+    run_fullscreen=False
     
     # Let's instantiate the ChatGUI object and conveniantly name it self...
     self = ChatGUI(
@@ -651,6 +717,7 @@ if __name__ == "__main__":
         verbose_ai=verbose_ai,
         portugese_mode=portugese_mode,
         ai_fake_typing=ai_fake_typing,
+        run_fullscreen=run_fullscreen,
     )
 
     while True:
@@ -666,12 +733,16 @@ if __name__ == "__main__":
             self.render_ai_fake_typing()
         self.render_text_history()
         
-        if not self.active_ai_fake_typing:
+        if not self.active_ai_fake_typing and self.chat_active:
             self.render_text_typing()
             self.render_cursor_human()
             self.send_message_check()
 
         # Update display
         self.update_render()
+        
+        if not self.chat_active:
+            if time.time() > self.time_finish + 20:
+                xxx
 
         #print(f"bing: {time.time()}")
