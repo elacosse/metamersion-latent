@@ -35,6 +35,7 @@ sudo apt-get -y install espeak-ng
 
 # Music
 pip install pydub
+pip install wget
 
 # Vimeo
 pip install PyVimeo
