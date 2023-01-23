@@ -1,5 +1,6 @@
 import signal
 import time
+from datetime import datetime
 
 import click
 from dotenv import find_dotenv, load_dotenv
@@ -8,6 +9,9 @@ from metamersion_latent.llm.analysis import prompt
 from metamersion_latent.llm.chat import Chat
 from metamersion_latent.llm.config import Config
 from metamersion_latent.utils.translation import translate
+from metamersion_latent.utils.utils import save_to_yaml
+
+CHAT_HISTORY_OUTPUT_DIR = "data/chat_history"
 
 
 def select_language() -> int:
@@ -75,6 +79,7 @@ def main(config_path, verbose, time_limit):
         human_input = input(config.initial_bot_message + "\n")
         output = chat(human_input)
         print(output)
+    username = human_input
     # Start chat loop
     while True:
         signal.signal(signal.SIGALRM, timeout_handler)
@@ -105,6 +110,17 @@ def main(config_path, verbose, time_limit):
     chat_history = (
         config.ai_prefix + ": " + config.initial_bot_message + chat.get_history()
     )
+
+    # Save chat history to yaml file
+    # Format the datetime as a string
+    now = datetime.now()
+    date = now.strftime("%Y%m%d_%H%M")
+    # remove any special characters from the username
+    username = "".join(e for e in username if e.isalnum())
+    token = f"{date}_{username}"
+    items = {"chat_history": chat_history, "token": token}
+    save_to_yaml(items, token, output_dir=CHAT_HISTORY_OUTPUT_DIR)
+
     #######################################################################################################################
     # Perform Analysis
     #######################################################################################################################
@@ -192,4 +208,5 @@ def main(config_path, verbose, time_limit):
 
 
 if __name__ == "__main__":
+    main()
     main()
