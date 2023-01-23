@@ -90,32 +90,6 @@ def audio_length(file_path):
     return frames / float(rate)
 
 
-def assemble_audio(audio_files, duration, start_times):
-    # Create an empty array to hold the concatenated audio data
-
-    concatenated_audio = np.array([])
-
-    # Iterate through the audio files and start times
-    for i in range(len(audio_files)):
-        # Load the audio file into memory
-        data, samplerate = sf.read(audio_files[i])
-
-        # If this is not the first audio file, add silence to the beginning
-        if i > 0:
-            silence = np.zeros(int(start_times[i] * samplerate))
-            concatenated_audio = np.concatenate((concatenated_audio, silence))
-
-        # Add the audio data to the concatenated audio data
-        concatenated_audio = np.concatenate((concatenated_audio, data))
-
-    # Add silence to the end of the concatenated audio to reach the desired duration
-    end_time = start_times[-1] + len(data) / samplerate
-    silence = np.zeros(int((duration - end_time) * samplerate))
-    concatenated_audio = np.concatenate((concatenated_audio, silence))
-
-    return concatenated_audio, samplerate
-
-
 def assemble_audio_files_with_silence_and_save(
     filepaths,
     audio_duration,
