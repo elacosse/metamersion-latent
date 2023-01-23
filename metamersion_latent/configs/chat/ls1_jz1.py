@@ -19,7 +19,7 @@ default_chat_input = "I don't know what to say."
 default_time_limit_message = (
     "Sorry, I don't have any more time to continue chatting with you."
 )
-initial_chat_time_limit = 60 * 3 # 5 minutes
+initial_chat_time_limit = 60 * 5 # 5 minutes
 exit_chat_time_limit = 60 * 5  # 5 minutes
 
 initialization_message = """
@@ -68,11 +68,11 @@ postfix = "8k, vivid colors, masterpiece, trending on artstation"
 # Latent Blending Configuration
 #######################################################################################################################
 # Latent blending configs
-duration_single_trans = 15
+duration_single_trans = 25
 ChosenSet = 1 #music set! needs to be between 1 and 13
-duration_fade = 20
+duration_fade = 15
 silence_begin = -3
-quality = 'lowest'
+quality = 'medium'
 depth_strength = 0.5
 seed = 420
 width = 768

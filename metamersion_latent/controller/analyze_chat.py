@@ -12,6 +12,7 @@ from metamersion_latent.llm.config import Config
 from metamersion_latent.utils import create_output_directory_with_identifier, save_to_yaml, load_yaml
 from metamersion_latent.utils.translation import translate
 import os
+import re
 
 load_dotenv(find_dotenv(), verbose=False)  # load environment variables
 verbose = True
@@ -88,6 +89,12 @@ poem = "1:" + prompt(
     ),
     config.poem_analysis_model,
 )
+# Split poem
+narration_list = re.split(r"\d:", poem, maxsplit=config.N_story_steps)
+narration_list = [l for l in narration_list if len(l) > 5]
+narration_list = [l.replace('\n', ' ') for l in narration_list]
+narration_list = [l.strip() for l in narration_list]
+
 if verbose:
     print("Poem:\n" + poem)
 #######################################################################################################################
@@ -108,8 +115,6 @@ for p in prompts:
     print(p)
 
 
-import pdb; pdb.set_trace()
-
-dict_out['prompts'] = prompts
-dict_out['poem'] = poem
+dict_out['list_prompts'] = prompts
+dict_out['narration_list'] = narration_list
 save_to_yaml(dict_out, 'chat_analysis', dp_session)
