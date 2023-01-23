@@ -16,7 +16,7 @@ import sys
 sys.path.append("../..")
 sys.path.append("..")
 from metamersion_latent.llm.config import Config
-from metamersion_latent.utils import save_to_yaml, load_yaml
+from metamersion_latent.utils import save_to_yaml, load_yaml, user_choice
 import os
 import subprocess
 import shutil
@@ -249,7 +249,13 @@ class Client():
 #%%
 # spawn remote connection to server
 
-dp_session = '/mnt/ls1_data/test_sessions/230123_202646_NONE/'
+dp_base = '/mnt/ls1_data/test_sessions/'
+list_dns = os.listdir(dp_base)
+list_dns.sort(reverse=True)
+
+dn = user_choice(list_dns, sort=False, suggestion=list_dns[0])
+dp_session = f'/mnt/ls1_data/test_sessions/{dn}'
+
 fp_chat_analysis = os.path.join(dp_session, 'chat_analysis.yaml')
 config = Config.fromfile("../configs/chat/ls1_jz1.py")
 dict_meta = load_yaml(fp_chat_analysis)
@@ -291,6 +297,7 @@ dp_incoming = os.path.join(dp_session, "incoming")
 scp_cmd_mod = scp_cmd[:-2]+f"/* {dp_incoming}/"
 os.makedirs(dp_incoming)
 subprocess.call(scp_cmd_mod, shell=True)
+print("SCP DONE!")
 
 list_files_prio = ['current.mp4', 'current.mp3']
 

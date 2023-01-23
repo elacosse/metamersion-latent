@@ -9,7 +9,7 @@ sys.path.append("..")
 from metamersion_latent.llm.analysis import prompt
 from metamersion_latent.llm.chat import Chat
 from metamersion_latent.llm.config import Config
-from metamersion_latent.utils import create_output_directory_with_identifier, save_to_yaml, load_yaml
+from metamersion_latent.utils import create_output_directory_with_identifier, save_to_yaml, load_yaml, user_choice
 from metamersion_latent.utils.translation import translate
 import os
 import re
@@ -17,12 +17,17 @@ import re
 load_dotenv(find_dotenv(), verbose=False)  # load environment variables
 verbose = True
 
-dp_session = '/mnt/ls1_data/test_sessions/230123_202646_NONE/'
+dp_base = '/mnt/ls1_data/test_sessions/'
+list_dns = os.listdir(dp_base)
+list_dns.sort(reverse=True)
+
+dn = user_choice(list_dns, sort=False, suggestion=list_dns[0])
+dp_session = f'/mnt/ls1_data/test_sessions/{dn}'
 fp_chat = os.path.join(dp_session, 'chat_history.yaml')
 config = Config.fromfile("../configs/chat/ls1_jz1.py")
-dict_out = load_yaml(fp_chat)
-chat_history = dict_out['chat_history']
-
+dict_meta = load_yaml(fp_chat)
+username = dict_meta['username']
+chat_history = dict_meta['chat_history']
 #######################################################################################################################
 # Perform Analysis
 #######################################################################################################################
@@ -115,6 +120,6 @@ for p in prompts:
     print(p)
 
 
-dict_out['list_prompts'] = prompts
-dict_out['narration_list'] = narration_list
-save_to_yaml(dict_out, 'chat_analysis', dp_session)
+dict_meta['list_prompts'] = prompts
+dict_meta['narration_list'] = narration_list
+save_to_yaml(dict_meta, 'chat_analysis', dp_session)

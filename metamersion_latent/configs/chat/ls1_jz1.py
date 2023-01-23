@@ -44,7 +44,7 @@ Visitor: {input}
 AI:"""  # note these must be history and input!
 human_prefix = "Visitor"
 ai_prefix = "AI"
-conversation_stop_list = [f"{ai_prefix}: "]
+conversation_stop_list = [f"{ai_prefix}: ", f"{human_prefix}: "]
 initial_bot_message = """Can you tell me your name or what I should call you?"""
 last_bot_pre_message_injection = f"""\nThis was enough information for the {ai_prefix}. In the next statement, the {ai_prefix} politely thanked the {human_prefix} and said that the VR experience can now begin in the next room."""
 
