@@ -4,10 +4,9 @@ import wave
 import numpy as np
 import torchaudio
 from tortoise.utils.audio import load_voice
-from TTS.api import TTS
 
 from metamersion_latent.audio.tortoise import TextToSpeech
-
+import threading
 
 def create_tts_from_text(text: str, output_path: str, voice: str, preset="fast", device: str ="cuda:0") -> None:
     """ Generate audio from text using a TTS model.
@@ -18,15 +17,54 @@ def create_tts_from_text(text: str, output_path: str, voice: str, preset="fast",
         preset (str): TTS preset.
         device (str): Device to use for TTS.
     """
-    
-
     tts = TextToSpeech(device=device)
     voice_samples, conditioning_latents = load_voice(voice)
     gen = tts.tts_with_preset(text, voice_samples=voice_samples, conditioning_latents=conditioning_latents, 
                             preset=preset)
     torchaudio.save(output_path, gen.squeeze(0).cpu(), 24000)
 
+def assemble_tts_for_video(
+    narration_list: list,
+    transition_duration: float,
+    start_times: list,
+    output_filepath: str,
+    preset: str,
+    voice: str,
+    devices: list,
+) -> None:
+    """Assemble TTS audio files into a single audio file with silence between each file.
+    Args:
+        narration_list (list): List of narration strings.
+        transition_duration (float): Duration of video segments (fixed)
+        start_times (list): List of start times for each transition.
+        output_filepath (str): Path to output file.
+        preset (str): Quality of TTS audio.
+        voice (str): Voice of speaker.
+        devices (list): List of cuda devices to use for TTS.
+    """
+    # MAX_CHAR_LENGTH = 220
+    # # Get length of narrations and truncate if too long
+    # new_narration_list = []
+    # for i, narration in enumerate(narration_list):
+    #     while len(narration) > MAX_CHAR_LENGTH:
+    #         # Get rid of the last sentence assuming formatting with \n
+    #         narration = narration[: narration.rfind("\n") + 1]
+    #     new_narration_list.append(narration)
+    output_dir = os.path.dirname(output_filepath)
+    segment_filepaths = [os.path.join(output_dir, f"segment{i}.wav") for i in range(len(narration_list))]
+    for i, narration in enumerate(narration_list):
+        create_tts_from_text(narration, segment_filepaths[i], voice, preset, devices[0])
 
+    # for i, narration_list in enumerate(narration_list):
+    #     device = devices[i % len(devices)]
+    #     thread_list.append(threading.Thread(target=create_tts_from_thread,args=(narration_list[0], segment_filepaths[0], voice, preset, device)))
+    #     thread_list[-1].start()
+
+    audio_duration = transition_duration * len(start_times)
+    assemble_audio_files_with_silence_and_save(
+        segment_filepaths, audio_duration, start_times, output_filepath
+    )
+    
 def generate_tts_audio_from_list_onsets(
     narration_list, start_times, total_length, tts_model, speaker_indx, output_file
 ):
@@ -192,46 +230,7 @@ def assemble_audio_files(filepaths, silence_duration, output_filepath):
         output_audio_file.writeframes(audio_data.tobytes())
 
 
-def assemble_tts_for_video(
-    narration_list: list,
-    transition_duration: float,
-    start_times: list,
-    output_filepath: str,
-    tts_model: str,
-    speaker_indx: int,
-    length_scale: float = 1.0,
-) -> None:
-    """Assemble TTS audio files into a single audio file with silence between each file.
-    Args:
-        narration_list (list): List of narration strings.
-        transition_duration (float): Duration of video segments (fixed)
-        start_times (list): List of start times for each transition.
-        output_filepath (str): Path to output file.
-        tts_model (str): Path to TTS model.
-        speaker_indx (int): Index of speaker to use.
-        length_scale (float): Scale the length of the audio segments.
-    """
-    # MAX_CHAR_LENGTH = 220
-    # # Get length of narrations and truncate if too long
-    # new_narration_list = []
-    # for i, narration in enumerate(narration_list):
-    #     while len(narration) > MAX_CHAR_LENGTH:
-    #         # Get rid of the last sentence assuming formatting with \n
-    #         narration = narration[: narration.rfind("\n") + 1]
-    #     new_narration_list.append(narration)
 
-    segment_filepaths = generate_tts_audio_from_list(
-        narration_list,
-        tts_model,
-        speaker_indx,
-        os.path.dirname(output_filepath),
-        length_scale,
-    )
-
-    audio_duration = transition_duration * len(start_times)
-    assemble_audio_files_with_silence_and_save(
-        segment_filepaths, audio_duration, start_times, output_filepath
-    )
 
 
 if __name__ == "__main__":
@@ -262,17 +261,10 @@ if __name__ == "__main__":
         np.arange(0, transition_duration * len(narration_list), transition_duration)
         + silence_begin
     )
-    tts_model = "tts_models/en/vctk/vits"
-    speaker_indx = 0
     output_file = "/tmp/test.wav"
+    preset = "fast"
+    assemble_tts_for_video(narration_list, transition_duration, start_times, output_file, preset, ["cuda:0"])
 
-    generate_tts_audio_from_list_onsets(
-        narration_list, start_times, tts_model, 0, output_file
-    )
-
-    text = ""
-    # get rid of last sentence in text
-    text = text[: text.rfind(".") + 1]
 
     """
     COMMENT:
