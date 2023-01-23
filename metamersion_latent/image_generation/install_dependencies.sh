@@ -32,6 +32,7 @@ pip install PyYAML
 # TTS installs
 git clone https://github.com/elacosse/metamersion-latent
 mv metamersion-latent metamersion_latent
+pip install git+https://github.com/neonbjb/tortoise-tts
 pip install TTS
 sudo apt-get -y install espeak-ng
 
