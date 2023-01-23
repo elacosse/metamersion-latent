@@ -133,6 +133,7 @@ def main(config_path, example_path, output_path, verbose):
         prompts_dict[i] = p
     items = [
         dict(
+            example_path=example_path,
             config_path=config_path,
             chat_history=chat_history,
             analysis=analysis_dict,
