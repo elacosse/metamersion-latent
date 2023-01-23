@@ -119,7 +119,6 @@ def main(config_path, verbose, time_limit):
         "chat_history": chat_history,
         "username": username,
         "language": language_selection,
-        "time": time.time(),
     }
     label = "chat_history"
     save_to_yaml(items, label, output_dir=output_dir)
