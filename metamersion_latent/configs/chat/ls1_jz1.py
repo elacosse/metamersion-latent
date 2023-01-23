@@ -19,8 +19,9 @@ default_chat_input = "I don't know what to say."
 default_time_limit_message = (
     "Sorry, I don't have any more time to continue chatting with you."
 )
-initial_chat_time_limit = 60  # 5 minutes
+initial_chat_time_limit = 60 * 3 # 5 minutes
 exit_chat_time_limit = 60 * 5  # 5 minutes
+
 initialization_message = """
 PLACE A MESSAGE HERE TO INTRODUCE PEOPLE TO THE EXPERIENCE
 """
@@ -40,6 +41,7 @@ Visitor: {input}
 AI:"""  # note these must be history and input!
 human_prefix = "Visitor"
 ai_prefix = "AI"
+conversation_stop_list = [f"{ai_prefix}: "]
 initial_bot_message = """Can you tell me your name or what I should call you?"""
 last_bot_pre_message_injection = f"""\nThis was enough information for the {ai_prefix}. In the next statement, the {ai_prefix} politely thanked the {human_prefix} and said that the VR experience can now begin in the next room."""
 
@@ -65,7 +67,17 @@ postfix = "8k, vivid colors, masterpiece, trending on artstation"
 #######################################################################################################################
 # Latent Blending Configuration
 #######################################################################################################################
-# Latent blending configs?
+# Latent blending configs
+duration_single_trans = 15
+ChosenSet = 1 #music set! needs to be between 1 and 13
+duration_fade = 20
+silence_begin = -3
+quality = 'lowest'
+depth_strength = 0.5
+seed = 420
+width = 768
+height = 512
+negative_prompt = "ugly, blurry"
 
 
 #######################################################################################################################
