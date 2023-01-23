@@ -1,5 +1,6 @@
 import re
 
+from dotenv import find_dotenv, load_dotenv
 from langchain.chains import ConversationChain, LLMChain
 from langchain.chains.conversation.memory import (
     ConversationBufferMemory,
@@ -9,8 +10,7 @@ from langchain.llms.loading import load_llm_from_config
 from langchain.prompts.prompt import PromptTemplate
 
 from metamersion_latent.llm.config import Config
-import os
-from dotenv import find_dotenv, load_dotenv
+
 
 def gpt_vanilla_call(prompt: str, config: dict) -> str:
     """Call GPT-3 with a prompt and return the output.
@@ -41,7 +41,7 @@ class Chat:
 
         self.verbose = verbose
         self.config = config
-        load_dotenv(find_dotenv(), verbose=False) 
+        load_dotenv(find_dotenv(), verbose=False)
         self.llm = load_llm_from_config(config.model)
         self.template = self.config.template
         if exit_conversation:
@@ -86,7 +86,9 @@ class Chat:
         """
         self.inputs.append(user_message)
         try:
-            output = self.conversation.predict(input=user_message)
+            output = self.conversation.predict(
+                input=user_message, stop=self.config.conversation_stop_list
+            )
             # remove double spaces
             self.memory.buffer = re.sub(" +", " ", self.memory.buffer)
         except Exception:
