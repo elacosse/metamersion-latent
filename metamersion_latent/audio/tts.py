@@ -2,14 +2,18 @@ import os
 import wave
 
 import numpy as np
+import soundfile as sf
 import torchaudio
+
+# from metamersion_latent.audio.my_tortoise import TextToSpeech
+from tortoise.api import TextToSpeech
 from tortoise.utils.audio import load_voice
 
-from metamersion_latent.audio.tortoise import TextToSpeech
-import threading
 
-def create_tts_from_text(text: str, output_path: str, voice: str, preset="fast", device: str ="cuda:0") -> None:
-    """ Generate audio from text using a TTS model.
+def create_tts_from_text(
+    text: str, output_path: str, voice: str, preset="fast", device: str = "cuda:0"
+) -> None:
+    """Generate audio from text using a TTS model.
     Args:
         text (str): Text to generate audio from.
         output_path (str): Path to output file.
@@ -19,9 +23,15 @@ def create_tts_from_text(text: str, output_path: str, voice: str, preset="fast",
     """
     tts = TextToSpeech(device=device)
     voice_samples, conditioning_latents = load_voice(voice)
-    gen = tts.tts_with_preset(text, voice_samples=voice_samples, conditioning_latents=conditioning_latents, 
-                            preset=preset)
-    torchaudio.save(output_path, gen.squeeze(0).cpu(), 24000)
+    gen = tts.tts_with_preset(
+        text,
+        voice_samples=voice_samples,
+        conditioning_latents=conditioning_latents,
+        preset=preset,
+    )
+    data = gen.squeeze(0).cpu()
+    torchaudio.save(output_path, data, 24000)
+
 
 def assemble_tts_for_video(
     narration_list: list,
@@ -51,7 +61,9 @@ def assemble_tts_for_video(
     #         narration = narration[: narration.rfind("\n") + 1]
     #     new_narration_list.append(narration)
     output_dir = os.path.dirname(output_filepath)
-    segment_filepaths = [os.path.join(output_dir, f"segment{i}.wav") for i in range(len(narration_list))]
+    segment_filepaths = [
+        os.path.join(output_dir, f"segment{i}.wav") for i in range(len(narration_list))
+    ]
     for i, narration in enumerate(narration_list):
         create_tts_from_text(narration, segment_filepaths[i], voice, preset, devices[0])
 
@@ -59,64 +71,10 @@ def assemble_tts_for_video(
     #     device = devices[i % len(devices)]
     #     thread_list.append(threading.Thread(target=create_tts_from_thread,args=(narration_list[0], segment_filepaths[0], voice, preset, device)))
     #     thread_list[-1].start()
-
     audio_duration = transition_duration * len(start_times)
     assemble_audio_files_with_silence_and_save(
         segment_filepaths, audio_duration, start_times, output_filepath
     )
-    
-def generate_tts_audio_from_list_onsets(
-    narration_list, start_times, total_length, tts_model, speaker_indx, output_file
-):
-    """Generate audio from a list of conversation strings using a TTS model.
-    Args:
-        narration_list (list): List of narration strings.
-        tts_model (str): Name of TTS model.
-        speaker_indx (int): idx speker
-        output_path (str): Path to output file.
-    Returns:
-        list: List of paths to generated audio files.
-    """
-    output_path = "/tmp/"
-    generate_tts_audio_from_list(narration_list, tts_model, speaker_indx, output_path)
-    filepaths = os.listdir(output_path)
-    filepaths = [l for l in filepaths if "narration_seg" in l]
-    filepaths.sort()
-    filepaths = filepaths[0 : len(narration_list)]
-    filepaths = [os.path.join(output_path, l) for l in filepaths]
-    segment_duration = [audio_length(l) for l in filepaths]
-    assemble_audio_files_with_silence_and_save(
-        filepaths, total_length, start_times, output_file
-    )
-    print("DONE!")
-    return segment_duration
-
-
-def generate_tts_audio_from_list(
-    narration_list, tts_model, speaker_indx, output_path, length_scale=1.0
-):
-    """Generate audio from a list of conversation strings using a TTS model.
-    Args:
-        narration_list (list): List of narration strings.
-        tts_model (str): Name of TTS model.
-        output_path (str): Path to output file.
-        length_scale (float): Length scale for TTS model.
-    Returns:
-        list: List of paths to generated audio files.
-    """
-    # Initialize the TTS model
-    tts = TTS(tts_model)
-    tts.synthesizer.tts_model.length_scale = length_scale
-    filepaths = []
-    # get directory of output_path
-    output_path = os.path.dirname(output_path)
-    # Generate audio for each conversation string
-    for i, narration in enumerate(narration_list):
-        wav = tts.tts(narration, speaker=tts.speakers[speaker_indx])
-        filepath = os.path.join(output_path, f"narration_seg_{i}.wav")
-        tts.synthesizer.save_wav(wav=wav, path=filepath)
-        filepaths.append(filepath)
-    return filepaths
 
 
 def audio_length(file_path):
@@ -130,6 +88,32 @@ def audio_length(file_path):
         frames = audio.getnframes()
         rate = audio.getframerate()
     return frames / float(rate)
+
+
+def assemble_audio(audio_files, duration, start_times):
+    # Create an empty array to hold the concatenated audio data
+
+    concatenated_audio = np.array([])
+
+    # Iterate through the audio files and start times
+    for i in range(len(audio_files)):
+        # Load the audio file into memory
+        data, samplerate = sf.read(audio_files[i])
+
+        # If this is not the first audio file, add silence to the beginning
+        if i > 0:
+            silence = np.zeros(int(start_times[i] * samplerate))
+            concatenated_audio = np.concatenate((concatenated_audio, silence))
+
+        # Add the audio data to the concatenated audio data
+        concatenated_audio = np.concatenate((concatenated_audio, data))
+
+    # Add silence to the end of the concatenated audio to reach the desired duration
+    end_time = start_times[-1] + len(data) / samplerate
+    silence = np.zeros(int((duration - end_time) * samplerate))
+    concatenated_audio = np.concatenate((concatenated_audio, silence))
+
+    return concatenated_audio, samplerate
 
 
 def assemble_audio_files_with_silence_and_save(
@@ -149,43 +133,25 @@ def assemble_audio_files_with_silence_and_save(
     list_durations = []
 
     # Open the first audio file
-    with wave.open(filepaths[0], "rb") as audio_file:
-        # Get the audio parameters
-        sample_rate = audio_file.getframerate()
-        sample_width = audio_file.getsampwidth()
-        channels = audio_file.getnchannels()
-    # Create audio_data
-    audio_data = np.zeros(int(sample_rate * audio_duration), np.int16)
-    # Iterate through the audio files
-    for i, file_path in enumerate(filepaths):
-        # Open the next audio file
-        with wave.open(file_path, "rb") as next_audio_file:
-            # Check that the audio parameters match
-            assert next_audio_file.getframerate() == sample_rate
-            assert next_audio_file.getsampwidth() == sample_width
-            assert next_audio_file.getnchannels() == channels
-            # Get the audio data
-            next_audio_data = np.frombuffer(next_audio_file.readframes(-1), np.int16)
-            # Get the start time
-            start_time_indx = int(sample_rate * start_times[i])
-            list_onsets.append(start_time_indx / sample_rate)
-            # Get the end time
-            end_time_indx = start_time_indx + len(next_audio_data)
-            list_durations.append((end_time_indx - start_time_indx) / sample_rate)
-            # make sure they are same length
-            if end_time_indx - start_time_indx != len(next_audio_data):
-                next_audio_data = next_audio_data[: end_time_indx - start_time_indx]
-            # Insert the audio data into the audio_data array
-            audio_data[start_time_indx:end_time_indx] = next_audio_data
-    # Open the output file for writing
-    with wave.open(output_filepath, "wb") as output_audio_file:
-        # Set the audio parameters
-        output_audio_file.setframerate(sample_rate)
-        output_audio_file.setsampwidth(sample_width)
-        output_audio_file.setnchannels(channels)
-        # Write the audio data to the output file
-        output_audio_file.writeframes(audio_data.tobytes())
 
+    data, sample_rate = sf.read(filepaths[0], dtype="float32")
+    audio_data = np.zeros(int(sample_rate * audio_duration), np.float32)
+
+    for i, file_path in enumerate(filepaths):
+        next_audio_data, sample_rate = sf.read(filepaths[i], dtype="float32")
+        # Get the start time
+        start_time_indx = int(sample_rate * start_times[i])
+        list_onsets.append(start_time_indx / sample_rate)
+        # Get the end time
+        end_time_indx = start_time_indx + len(next_audio_data)
+        list_durations.append((end_time_indx - start_time_indx) / sample_rate)
+        # make sure they are same length
+        if end_time_indx - start_time_indx != len(next_audio_data):
+            next_audio_data = next_audio_data[: end_time_indx - start_time_indx]
+        # Insert the audio data into the audio_data array
+        audio_data[start_time_indx:end_time_indx] = next_audio_data
+
+    sf.write(output_filepath, audio_data, sample_rate)
     return list_onsets, list_durations
 
 
@@ -230,9 +196,6 @@ def assemble_audio_files(filepaths, silence_duration, output_filepath):
         output_audio_file.writeframes(audio_data.tobytes())
 
 
-
-
-
 if __name__ == "__main__":
 
     # EXAMPLE OF WHAT WE HAVE NOW
@@ -256,22 +219,21 @@ if __name__ == "__main__":
         "Alan decides to take a piece of what he has learned back to the real world with him, vowing to take the time to be kind to himself and others. He steps back through the portal, grateful for the unexpected experience.    "
     )
     silence_begin = 3
-    transition_duration = 10
+    transition_duration = 20
     start_times = list(
         np.arange(0, transition_duration * len(narration_list), transition_duration)
         + silence_begin
     )
     output_file = "/tmp/test.wav"
     preset = "fast"
-    assemble_tts_for_video(narration_list, transition_duration, start_times, output_file, preset, ["cuda:0"])
-
-
-    """
-    COMMENT:
-    the reason why this function will be nontrivial are the overlaps.
-    if say the first segment is longer than 15s, what happens? 
-    it will suck and it could always happen, especially when the content is llm gen.
-    proposed solutions would be to check the length of each segment BEFORE concating
-    and if it is too long, we need to re-run a shorter version of the segment
-    """
-    """
+    voice = "train_dreams"
+    devices = ["cuda:0"]
+    assemble_tts_for_video(
+        narration_list,
+        transition_duration,
+        start_times,
+        output_file,
+        preset,
+        voice,
+        devices,
+    )
