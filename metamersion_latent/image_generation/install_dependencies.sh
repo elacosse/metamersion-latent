@@ -33,6 +33,9 @@ pip install PyYAML
 pip install TTS
 sudo apt-get -y install espeak-ng
 
+# Music
+pip install pydub
+
 # Vimeo
 pip install PyVimeo
 
