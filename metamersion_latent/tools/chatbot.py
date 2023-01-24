@@ -69,8 +69,10 @@ def main(config_path, verbose, time_limit):
     config.template = config.template.format(
         initial_bot_message=config.initial_bot_message,
         history="{history}",
+        qualifier="{qualifier}",
         input="{input}",
     )
+    print(config.template)
     chat = Chat(config, verbose)
     if bool_translate:
         human_input = input(translate(config.initial_bot_message, "PT") + "\n")

@@ -1,7 +1,9 @@
 import re
 
 from dotenv import find_dotenv, load_dotenv
-from langchain.chains import ConversationChain, LLMChain
+
+# from langchain.chains import ConversationChain, LLMChain
+from langchain.chains import LLMChain
 from langchain.chains.conversation.memory import (
     ConversationBufferMemory,
     ConversationSummaryMemory,
@@ -54,7 +56,9 @@ class Chat:
         # Initialize memory to selected type
         if self.config.memory_type == "Buffer":
             self.memory = ConversationBufferMemory(
-                human_prefix=self.config.human_prefix, ai_prefix=self.config.ai_prefix
+                memory_key="history",
+                human_prefix=self.config.human_prefix,
+                ai_prefix=self.config.ai_prefix,
             )
         elif self.config.memory_type == "BufferWindow":
             self.memory = ConversationBufferMemory(
@@ -70,9 +74,13 @@ class Chat:
             )
 
         self.prompt = PromptTemplate(
-            input_variables=["history", "input"], template=self.template
+            input_variables=["history", "input", "qualifier"],
+            template=self.template,
         )
-        self.conversation = ConversationChain(
+        # self.conversation = ConversationChain(
+        #     prompt=self.prompt, llm=self.llm, verbose=self.verbose, memory=self.memory
+        # )
+        self.conversation = LLMChain(
             prompt=self.prompt, llm=self.llm, verbose=self.verbose, memory=self.memory
         )
 
@@ -84,15 +92,20 @@ class Chat:
         Returns:
             str: The AI's response.
         """
+        qualifier = " pretends to be high on drugs"
         self.inputs.append(user_message)
-        try:
-            output = self.conversation.predict(
-                input=user_message, stop=self.config.conversation_stop_list
-            )
-            # remove double spaces
-            self.memory.buffer = re.sub(" +", " ", self.memory.buffer)
-        except Exception:
-            output = "Oops, something went wrong. I'm sorry. What did you say?"
+        # try:
+        output = self.conversation.predict(
+            input=user_message,
+            qualifier=qualifier,
+            stop=self.config.conversation_stop_list,
+        )
+        # remove double spaces
+        self.memory.buffer = re.sub(" +", " ", self.memory.buffer)
+        # dynamic qualifier hack
+        # except Exception as e:
+        #     print(e)
+        #     output = "Oops, something went wrong. I'm sorry. What did you say?"
         self.outputs.append(output)
         return output
 
