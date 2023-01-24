@@ -87,7 +87,7 @@ def write_text_under_image(image, text_list):
     font_resource_path = (
         Path(__file__).resolve().parents[1] / "frontend" / "kongtext.ttf"
     )
-    font = ImageFont.truetype(str(font_resource_path), 18)
+    font = ImageFont.truetype(str(font_resource_path), 15)
     # Calculate the vertical spacing between each phrase
     spacing = width / len(text_list)
     # Draw the text on the new image

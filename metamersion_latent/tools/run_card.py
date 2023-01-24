@@ -1,5 +1,5 @@
 import logging
-import sys
+import os
 from datetime import datetime
 from pathlib import Path
 
@@ -64,7 +64,7 @@ def main(config_path, example_path, output_path, verbose):
     logger.info("Saved to %s", filepath)
 
     #######################################################################################################################
-    narration_list = analysis_dict["narration_list"]
+    analysis_dict["narration_list"]
     prompts = analysis_dict["list_prompts"]
     from metamersion_latent.controller.c2_generate_movie import Client
 
@@ -92,13 +92,14 @@ def main(config_path, example_path, output_path, verbose):
         write_text_under_image,
     )
 
-    print(poem)
+    poem = analysis_dict["poem"]
+    split_poem = [phrase[:-1] for phrase in poem.split(":")[1:]]
     collage = create_collage(list_imgs)
     card_output = Path(output_path) / f"{token}.png"
-    collage = write_text_under_image(collage, narration_list)
+    collage = write_text_under_image(collage, split_poem)
     collage.save(card_output)
 
-    sys.exit()
+    os.system("kill %d" % os.getpid())
 
 
 if __name__ == "__main__":

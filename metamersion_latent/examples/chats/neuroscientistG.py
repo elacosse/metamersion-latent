@@ -1,6 +1,5 @@
-username = "Gilly" # Name of chatbot user
-chat_history = """
-AI: Hi Gilly It's so nice to meet you. Do you know why you're here? I'm here to help you explore Latent Spaces and learn more about yourself through AI. I'm sure you have lots of questions, so let's get started! Where shall we begin?
+username = "Gilly"  # Name of chatbot user
+chat_history = """AI: Hi Gilly It's so nice to meet you. Do you know why you're here? I'm here to help you explore Latent Spaces and learn more about yourself through AI. I'm sure you have lots of questions, so let's get started! Where shall we begin?
 Visitor: Let's talk!
 AI: Great! I am always up for a good chat. What would you like to talk about?
 Visitor: What's going on here?
