@@ -9,6 +9,7 @@ from metamersion_latent.llm.analysis import perform_analysis
 from metamersion_latent.llm.config import Config
 from metamersion_latent.utils import save_to_yaml
 
+
 # from metamersion_latent.image_generation.stability import create_collage
 # from metamersion_latent.image_generation.stability import write_text_under_image
 
@@ -50,27 +51,12 @@ def main(config_path, example_path, output_path, verbose):
     # Perform Analysis
     logger.info("Performing analysis on chat history...")
     analysis_dict = perform_analysis(chat_history, config)
-
-    # Craft prompts
-    draft_prompts = analysis_dict["surreal_landscapes"]
-    draft_prompts = [
-        line.split(":", 1)[1][1:].replace(". ", "")
-        for line in draft_prompts.split("\n")
-    ]
-    prompts = [
-        config.prefix + prompt.rstrip(".") + ", " + config.postfix
-        for prompt in draft_prompts
-    ]
-    prompts_dict = dict()
-    for i, p in enumerate(prompts):
-        prompts_dict[i] = p
     items = [
         dict(
             example_path=example_path,
             config_path=config_path,
             chat_history=chat_history,
             analysis=analysis_dict,
-            prompts=prompts_dict,
         )
     ]
 
@@ -78,14 +64,24 @@ def main(config_path, example_path, output_path, verbose):
     logger.info("Saved to %s", filepath)
 
     #######################################################################################################################
-    # Format poem into phrase
-    # [phrase[:-1] for phrase in poem.split(":")[1:]]
-
-    # TTS
-
-    # TODO
-
-    ### Get Latent Blending to assemble 6 images
+    analysis_dict["narration_list"]
+    # negative_prompt = "ugly, blurry"
+    # seed = 420
+    # width = 768
+    # height = 512
+    # ip_server = "138.2.229.216"
+    # zmq_client = Client(ip_server, 7555, 7556, image_dims=IMAGE_DIMS, verbose=True)
+    # from tqdm import tqdm
+    # list_imgs = []
+    # for prompt in tqdm(prompts):
+    #     dict_meta = {}
+    #     dict_meta['prompt'] = prompt
+    #     dict_meta['neg_prompt'] = negative_prompt
+    #     dict_meta['seed'] = seed
+    #     dict_meta['width'] = width
+    #     dict_meta['height'] = height
+    #     img = zmq_client.run_image(dict_meta)
+    #     list_imgs.append(img)
 
     # assign to list_imgs
 
