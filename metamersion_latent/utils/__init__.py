@@ -3,7 +3,7 @@ from pathlib import Path
 
 import yaml
 import os
-
+import numpy as np
 
 
 def create_output_directory_with_identifier(
@@ -61,5 +61,24 @@ def user_choice(list_options=None, info_text='please select:', fn_choice_save=No
         sel = int(sel)
         choice =  list_options[sel]
     
-    
     return choice
+
+
+def get_p(array,epsilon=0.0001,divideby1=True):
+    array = np.asarray(array,dtype=np.float64).ravel()
+    k=0
+    agfd = np.min(array)
+    array -= np.min((0,agfd))
+#    array -= np.min((0,np.min(array)))
+#    array[array<0]=0
+    array = array/np.sum(array) #speedier
+    
+    while np.abs(np.sum(array) - 1)>epsilon:
+#        array[array<0]=0
+        array -= np.min((0,np.min(array)))
+        array = array/np.sum(array)
+        
+        k+=1
+        if k>50:
+            print('garden get_p is mad like %i times!!' %k)
+    return array

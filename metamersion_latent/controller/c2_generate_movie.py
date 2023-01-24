@@ -294,11 +294,21 @@ scp_cmd = zmq_client.run_movie(dict_meta)
 
 print(scp_cmd)
 
+#%% Get the server timestamp
+
+
+
+
 
 #%% Download
-dp_incoming = os.path.join(dp_session, "incoming")
-scp_cmd_mod = scp_cmd[:-2]+f"/* {dp_incoming}/"
+ts_server = scp_cmd[:-2].split("/")[-1]
+dp_computed = os.path.join(dp_session, f"computed_{ts_server}")
 os.makedirs(dp_incoming)
+# copy the chat analysis
+shutil.copyfile(os.path.join(dp_session, 'chat_analysis.yaml'), os.path.join(dp_incoming, 'chat_analysis.yaml'))
+
+# SCP everything
+scp_cmd_mod = scp_cmd[:-2]+f"/* {dp_incoming}/"
 subprocess.call(scp_cmd_mod, shell=True)
 print("SCP DONE!")
 
