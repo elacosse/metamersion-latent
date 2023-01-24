@@ -28,52 +28,100 @@ config = Config.fromfile("../configs/chat/ls1_jz1.py")
 dict_meta = load_yaml(fp_chat)
 username = dict_meta['username']
 chat_history = dict_meta['chat_history']
+
 #######################################################################################################################
-# Perform Analysis
+#
+#Analyze Chat and Generate Story
+#
 #######################################################################################################################
-# Short analysis
-personal_analysis = "1." + prompt(
-    config.short_analysis_template.format(chat_history=chat_history),
-    config.short_analysis_model,
+
+#######################################################################################################################
+# 1. Analyze the chat
+#######################################################################################################################
+
+personal_analysis = "1:" + prompt(
+    config.personal_analysis_template.format(chat_history=chat_history),
+    config.personal_analysis_model,
 )
 if verbose:
     print("Personal analysis:\n" + personal_analysis)
-# Story analysis
+
+#######################################################################################################################
+# 2. Generate Story
+#######################################################################################################################
 amusing_story = "1:" + prompt(
-    config.story_analysis_template.format(
+    config.amusing_story_template.format(
         chat_history=chat_history,
         personal_analysis=personal_analysis,
         N_story_steps=config.N_story_steps,
+        human_prefix=config.human_prefix
     ),
     config.story_analysis_model,
 )
 if verbose:
     print("Amusing story:\n" + amusing_story)
+
+#######################################################################################################################
+# 2.1 Critique the Story
+#######################################################################################################################
+
+critique_story = "1:" + prompt(
+    config.critique_story_template.format(
+        N_story_steps=config.N_story_steps,
+        amusing_story=amusing_story,
+        personal_analysis=personal_analysis,
+    ),
+    config.critique_story_model,
+)
+if verbose:
+    print("Story critique:\n" + critique_story)
+
+#######################################################################################################################
+# 3. Make scenes for the story
+#######################################################################################################################
+
 # Scene analysis
 story_scenes = "1:" + prompt(
-    config.scene_analysis_template.format(
-        N_story_steps=config.N_story_steps, amusing_story=amusing_story
+    config.story_scenes_template.format(
+        N_story_steps=config.N_story_steps,
+        amusing_story=amusing_story
     ),
-    config.scene_analysis_model,
+    config.story_scenes_model,
 )
 if verbose:
     print("Story scenes:\n" + story_scenes)
+
+
+#######################################################################################################################
+# 4. Create the landscapes
+#######################################################################################################################
+
 # Landscape analysis
 created_landscapes = "1:" + prompt(
-    config.landscape_analysis_template.format(story_scenes=story_scenes),
-    config.landscape_analysis_model,
+    config.create_landscapes_template.format(story_scenes=story_scenes),
+    config.create_landscapes_model,
 )
 if verbose:
     print("Created landscapes:\n" + created_landscapes)
+
+
+#######################################################################################################################
+# 4. Create the objects
+#######################################################################################################################
+  
 # Object analysis
 created_objects = "1:" + prompt(
     config.object_analysis_template.format(
         story_scenes=story_scenes, N_story_steps=config.N_story_steps
     ),
-    config.object_analysis_model,
+    config.create_object_model,
 )
 if verbose:
     print("Created objects:\n" + created_objects)
+
+
+
+
 # Objects in landscape analysis
 surreal_landscapes = "1:" + prompt(
     config.object_in_landscape_analysis_template.format(
