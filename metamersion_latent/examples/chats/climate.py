@@ -1,3 +1,5 @@
+username = "Zach" # Name of chatbot user
+chat_history = """
 YY: Hello, what's your name?
 Visitor: Zach
 YY: Hi Zach, do you know why you're here?
@@ -26,3 +28,4 @@ YY: That's ok. There are many different ways to help, and it can be hard to know
 Visitor: True.
 Now that it has learned something about the visitor, YY thanks the visitor, says goodbye and invites the visitor to enter the virtual reality room. It reminds the visitor to come back to chat again after the VR experience. 
 YY: Well, it's been great talking to you! I hope you enjoyed our conversation. I look forward to hearing more from you after your virtual reality experience. Have a great time!
+"""
