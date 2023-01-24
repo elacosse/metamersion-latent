@@ -4,6 +4,7 @@ import os
 import numpy as np
 import soundfile as sf
 import torchaudio
+from pydub import AudioSegment  # got that anyway from andre
 
 # from metamersion_latent.audio.my_tortoise import TextToSpeech
 from tortoise.api import TextToSpeech
@@ -30,7 +31,7 @@ def create_tts_from_text(
         preset=preset,
     )
     data = gen.squeeze(0).cpu()
-    torchaudio.save(output_path, data, 24000)
+    torchaudio.save(output_path, data, 24000, format="wav")
 
 
 def assemble_tts_for_video(
@@ -76,6 +77,11 @@ def assemble_tts_for_video(
         segment_filepaths, audio_duration, start_times, output_filepath
     )
 
+    check_tts_output_concatenation_and_clip(output_filepath, audio_duration)
+    # convert to mp3
+    sound = AudioSegment.from_wav(output_filepath)
+    sound.export(output_filepath.replace(".wav", ".mp3"), format="mp3")
+
 
 def assemble_audio_files_with_silence_and_save(
     filepaths,
@@ -117,6 +123,18 @@ def assemble_audio_files_with_silence_and_save(
 
     sf.write(output_filepath, audio_data, sample_rate)
     return list_onsets, list_durations
+
+
+def check_tts_output_concatenation_and_clip(
+    filepath: str, audio_duration: float
+) -> None:
+    """Clips wav file if necessary to given length because of madness..."""
+    data, sample_rate = sf.read(filepath, dtype="float32")
+    if len(data) * sample_rate > audio_duration:
+        # clip!
+        end_indx = audio_duration * sample_rate
+        data = data[:end_indx]
+        sf.write(filepath, data, sample_rate)
 
 
 if __name__ == "__main__":
