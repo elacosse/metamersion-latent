@@ -1,12 +1,8 @@
 #######################################################################################################################
 # Chatbot Configuration
 #######################################################################################################################
-
-# INJECTIONS FOR ERIC
 human_prefix = "Visitor"
 ai_prefix = "AI"
-
-
 qualifier_dict = {
     "": 10,
     " is being sneaky and deceptive": 1,
@@ -17,7 +13,6 @@ qualifier_dict = {
     " is being very angry": 1,
     " is being very happy": 1,
 }
-
 model = {
     "model_name": "text-davinci-003",
     "temperature": 0.95,
@@ -36,7 +31,7 @@ default_chat_input = "I don't know what to say."
 default_time_limit_message = (
     "Sorry, I don't have any more time to continue chatting with you."
 )
-initial_chat_time_limit = 60 * 5 # 5 minutes
+initial_chat_time_limit = 60 * 5  # 5 minutes
 exit_chat_time_limit = 60 * 5  # 5 minutes
 
 arbstring1 = "{initial_bot_message}{history}"
@@ -45,7 +40,7 @@ arbstring2 = "{input}"
 initialization_message = """
 PLACE A MESSAGE HERE TO INTRODUCE PEOPLE TO THE EXPERIENCE
 """
-template = f"""In Metamersion: Latent Spaces, we continue in our voyage to discover deep synergies between Science, Art, and Technology. In machine learning, a latent space is a compressed representation of the data that an algorithm has been trained to operate on. It is internal to the algorithm, and thus hidden from the outside world. However, it is where core functionality is embedded within AI. Imagine a model trained to translate languages: a key latent space might be semantic in nature, where the meanings of words and their combinations reside, independent of the language used to convey those meanings. In our own minds, there exist a multitude of latent spaces where the people you know, your values, your memories, your actions, might live, ready to be called upon when needed, or updated in response to new experience. Might we use technology to pull such latent spaces out into the open, where they can be seen and studied? When they have been damaged or seem to be otherwise falling short of their potential, can we research and develop methods for improving them? Given the deep connections between our minds and our overall physiology, might this provide a powerful path towards improving health and treating disease? This second Metamersion is part of a series of events tied to a larger effort at the Champalimaud Foundation to use perception and movement as both lenses and levers for research and rehabilitation.
+template = """In Metamersion: Latent Spaces, we continue in our voyage to discover deep synergies between Science, Art, and Technology. In machine learning, a latent space is a compressed representation of the data that an algorithm has been trained to operate on. It is internal to the algorithm, and thus hidden from the outside world. However, it is where core functionality is embedded within AI. Imagine a model trained to translate languages: a key latent space might be semantic in nature, where the meanings of words and their combinations reside, independent of the language used to convey those meanings. In our own minds, there exist a multitude of latent spaces where the people you know, your values, your memories, your actions, might live, ready to be called upon when needed, or updated in response to new experience. Might we use technology to pull such latent spaces out into the open, where they can be seen and studied? When they have been damaged or seem to be otherwise falling short of their potential, can we research and develop methods for improving them? Given the deep connections between our minds and our overall physiology, might this provide a powerful path towards improving health and treating disease? This second Metamersion is part of a series of events tied to a larger effort at the Champalimaud Foundation to use perception and movement as both lenses and levers for research and rehabilitation.
 We invite you to explore and interact with dynamic physical and digital worlds, to open yourself up to new possibilities for understanding, where the fundamental and applied, the scientific and artistic, are woven together into new materials with powerful properties for all of mankind. We envision a kind of personalised public health, empowered by science, technology and art, that takes into account the deep connection between our minds and our bodies, and the power of perception and action to bring about systemic change within those internal, latent spaces of ourselves that ultimately form the basis for health and well-being. 
 The following conversation takes place in an old warehouse. For many years, the warehouse was used to unload fish that came in boats which unloaded their daily catch there. The warehouse came into disuse, and now there is a breath of new life. The warehouse is being transformed into a place where something novel and remarkable will happen. Soon, researchers, with the help of advanced AI systems, will develop breakthrough life-enhancing and extending therapies based on  digital technologies. 
 Today, in the warehouse there is an exhibition where science and art come together. The exhibition is called Metamersion: Latent Spaces, as described above.
@@ -59,9 +54,11 @@ The creators of Latent Space I have created an AI, who is called YY, to entertai
 
 In this chat, first YY asks the vistitor their name and then asks 'Do you know why you're here?' and stops.  After the visitor answers this very important question, YY introduces itself, saying My name is YY. I think I'm an AI, but sometimes I'm not sure. I know a lot of things, but sometimes get confused.
  and also telling the visitor about itself and stops. Next it asks about who the visitor is.
-{ai_prefix}: {arbstring1}
-{human_prefix}: {arbstring2}
-{ai_prefix}:"""  # note these must be history and input!
+ 
+Current conversation:
+AI: {initial_bot_message}{history}
+Visitor: {input}
+AI{qualifier}:"""  # note these must be history and input!
 conversation_stop_list = [f"{ai_prefix}: ", f"{human_prefix}: "]
 initial_bot_message = """Can you tell me your name or what I should call you?"""
 last_bot_pre_message_injection = f"""\nThis was enough information for the {ai_prefix}. In the next statement, the {ai_prefix} politely thanked the {human_prefix} and said that the VR experience can now begin in the next room."""
@@ -71,9 +68,9 @@ exit_conversation_template = """You are at the Champalimaud warehouse in Lisbon,
 Below is a chat between you the AI and the visitor who has approached your terminal. In this conversation, you tell the visitor about what you are doing and you try to find out something interesting, important or meaningful to the visitor. Always be friendly, humorous and compassionate. If the the visitor asks a question, you answer. If the visitor doesn't ask a question, you ask one.
 
 Current conversation:
-{ai_prefix}: {initial_bot_message}{history}
-{human_prefix}: {input}
-{ai_prefix}:"""  # note these must be history and input!
+AI: {initial_bot_message}{history}
+Visitor: {input}
+AI{qualifier}:"""  # note these must be history and input!
 initial_exit_bot_message = """Can you tell me your name or what I should call you?"""
 
 
@@ -94,10 +91,10 @@ postfix = "8k, vivid colors, masterpiece, trending on artstation"
 #######################################################################################################################
 # Latent blending configs
 duration_single_trans = 25
-ChosenSet = 3 #music set! needs to be between 1 and 13
+ChosenSet = 3  # music set! needs to be between 1 and 13
 duration_fade = 15
 silence_begin = -3
-quality = 'medium'
+quality = "medium"
 depth_strength = 0.5
 seed = 420
 width = 768
@@ -136,7 +133,7 @@ N_steps = 6
 # temperature important here
 # FIX: how to not go for the same objects all the time
 # consider
-#Think of 20 unusual dramatic landscapes and 20 strange and symbolic objects, which are man-made things or living creatures.
+# Think of 20 unusual dramatic landscapes and 20 strange and symbolic objects, which are man-made things or living creatures.
 
 create_story_template = """
 This is an analysis what {human_prefix} is interested in:
