@@ -12,6 +12,7 @@ from langchain.llms.loading import load_llm_from_config
 from langchain.prompts.prompt import PromptTemplate
 
 from metamersion_latent.llm.config import Config
+from metamersion_latent.utils import get_p, select_dict_key_by_probability
 
 
 def gpt_vanilla_call(prompt: str, config: dict) -> str:
@@ -27,6 +28,18 @@ def gpt_vanilla_call(prompt: str, config: dict) -> str:
     llm = load_llm_from_config(config)
     output = llm(prompt)
     return output
+
+
+def _chat_output_check(output: str) -> bool:
+    """Returns true if it's a valid output from GPT-3.
+    Args:
+        output (str): The output from GPT-3.
+    Returns:
+        bool: True if it's a valid output from GPT-3.
+    """
+    for char in output:
+        if char.isalpha():
+            return True
 
 
 class Chat:
@@ -48,6 +61,13 @@ class Chat:
         self.template = self.config.template
         if exit_conversation:
             self.template = self.config.exit_conversation_template
+
+        qualifier_dict = self.config.qualifier_dict
+        # Get p values for each qualifier and set them in the config
+        pvals = get_p(list(qualifier_dict.values()))
+        for i, key in enumerate(qualifier_dict):
+            qualifier_dict[key] = pvals[i]
+        self.config.qualifier_dict = qualifier_dict
 
         # keep a list of all input and outputs this handled
         self.inputs = []
@@ -92,20 +112,29 @@ class Chat:
         Returns:
             str: The AI's response.
         """
-        qualifier = " pretends to be high on drugs"
+        qualifier = " is a extremely formal"
         self.inputs.append(user_message)
-        # try:
-        output = self.conversation.predict(
-            input=user_message,
-            qualifier=qualifier,
-            stop=self.config.conversation_stop_list,
-        )
-        # remove double spaces
-        self.memory.buffer = re.sub(" +", " ", self.memory.buffer)
-        # dynamic qualifier hack
-        # except Exception as e:
-        #     print(e)
-        #     output = "Oops, something went wrong. I'm sorry. What did you say?"
+        qualifier = select_dict_key_by_probability(self.config.qualifier_dict)
+
+        iterations = 0
+        while True or iterations > 10:
+            try:
+                # TODO make sure output is at least something!
+                output = self.conversation.predict(
+                    input=user_message,
+                    qualifier=qualifier,
+                    stop=self.config.conversation_stop_list,
+                )
+                # remove double spaces or other hacks...
+                self.memory.buffer = re.sub(" +", " ", self.memory.buffer)
+                self.memory.buffer = self.memory.buffer.replace(
+                    f"{self.config.ai_prefix}: \n\n", f"{self.config.ai_prefix}:"
+                )
+            except Exception:
+                output = "Oops, something went wrong. I'm sorry. What did you say?"
+            if _chat_output_check(output):
+                break
+            iterations += 1
         self.outputs.append(output)
         return output
 
