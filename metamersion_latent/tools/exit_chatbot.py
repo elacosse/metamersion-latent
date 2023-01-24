@@ -72,7 +72,7 @@ def main(config_path, verbose, time_limit):
         qualifier="{qualifier}",
         input="{input}",
     )
-    chat = Chat(config, verbose)
+    chat = Chat(config, verbose, exit_conversation=True)
     if bool_translate:
         human_input = input(translate(config.initial_bot_message, "PT") + "\n")
         # human_input = translate(human_input, "EN")
@@ -138,21 +138,6 @@ def main(config_path, verbose, time_limit):
         print("Surreal landscapes:\n" + analysis_dict["surreal_landscapes"])
         print("Poem:\n" + analysis_dict["poem"])
     #######################################################################################################################
-    draft_prompts = analysis_dict["surreal_landscapes"]
-
-    ### Put this into a function!
-    draft_prompts = [
-        line.split(":", 1)[1][1:].replace(". ", "")
-        for line in draft_prompts.split("\n")
-    ]
-    # draft_prompts = [line.split(":", 1)[1][1:] for line in draft_prompts.split("\n")]
-
-    prompts = [
-        config.prefix + prompt.rstrip(".") + ", " + config.postfix
-        for prompt in draft_prompts
-    ]
-    for p in prompts:
-        print(p)
 
 
 if __name__ == "__main__":
