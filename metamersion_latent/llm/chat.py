@@ -93,7 +93,7 @@ class Chat:
         Returns:
             str: The AI's response.
         """
-        qualifier = " pretends to be high on drugs"
+        # qualifier = " pretends to be high on drugs"
         self.inputs.append(user_message)
         # try:
         output = self.conversation.predict(
