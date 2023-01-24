@@ -1,6 +1,23 @@
 #######################################################################################################################
 # Chatbot Configuration
 #######################################################################################################################
+
+# INJECTIONS FOR ERIC
+human_prefix = "Visitor"
+ai_prefix = "AI"
+
+
+qualifier_dict = {
+    "": 10,
+    " is being sneaky and deceptive": 1,
+    " is being very light hearted": 1,
+    " is being very serious": 1,
+    " is being very funny": 1,
+    " is being very sad": 1,
+    " is being very angry": 1,
+    " is being very happy": 1,
+}
+
 model = {
     "model_name": "text-davinci-003",
     "temperature": 0.95,
@@ -24,8 +41,7 @@ exit_chat_time_limit = 60 * 5  # 5 minutes
 
 arbstring1 = "{initial_bot_message}{history}"
 arbstring2 = "{input}"
-human_prefix = "Visitor"
-ai_prefix = "AI"
+
 initialization_message = """
 PLACE A MESSAGE HERE TO INTRODUCE PEOPLE TO THE EXPERIENCE
 """
