@@ -10,7 +10,6 @@ import deepl #pip install deepl
 
 sys.path.append("../..")
 sys.path.append("..")
-sys.path.append("/Users/jjj/git/metamersion_latent")
 from metamersion_latent.llm.chat import Chat
 from metamersion_latent.llm.config import Config
 from metamersion_latent.utils import create_output_directory_with_identifier, save_to_yaml
@@ -370,9 +369,10 @@ class ChatGUI:
     def init_ai_chat(self, fp_config, verbose=False):
         config = Config.fromfile(fp_config)
         config.template = config.template.format(
-        initial_bot_message=config.initial_bot_message,
-        history="{history}",
-        input="{input}",
+            initial_bot_message=config.initial_bot_message,
+            history="{history}",
+            qualifier="{qualifier}",
+            input="{input}",
         )
         self.config = config
         self.chat = Chat(config, self.verbose_ai)
