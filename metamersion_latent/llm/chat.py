@@ -98,7 +98,7 @@ class Chat:
         # try:
         output = self.conversation.predict(
             input=user_message,
-            qualifier=qualifier,
+            # qualifier=qualifier,
             stop=self.config.conversation_stop_list,
         )
         # remove double spaces
