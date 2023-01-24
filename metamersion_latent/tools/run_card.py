@@ -58,7 +58,6 @@ def main(config_path, example_path, output_path, verbose):
             analysis=analysis_dict,
         )
     ]
-
     filepath = save_to_yaml(items, token, output_path)
     logger.info("Saved to %s", filepath)
 
@@ -76,9 +75,9 @@ def main(config_path, example_path, output_path, verbose):
     from tqdm import tqdm
 
     list_imgs = []
-    for prompt in tqdm(prompts):
+    for prompt_item in tqdm(prompts):
         dict_meta = {}
-        dict_meta["prompt"] = prompt
+        dict_meta["prompt"] = prompt_item
         dict_meta["neg_prompt"] = negative_prompt
         dict_meta["seed"] = seed
         dict_meta["width"] = width
