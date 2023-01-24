@@ -14,96 +14,159 @@ from metamersion_latent.utils.translation import translate
 import os
 import re
 
-load_dotenv(find_dotenv(), verbose=False)  # load environment variables
-verbose = True
-
-dp_base = '/mnt/ls1_data/test_sessions/'
+load_dotenv(find_dotenv(), verbose=False) 
+dp_base = os.getenv("DIR_SUBJ_DATA") # to .env add  DIR_SUBJ_DATA='/Volumes/LXS/test_sessions/'
 list_dns = os.listdir(dp_base)
+list_dns = [l for l in list_dns if l[0]=="2"]
 list_dns.sort(reverse=True)
 
+
 dn = user_choice(list_dns, sort=False, suggestion=list_dns[0])
-dp_session = f'/mnt/ls1_data/test_sessions/{dn}'
+dp_session = f'{dp_base}/{dn}'
 fp_chat = os.path.join(dp_session, 'chat_history.yaml')
-config = Config.fromfile("../configs/chat/ls1_jz1.py")
+config = Config.fromfile("../configs/chat/ls1_version_4.py")
 dict_meta = load_yaml(fp_chat)
 username = dict_meta['username']
 chat_history = dict_meta['chat_history']
+
 #######################################################################################################################
-# Perform Analysis
+#
+#Analyze Chat and Generate Story
+#
 #######################################################################################################################
-# Short analysis
-personal_analysis = "1." + prompt(
-    config.short_analysis_template.format(chat_history=chat_history),
-    config.short_analysis_model,
+
+#######################################################################################################################
+# 1. Analyze the chat
+#######################################################################################################################
+
+chat_analysis = "1:" + prompt(
+    config.analyze_chat_template.format(chat_history=chat_history),
+    config.analyze_chat_model,
 )
 if verbose:
-    print("Personal analysis:\n" + personal_analysis)
-# Story analysis
-amusing_story = "1:" + prompt(
-    config.story_analysis_template.format(
+    print("\n\nChat analysis:\n" + chat_analysis)
+
+#######################################################################################################################
+# 2. Generate Story
+#######################################################################################################################
+story = "1:" + prompt(
+    config.create_story_template.format(
         chat_history=chat_history,
-        personal_analysis=personal_analysis,
-        N_story_steps=config.N_story_steps,
+        chat_analysis=chat_analysis,
+        N_steps=config.N_steps,
+        human_prefix=config.human_prefix
     ),
-    config.story_analysis_model,
+    config.create_story_model,
 )
 if verbose:
-    print("Amusing story:\n" + amusing_story)
-# Scene analysis
-story_scenes = "1:" + prompt(
-    config.scene_analysis_template.format(
-        N_story_steps=config.N_story_steps, amusing_story=amusing_story
+    print("\n\nThe story:\n" + story)
+
+#######################################################################################################################
+# 2.1 Critique the Story
+#######################################################################################################################
+
+critique_story = "1:" + prompt(
+    config.critique_story_template.format(
+        N_steps=config.N_steps,
+        story=story,
+        chat_analysis=chat_analysis,
     ),
-    config.scene_analysis_model,
+    config.critique_story_model,
 )
 if verbose:
-    print("Story scenes:\n" + story_scenes)
-# Landscape analysis
-created_landscapes = "1:" + prompt(
-    config.landscape_analysis_template.format(story_scenes=story_scenes),
-    config.landscape_analysis_model,
-)
-if verbose:
-    print("Created landscapes:\n" + created_landscapes)
-# Object analysis
-created_objects = "1:" + prompt(
-    config.object_analysis_template.format(
-        story_scenes=story_scenes, N_story_steps=config.N_story_steps
+    print("\n\nStory critique:\n" + critique_story)
+
+#######################################################################################################################
+# 3. Make scenes for the story
+#######################################################################################################################
+
+scenes = "1:" + prompt(
+    config.create_scenes_template.format(
+        N_steps=config.N_steps,
+        story=story
     ),
-    config.object_analysis_model,
+    config.create_scenes_model,
 )
 if verbose:
-    print("Created objects:\n" + created_objects)
-# Objects in landscape analysis
-surreal_landscapes = "1:" + prompt(
-    config.object_in_landscape_analysis_template.format(
-        created_landscapes=created_landscapes, created_objects=created_objects
+    print("\n\nScenes:\n" + scenes)
+
+
+#######################################################################################################################
+# 4. Create the landscapes
+#######################################################################################################################
+
+landscapes = "1:" + prompt(
+    config.create_landscapes_template.format(
+        scenes=scenes
     ),
-    config.object_in_landscape_analysis_model,
+    config.create_landscapes_model,
 )
 if verbose:
-    print("Surreal landscapes:\n" + surreal_landscapes)
-# Poem analysis
+    print("\n\nLandscapes:\n" + landscapes)
+
+
+#######################################################################################################################
+# 5. Create the objects
+#######################################################################################################################
+  
+objects = "1:" + prompt(
+    config.create_objects_template.format(
+        scenes=scenes,
+        N_steps=config.N_steps
+    ),
+    config.create_objects_model,
+)
+if verbose:
+    print("\n\nObjects:\n" + objects)
+
+
+#######################################################################################################################
+# 6. Create captions
+#######################################################################################################################
+
+captions = "1:" + prompt(
+    config.create_captions_template.format(
+        landscapes=landscapes,
+        objects=objects
+    ),
+    config.create_captions_model,
+)
+if verbose:
+    print("\n\nCaptions:\n" + captions)
+
+
+#######################################################################################################################
+# 7. Create poem
+#######################################################################################################################
+
 poem = "1:" + prompt(
-    config.poem_analysis_template.format(
-        N_story_steps=config.N_story_steps,
-        story_scenes=story_scenes,
-        created_objects=created_objects,
+    config.create_poem_template.format(
+        N_steps=config.N_steps,
+        scenes=scenes,
+        objects=objects,
         poem_style=config.poem_style,
         verse_length=config.verse_length,
     ),
-    config.poem_analysis_model,
+    config.create_poem_model,
 )
 # Split poem
-narration_list = re.split(r"\d:", poem, maxsplit=config.N_story_steps)
+narration_list = re.split(r"\d:", poem, maxsplit=config.N_steps)
 narration_list = [l for l in narration_list if len(l) > 5]
 narration_list = [l.replace('\n', ' ') for l in narration_list]
 narration_list = [l.strip() for l in narration_list]
 
 if verbose:
-    print("Poem:\n" + poem)
+    print("\n\nPoem:\n")
+    for n in narration_list:
+        print(n)
+
+
 #######################################################################################################################
-draft_prompts = surreal_landscapes
+# 8. Create captions
+#######################################################################################################################
+
+#######################################################################################################################
+draft_prompts = captions
 
 ### Put this into a function!
 draft_prompts = [
@@ -116,8 +179,10 @@ prompts = [
     config.prefix + prompt.rstrip(".") + ", " + config.postfix
     for prompt in draft_prompts
 ]
-for p in prompts:
-    print(p)
+if verbose:
+    print("\n\nPrompts:\n")
+    for p in prompts:
+        print(p)
 
 
 dict_meta['list_prompts'] = prompts

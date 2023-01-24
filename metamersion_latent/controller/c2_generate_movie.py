@@ -248,16 +248,19 @@ class Client():
 
 #%%
 # spawn remote connection to server
-
-dp_base = '/mnt/ls1_data/test_sessions/'
+load_dotenv(find_dotenv(), verbose=False) 
+dp_base = os.getenv("DIR_SUBJ_DATA") # to .env add  DIR_SUBJ_DATA='/Volumes/LXS/test_sessions/'
 list_dns = os.listdir(dp_base)
+list_dns = [l for l in list_dns if l[0]=="2"]
+list_dns = [l for l in list_dns if os.path.isfile(os.path.join(dp_base, l, 'chat_analysis.yaml'))]
+
 list_dns.sort(reverse=True)
 
 dn = user_choice(list_dns, sort=False, suggestion=list_dns[0])
-dp_session = f'/mnt/ls1_data/test_sessions/{dn}'
+dp_session = f'{dp_base}/{dn}'
 
 fp_chat_analysis = os.path.join(dp_session, 'chat_analysis.yaml')
-config = Config.fromfile("../configs/chat/ls1_jz1.py")
+config = Config.fromfile("../configs/chat/ls1_version_4.py")
 dict_meta = load_yaml(fp_chat_analysis)
 
 
@@ -291,11 +294,21 @@ scp_cmd = zmq_client.run_movie(dict_meta)
 
 print(scp_cmd)
 
+#%% Get the server timestamp
+
+
+
+
 
 #%% Download
-dp_incoming = os.path.join(dp_session, "incoming")
-scp_cmd_mod = scp_cmd[:-2]+f"/* {dp_incoming}/"
+ts_server = scp_cmd[:-2].split("/")[-1]
+dp_computed = os.path.join(dp_session, f"computed_{ts_server}")
 os.makedirs(dp_incoming)
+# copy the chat analysis
+shutil.copyfile(os.path.join(dp_session, 'chat_analysis.yaml'), os.path.join(dp_incoming, 'chat_analysis.yaml'))
+
+# SCP everything
+scp_cmd_mod = scp_cmd[:-2]+f"/* {dp_incoming}/"
 subprocess.call(scp_cmd_mod, shell=True)
 print("SCP DONE!")
 

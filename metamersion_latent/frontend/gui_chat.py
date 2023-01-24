@@ -383,10 +383,16 @@ class ChatGUI:
         self.send_message_timer = 3
         
     def init_chat_session(self, username="NONE"):
+        username.replace(" ", "_")
+        username = "".join([c for c in username if c.isalpha() or c.isnumeric()])
+        self.time_start = time.time()
         self.dp_out = os.path.join("/mnt/ls1_data/test_sessions/", f"{get_time('second')}_{username}")
         self.username = username
-        os.makedirs(self.dp_out)
-        
+        try:
+            os.makedirs(self.dp_out)
+        except Exception as e:
+            print(f"failed making dp_out: {self.dp_out} {e}")
+      
 
     def hit_enter(self):
         if not self.last_input_ai():
@@ -397,8 +403,9 @@ class ChatGUI:
             text = self.text_typing
             if len(self.history_human) == 0:
                 print("STARTING TIME SET!")
-                self.init_chat_session()
-                self.time_start = time.time()
+                self.init_chat_session(text)
+                
+                
             self.history_human.append(text)
             if self.portugese_mode:
                 text = self.translate_PT2EN(text)
@@ -455,7 +462,10 @@ class ChatGUI:
             "time": time.time(),
         }
         label = "chat_history"
-        save_to_yaml(items, label, output_dir=self.dp_out)
+        try:
+            save_to_yaml(items, label, output_dir=self.dp_out)
+        except Exception as e:
+            print(f"failed wrap_up_and_save: {e}")
         
         return output
 
@@ -706,12 +716,12 @@ if __name__ == "__main__":
     
     
     # Change Parameters below
-    fp_config="../configs/chat/ls1_jz1.py"
+    fp_config="../configs/chat/ls1_version_4.py"
     use_ai_chat=True
     verbose_ai=True
     portugese_mode=False
     ai_fake_typing=True
-    run_fullscreen=True
+    run_fullscreen=False
     
     # Let's instantiate the ChatGUI object and conveniantly name it self...
     self = ChatGUI(

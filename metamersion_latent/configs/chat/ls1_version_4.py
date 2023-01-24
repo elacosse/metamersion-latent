@@ -59,16 +59,20 @@ Current conversation:
 {human_prefix}: {input}
 {ai_prefix}:"""  # note these must be history and input!
 initial_exit_bot_message = """Can you tell me your name or what I should call you?"""
+
+
 #######################################################################################################################
 # TTS Configuration
 #######################################################################################################################
 voice = "train_dotrice"
 preset = "high_quality"
+
 #######################################################################################################################
 # Stable Diffusion Prompt Creation
 #######################################################################################################################
 prefix = ""
 postfix = "8k, vivid colors, masterpiece, trending on artstation"
+
 #######################################################################################################################
 # Latent Blending Configuration
 #######################################################################################################################
@@ -86,62 +90,75 @@ negative_prompt = "ugly, blurry"
 
 
 #######################################################################################################################
-# Short Analysis Template
+# 1. Analyze the chat
 #######################################################################################################################
-short_analysis_template = """This is a conversation with the visitor:
+analyze_chat_template = """This is a conversation with the visitor:
 {chat_history}
 Based on the conversation, describe some important things about the visitor.
 1."""
-short_analysis_model = {
-    "model_name": "text-davinci-003",
-    "temperature": 0.85,
-    "max_tokens": 256,
-    "top_p": 1.0,
-    "frequency_penalty": 0.0,
-    "presence_penalty": 0.0,
-    "n": 1,
-    "best_of": 1,
-    "request_timeout": None,
-    "_type": "openai",
-}
 
-#######################################################################################################################
-# Story Analysis Template
-#######################################################################################################################
-N_story_steps = 6
-story_analysis_template = """This is a chat with the visitor:
-{chat_history}
-From this conversation, it is apparent that:
-{personal_analysis}
-Create a story in {N_story_steps} steps that the visitor would find amusing, surprising and help them learn about themselves.
-Be creative and concrete in describing the story.
-Set the story in dramatic outdoor landscapes.
-Include a specific man-made thing or living creatures with symbolic significance in each step.
-1:"""
-story_analysis_model = {
+analyze_chat_model = {
     "model_name": "text-davinci-003",
     "temperature": 0.85,
     "max_tokens": 1024,
     "top_p": 1.0,
-    "frequency_penalty": 0.0,
-    "presence_penalty": 0.0,
+    "frequency_penalty": 0.2,
+    "presence_penalty": 0.2,
     "n": 1,
     "best_of": 1,
     "request_timeout": None,
     "_type": "openai",
 }
+# Output variable is:
+# chat_analysis
 
 #######################################################################################################################
-# Scene Analysis Template
+# 2. Generate Story
 #######################################################################################################################
-scene_analysis_template = """This is the story in {N_story_steps} steps:
-{amusing_story}
-Generate an natural landscape setting for each of the {N_story_steps} steps.
-An OBJ is a specific man-made thing or a living creature with some symbolic significance to the story.
-Include one OBJ in each scene other than visitor.
+N_steps = 6
+
+# temperature important here
+# FIX: how to not go for the same objects all the time
+# consider
+#Think of 20 unusual dramatic landscapes and 20 strange and symbolic objects, which are man-made things or living creatures.
+
+create_story_template = """
+This is an analysis what {human_prefix} is interested in:
+{chat_analysis}
+Create a story in {N_steps} steps that {human_prefix} would find amusing, surprising and help them learn about themselves.
+Be creative and concrete in describing the story.
+Make the story explicitly relevant to {human_prefix}'s analysis.
+Set the story in dramatic and unusual outdoor landscapes.
+Include a specific strange man-made thing or living creatures with symbolic significance to the person in each step.
 1:"""
 
-scene_analysis_model = {
+create_story_model = {
+    "model_name": "text-davinci-003",
+    "temperature": 0.95,
+    "max_tokens": 1024,
+    "top_p": 1.0,
+    "frequency_penalty": 0.2,
+    "presence_penalty": 0.2,
+    "n": 1,
+    "best_of": 1,
+    "request_timeout": None,
+    "_type": "openai",
+}
+# Output variable is:
+# story
+
+#######################################################################################################################
+# 2.1 Critique the Story
+#######################################################################################################################
+critique_story_template = """
+This is what we know about the person:
+{chat_analysis}
+This is the story we created:
+{story}
+How well does the story address what we know about the person?
+1:"""
+
+critique_story_model = {
     "model_name": "text-davinci-003",
     "temperature": 0.75,
     "max_tokens": 1024,
@@ -153,18 +170,46 @@ scene_analysis_model = {
     "request_timeout": None,
     "_type": "openai",
 }
+# Output variable is:
+# critique_story
 
 #######################################################################################################################
-# Landscapes Analysis Template
+# 3. Make scenes for the story
+#######################################################################################################################
+create_scenes_template = """
+This is the story in {N_steps} steps:
+{story}
+Generate an natural landscape setting for each of the {N_steps} steps.
+An OBJ is a specific man-made thing or a living creature with some symbolic significance to the story.
+Include one OBJ in each scene other than visitor.
+1:"""
+
+create_scenes_model = {
+    "model_name": "text-davinci-003",
+    "temperature": 0.75,
+    "max_tokens": 1024,
+    "top_p": 1.0,
+    "frequency_penalty": 0.0,
+    "presence_penalty": 0.0,
+    "n": 1,
+    "best_of": 1,
+    "request_timeout": None,
+    "_type": "openai",
+}
+# Output variable is:
+# scenes
+
+#######################################################################################################################
+# 4. Create the landscapes
 #######################################################################################################################
 # notes, low noise & a little frequency penalty
 # Could use:
 # Write a caption for a photo taken of each step.
-landscape_analysis_template = """These are scenes:
-{story_scenes}
+create_landscapes_template = """These are scenes:
+{scenes}
 For each scene, the natural landscape in which it is set.
 1:"""
-landscape_analysis_model = {
+create_landscapes_model = {
     "model_name": "text-davinci-003",
     "temperature": 0.2,
     "max_tokens": 512,
@@ -176,19 +221,82 @@ landscape_analysis_model = {
     "request_timeout": None,
     "_type": "openai",
 }
+# Output variable is:
+# landscapes
 
 #######################################################################################################################
-# Object Extraction Analysis Template
+# 5. Create the objects
 #######################################################################################################################
-object_analysis_template = """This is the story:
-{story_scenes}
+create_objects_template = """This is the story:
+{scenes}
 An OBJ is a specific man-made thing or a living creature.
-Choose the main OBJ in each of the {N_story_steps} scenes.
+Choose the main OBJ in each of the {N_steps} scenes.
 1:"""
-object_analysis_model = {
+create_objects_model = {
     "model_name": "text-davinci-003",
-    "temperature": 0.4,
-    "max_tokens": 512,
+    "temperature": 0.2,
+    "max_tokens": 256,
+    "top_p": 1.0,
+    "frequency_penalty": 0,
+    "presence_penalty": 0,
+    "n": 1,
+    "best_of": 1,
+    "request_timeout": None,
+    "_type": "openai",
+}
+# Output variable is:
+# objects
+
+#######################################################################################################################
+# 6. Create captions
+#######################################################################################################################
+# Consider adding:
+# The objects are not in the foreground, but in the distance.
+# The resulting surreal scene is a concept art piece.
+
+create_captions_template = """
+These are the chosen objects:
+{objects}
+These are the landscapes:
+{landscapes}
+For each landscape the corresponding object is inserted into the landscape.
+A really concise caption for each of the scenes follows.
+1:"""
+create_captions_model = {
+    "model_name": "text-davinci-003",
+    "temperature": 0.2,
+    "max_tokens": 256,
+    "top_p": 1.0,
+    "frequency_penalty": 0,
+    "presence_penalty": 0,
+    "n": 1,
+    "best_of": 1,
+    "request_timeout": None,
+    "_type": "openai",
+}
+# Output variable is:
+# captions
+
+#######################################################################################################################
+# 7. Create poem
+#######################################################################################################################
+
+# set poem style
+poem_style = "mystical"
+verse_length = 4
+
+create_poem_template = """This is a story in {N_steps} scenes:
+{scenes}
+Each scene has one symbolic object:
+{objects}
+Rewrite the scenes in the style of a {poem_style} in {N_steps} verses of {verse_length} lines.
+The poem is in first person narration.
+1:"""
+# The symbolic object and its meaning appear in each verse.
+create_poem_model = {
+    "model_name": "text-davinci-003",
+    "temperature": 0.85,
+    "max_tokens": 1024,
     "top_p": 1.0,
     "frequency_penalty": 0.1,
     "presence_penalty": 0.1,
@@ -197,68 +305,21 @@ object_analysis_model = {
     "request_timeout": None,
     "_type": "openai",
 }
-#######################################################################################################################
-# Object in Landscape Analysis Template
-#######################################################################################################################
-object_in_landscape_analysis_template = """These are the chosen objects:
-{created_objects}
-These are the landscapes:
-{created_landscapes}
-For each landscape the corresponding object is inserted into the landscape.
-A really concise caption for each of the scenes follows.
-1:"""
-# The objects are not in the foreground, but in the distance.
-# The resulting surreal scene is a concept art piece.
-object_in_landscape_analysis_model = {
-    "model_name": "text-davinci-003",
-    "temperature": 0.1,
-    "max_tokens": 256,
-    "top_p": 1.0,
-    "frequency_penalty": 0.2,
-    "presence_penalty": 0.2,
-    "n": 1,
-    "best_of": 1,
-    "request_timeout": None,
-    "_type": "openai",
-}
 
-#######################################################################################################################
-# Poem Analysis Template
-#######################################################################################################################
-# set poem style
-poem_style = "haiku"
-verse_length = 4
-poem_analysis_template = """This is a story in {N_story_steps} scenes:
-{story_scenes}
-Each scene has one symbolic object:
-{created_objects}
-Rewrite the scenes in the style of a {poem_style} in {N_story_steps} verses of {verse_length} lines.
-The poem is in first person narration.
-1:"""
-# The symbolic object and its meaning appear in each verse.
-poem_analysis_model = {
-    "model_name": "text-davinci-003",
-    "temperature": 0.7,
-    "max_tokens": 1024,
-    "top_p": 1.0,
-    "frequency_penalty": 0.0,
-    "presence_penalty": 0.0,
-    "n": 1,
-    "best_of": 1,
-    "request_timeout": None,
-    "_type": "openai",
-}
+# Output variable is:
+# poem
 
-# Latent blending config dictionary
-latent_blending_config = {}
-latent_blending_config['duration_single_trans'] = 25
-latent_blending_config['ip_server'] = "138.2.229.216"
-latent_blending_config['quality'] = 'medium'
-latent_blending_config['depth_strength'] = 0.5
-latent_blending_config['silence_begin'] = -2
-latent_blending_config['speaker_indx'] = 1
-latent_blending_config['tts_length_scale'] = 1
-latent_blending_config['duration_fade'] = 10
-latent_blending_config['seed'] = 420
-latent_blending_config['width'] = 768
-latent_blending_config['height'] = 512
+
+# # Latent blending config dictionary
+# latent_blending_config = {}
+# latent_blending_config['duration_single_trans'] = 25
+# latent_blending_config['ip_server'] = "138.2.229.216"
+# latent_blending_config['quality'] = 'medium'
+# latent_blending_config['depth_strength'] = 0.5
+# latent_blending_config['silence_begin'] = -2
+# latent_blending_config['speaker_indx'] = 1
+# latent_blending_config['tts_length_scale'] = 1
+# latent_blending_config['duration_fade'] = 10
+# latent_blending_config['seed'] = 420
+# latent_blending_config['width'] = 768
+# latent_blending_config['height'] = 512

@@ -101,4 +101,3 @@ def user_choice(
         choice = list_options[sel]
 
     return choice
-    return choice
