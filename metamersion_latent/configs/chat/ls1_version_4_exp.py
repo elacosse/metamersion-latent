@@ -4,13 +4,12 @@
 human_prefix = "Visitor"
 ai_prefix = "AI"
 qualifier_dict = {
-    "": 5,
+    "": 7,
     " is being sneaky and deceptive": 1,
     " is being in a mysterious way": 1,
     " is being very serious": 1,
     " is being very philosophical": 1,
-    " is being very sad": 1,
-    " is being very angry": 1,
+    " is being very curious": 1,
     " is being very carefully optimistic": 1,
 }
 model = {
