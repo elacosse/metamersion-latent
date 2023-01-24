@@ -47,7 +47,7 @@ In this chat, first YYY asks the vistitor their name and then asks 'Do you know 
 Current conversation:
 AI: {initial_bot_message}{history}
 Visitor: {input}
-AI{qualifier}:"""  # note these must be history and input!
+AI:"""  # note these must be history and input!
 human_prefix = "Visitor"
 ai_prefix = "AI"
 initial_bot_message = """Can you tell me your name or what I should call you?"""

@@ -706,12 +706,12 @@ if __name__ == "__main__":
     
     
     # Change Parameters below
-    fp_config="../configs/chat/ls1_jz1.py"
+    fp_config="../configs/chat/ls1_version_2.py"
     use_ai_chat=True
     verbose_ai=True
     portugese_mode=False
     ai_fake_typing=True
-    run_fullscreen=True
+    run_fullscreen=False
     
     # Let's instantiate the ChatGUI object and conveniantly name it self...
     self = ChatGUI(

@@ -74,7 +74,8 @@ class Chat:
             )
 
         self.prompt = PromptTemplate(
-            input_variables=["history", "input", "qualifier"],
+            input_variables=["history", "input"],
+            # input_variables=["history", "input", "qualifier"],
             template=self.template,
         )
         # self.conversation = ConversationChain(
