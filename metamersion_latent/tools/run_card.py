@@ -1,4 +1,5 @@
 import logging
+import sys
 from datetime import datetime
 from pathlib import Path
 
@@ -8,6 +9,7 @@ from dotenv import find_dotenv, load_dotenv
 from metamersion_latent.llm.analysis import perform_analysis
 from metamersion_latent.llm.config import Config
 from metamersion_latent.utils import save_to_yaml
+
 
 # from metamersion_latent.image_generation.stability import create_collage
 # from metamersion_latent.image_generation.stability import write_text_under_image
@@ -84,17 +86,19 @@ def main(config_path, example_path, output_path, verbose):
         dict_meta["height"] = height
         img = zmq_client.run_image(dict_meta)
         list_imgs.append(img)
-
     ######## Create cards
     from metamersion_latent.image_generation.stability import (
         create_collage,
         write_text_under_image,
     )
 
+    print(poem)
     collage = create_collage(list_imgs)
     card_output = Path(output_path) / f"{token}.png"
     collage = write_text_under_image(collage, narration_list)
     collage.save(card_output)
+
+    sys.exit()
 
 
 if __name__ == "__main__":
