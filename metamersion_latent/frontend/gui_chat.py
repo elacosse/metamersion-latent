@@ -120,6 +120,10 @@ def get_key(pg_keycode):
     # Check comma
     if pg_keycode == pygame.K_COMMA:
         return ","
+    
+    # Check backslash
+    if pg_keycode == pygame.K_BACKSLASH:
+        return "\n"
 
     # Check if shift was pressed before and a capital character should be returned
     if pygame.key.get_mods() & pygame.KMOD_SHIFT:
@@ -230,8 +234,6 @@ class ChatGUI:
         self.verbose_ai = portugese_mode
         self.ai_fake_typing = ai_fake_typing
         
-
-        
         self.init_parameters()
         self.init_vars()
         self.tm = TimeMan()
@@ -255,7 +257,7 @@ class ChatGUI:
         else:
             self.history_sham()
             
-        self.init_chat_session()
+        # self.init_chat_session()
         
     def translate_EN2PT(self, text):
         try:
@@ -283,7 +285,7 @@ class ChatGUI:
         self.display_width = pygame.display.Info().current_w
         
         self.x_begin_text = 150
-        self.x_end_text = self.display_width - self.x_begin_text
+        self.x_end_text = self.display_width - self.x_begin_text - 50
         self.y_begin_text_history = 10
         self.y_end_text_history = self.display_height - 200
         self.y_end_text_typing = self.display_height - 50
@@ -395,6 +397,7 @@ class ChatGUI:
             text = self.text_typing
             if len(self.history_human) == 0:
                 print("STARTING TIME SET!")
+                self.init_chat_session()
                 self.time_start = time.time()
             self.history_human.append(text)
             if self.portugese_mode:
@@ -507,7 +510,7 @@ class ChatGUI:
                     color = self.text_color_ai
                     img = self.img_ai
                     
-                text_lines = wrap_text(font, text, self.x_end_text)
+                text_lines = wrap_text(font, text, self.x_end_text-self.x_begin_text)
 
                 for line in text_lines[::-1]:
                     # Render text
@@ -576,7 +579,7 @@ class ChatGUI:
                     self.text_typing = self.text_typing[:-1]
 
         # Multiline splitting
-        text_lines = wrap_text(self.font_typing, self.text_typing, self.x_end_text)
+        text_lines = wrap_text(self.font_typing, self.text_typing, self.x_end_text-self.x_begin_text)
 
         # Measure out total ydim
         y_total = len(text_lines) * (self.line_height_typing + self.line_distance)
@@ -646,7 +649,7 @@ class ChatGUI:
         font = self.font_history_ai
         color = self.text_color_ai
             
-        text_lines = wrap_text(font, text, self.x_end_text)
+        text_lines = wrap_text(font, text, self.x_end_text-self.x_begin_text)
         # get line height
         text_render = font.render(text_lines[0], True, color)
         text_size = text_render.get_size()
@@ -708,7 +711,7 @@ if __name__ == "__main__":
     verbose_ai=True
     portugese_mode=False
     ai_fake_typing=True
-    run_fullscreen=False
+    run_fullscreen=True
     
     # Let's instantiate the ChatGUI object and conveniantly name it self...
     self = ChatGUI(

@@ -15,13 +15,11 @@ from dotenv import find_dotenv, load_dotenv
 import sys
 sys.path.append("../..")
 sys.path.append("..")
-from metamersion_latent.llm.analysis import prompt
-from metamersion_latent.llm.chat import Chat
 from metamersion_latent.llm.config import Config
-from metamersion_latent.utils import create_output_directory_with_identifier, save_to_yaml, load_yaml
-from metamersion_latent.utils.translation import translate
+from metamersion_latent.utils import save_to_yaml, load_yaml, user_choice
 import os
-
+import subprocess
+import shutil
 
 IMAGE_DIMS = (400,400,3)
 EMO_STRING_LEN = 2 # In bytes
@@ -251,7 +249,13 @@ class Client():
 #%%
 # spawn remote connection to server
 
-dp_session = '/mnt/ls1_data/test_sessions/230123_202646_NONE/'
+dp_base = '/mnt/ls1_data/test_sessions/'
+list_dns = os.listdir(dp_base)
+list_dns.sort(reverse=True)
+
+dn = user_choice(list_dns, sort=False, suggestion=list_dns[0])
+dp_session = f'/mnt/ls1_data/test_sessions/{dn}'
+
 fp_chat_analysis = os.path.join(dp_session, 'chat_analysis.yaml')
 config = Config.fromfile("../configs/chat/ls1_jz1.py")
 dict_meta = load_yaml(fp_chat_analysis)
@@ -260,7 +264,6 @@ dict_meta = load_yaml(fp_chat_analysis)
 ip_server = "138.2.229.216"
 zmq_client = Client(ip_server, 7555, 7556, image_dims=IMAGE_DIMS, verbose=True)
 
-# PUT INTO CONFIG
 # duration_single_trans = 15
 # ChosenSet = 1 #music set! needs to be between 1 and 13
 # duration_fade = 20
@@ -272,9 +275,6 @@ zmq_client = Client(ip_server, 7555, 7556, image_dims=IMAGE_DIMS, verbose=True)
 # height = 512
 # negative_prompt = "ugly, blurry"
 
-
-dict_meta['list_prompts'] = dict_meta['prompts']
-dict_meta['narration_list'] = dict_meta['poem']
 dict_meta['duration_single_trans'] = config.duration_single_trans
 dict_meta['ip_server'] = ip_server
 dict_meta['negative_prompt'] = config.negative_prompt
@@ -291,5 +291,18 @@ scp_cmd = zmq_client.run_movie(dict_meta)
 
 print(scp_cmd)
 
-import pdb; pdb.set_trace()    
-    
+
+#%% Download
+dp_incoming = os.path.join(dp_session, "incoming")
+scp_cmd_mod = scp_cmd[:-2]+f"/* {dp_incoming}/"
+os.makedirs(dp_incoming)
+subprocess.call(scp_cmd_mod, shell=True)
+print("SCP DONE!")
+
+list_files_prio = ['current.mp4', 'current.mp3']
+
+for fn in list_files_prio:
+    fp_source = os.path.join(dp_incoming, fn)
+    fp_target = os.path.join(dp_session, fn)
+    shutil.copyfile(fp_source, fp_target)
+

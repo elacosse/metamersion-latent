@@ -2,6 +2,8 @@ from datetime import datetime
 from pathlib import Path
 
 import yaml
+import os
+
 
 
 def create_output_directory_with_identifier(
@@ -31,3 +33,33 @@ def save_to_yaml(items, token, output_dir="data/yaml"):
     with open(filepath, "w") as f:
         yaml.dump(items, f)
     return filepath
+
+
+def user_choice(list_options=None, info_text='please select:', fn_choice_save=None, suggestion=None, sort=True):
+    # cmdline choices
+    assert list_options is not None, 'please supply a list_options, e.g. ["good","bad","ugly"]'
+    if sort: 
+        list_options.sort()
+    
+    if suggestion is not None and suggestion in list_options:
+        idx_suggestion = list_options.index(suggestion)
+        info_text = info_text + ' (hit enter for: \033[93m%s\033[0m): ' %suggestion
+    else:
+        idx_suggestion = -1
+        
+    for i,f in enumerate(list_options):
+        if i==idx_suggestion:
+            print('\033[93m(%i) %s \033[0m' %(i,f))
+        else:
+            print('(%i) %s' %(i,f))
+            
+    sel = input("{} ".format(info_text))
+    if len(sel) == 0 and suggestion is not None:
+        choice = suggestion #list_options[int(suggestion)]
+    else:
+        assert sel.isdigit(), 'unclear choice (type a number). you typed <{}>'.format(sel)
+        sel = int(sel)
+        choice =  list_options[sel]
+    
+    
+    return choice
