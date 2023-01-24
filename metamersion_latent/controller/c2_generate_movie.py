@@ -262,9 +262,7 @@ class Client:
 
 #%%
 # spawn remote connection to server
-
-
-def main():
+if __name__ == "__main__":
     load_dotenv(find_dotenv(), verbose=False)
     dp_base = os.getenv(
         "DIR_SUBJ_DATA"
@@ -298,17 +296,17 @@ def main():
     # height = 512
     # negative_prompt = "ugly, blurry"
 
-    dict_meta["duration_single_trans"] = config.duration_single_trans
-    dict_meta["ip_server"] = ip_server
-    dict_meta["negative_prompt"] = config.negative_prompt
-    dict_meta["quality"] = config.quality
-    dict_meta["depth_strength"] = config.depth_strength
-    dict_meta["silence_begin"] = config.silence_begin
-    dict_meta["ChosenSet"] = config.ChosenSet
-    dict_meta["width"] = config.width
-    dict_meta["height"] = config.height
-    dict_meta["duration_fade"] = config.duration_fade
-    dict_meta["seed"] = config.seed
+    # dict_meta["duration_single_trans"] = config.duration_single_trans
+    # dict_meta["ip_server"] = ip_server
+    # dict_meta["negative_prompt"] = config.negative_prompt
+    # dict_meta["quality"] = config.quality
+    # dict_meta["depth_strength"] = config.depth_strength
+    # dict_meta["silence_begin"] = config.silence_begin
+    # dict_meta["ChosenSet"] = config.ChosenSet
+    # dict_meta["width"] = config.width
+    # dict_meta["height"] = config.height
+    # dict_meta["duration_fade"] = config.duration_fade
+    # dict_meta["seed"] = config.seed
 
     scp_cmd = zmq_client.run_movie(dict_meta)
 
@@ -338,5 +336,29 @@ def main():
     print("COPYING DONE!")
 
 
-if __name__ == "__main__":
-    main()
+# <<<<<<< HEAD
+
+# #%% Download
+# ts_server = scp_cmd[:-2].split("/")[-1]
+# dp_computed = os.path.join(dp_session, f"computed_{ts_server}")
+# os.makedirs(dp_computed)
+# # copy the chat analysis
+# shutil.copyfile(os.path.join(dp_session, 'chat_analysis.yaml'), os.path.join(dp_computed, 'chat_analysis.yaml'))
+
+# # SCP everything
+# scp_cmd_mod = scp_cmd[:-2]+f"/* {dp_computed}/"
+# subprocess.call(scp_cmd_mod, shell=True)
+# print(f"SCP DONE: {dp_computed}")
+
+# list_files_prio = ['current.mp4', 'current.mp3']
+
+# for fn in list_files_prio:
+#     fp_source = os.path.join(dp_computed, fn)
+#     fp_target = os.path.join(dp_session, fn)
+#     shutil.copyfile(fp_source, fp_target)
+#     print(f"copied: {fp_target}")
+# print("COPYING DONE!")
+# =======
+# if __name__ == "__main__":
+#     main()
+# >>>>>>> 8ddd42ab6eac2cccda653018575411927aedd1a3
