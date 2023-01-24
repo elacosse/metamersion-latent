@@ -265,17 +265,6 @@ dict_meta = load_yaml(fp_chat_analysis)
 ip_server = "138.2.229.216"
 zmq_client = Client(ip_server, 7555, 7556, image_dims=IMAGE_DIMS, verbose=True)
 
-# duration_single_trans = 15
-# ChosenSet = 1 #music set! needs to be between 1 and 13
-# duration_fade = 20
-# silence_begin = -3
-# quality = 'lowest'
-# depth_strength = 0.5
-# seed = 420
-# width = 768
-# height = 512
-# negative_prompt = "ugly, blurry"
-
 dict_meta['duration_single_trans'] = config.duration_single_trans
 dict_meta['ip_server'] = ip_server
 dict_meta['negative_prompt'] = config.negative_prompt
@@ -304,7 +293,7 @@ shutil.copyfile(os.path.join(dp_session, 'chat_analysis.yaml'), os.path.join(dp_
 # SCP everything
 scp_cmd_mod = scp_cmd[:-2]+f"/* {dp_computed}/"
 subprocess.call(scp_cmd_mod, shell=True)
-print("SCP DONE!")
+print(f"SCP DONE: {dp_computed}")
 
 list_files_prio = ['current.mp4', 'current.mp3']
 
@@ -312,4 +301,5 @@ for fn in list_files_prio:
     fp_source = os.path.join(dp_computed, fn)
     fp_target = os.path.join(dp_session, fn)
     shutil.copyfile(fp_source, fp_target)
+    print(f"copied: {fp_target}")
 print("COPYING DONE!")
