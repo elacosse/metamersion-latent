@@ -235,7 +235,7 @@ Choose the main OBJ in each of the {N_story_steps} scenes.
 create_object_model = {
     "model_name": "text-davinci-003",
     "temperature": 0.2,
-    "max_tokens": 1024,
+    "max_tokens": 256,
     "top_p": 1.0,
     "frequency_penalty": 0,
     "presence_penalty": 0,
@@ -248,37 +248,45 @@ create_object_model = {
 # created_objects
 
 #######################################################################################################################
-# Object in Landscape Analysis Template
+# 6. Create captions
 #######################################################################################################################
-object_in_landscape_analysis_template = """These are the chosen objects:
+# Consider adding:
+# The objects are not in the foreground, but in the distance.
+# The resulting surreal scene is a concept art piece.
+
+create_captions_template = """
+These are the chosen objects:
 {created_objects}
 These are the landscapes:
 {created_landscapes}
 For each landscape the corresponding object is inserted into the landscape.
 A really concise caption for each of the scenes follows.
 1:"""
-# The objects are not in the foreground, but in the distance.
-# The resulting surreal scene is a concept art piece.
-object_in_landscape_analysis_model = {
+create_captions_model = {
     "model_name": "text-davinci-003",
-    "temperature": 0.1,
+    "temperature": 0.2,
     "max_tokens": 256,
     "top_p": 1.0,
-    "frequency_penalty": 0.2,
-    "presence_penalty": 0.2,
+    "frequency_penalty": 0,
+    "presence_penalty": 0,
     "n": 1,
     "best_of": 1,
     "request_timeout": None,
     "_type": "openai",
 }
+# Output variable is:
+# captions
+
+
 
 #######################################################################################################################
-# Poem Analysis Template
+# 7. Create poem
 #######################################################################################################################
+
 # set poem style
 poem_style = "haiku"
 verse_length = 4
-poem_analysis_template = """This is a story in {N_story_steps} scenes:
+create_poem_template = """This is a story in {N_story_steps} scenes:
 {story_scenes}
 Each scene has one symbolic object:
 {created_objects}
@@ -286,13 +294,13 @@ Rewrite the scenes in the style of a {poem_style} in {N_story_steps} verses of {
 The poem is in first person narration.
 1:"""
 # The symbolic object and its meaning appear in each verse.
-poem_analysis_model = {
+create_poem_model = {
     "model_name": "text-davinci-003",
-    "temperature": 0.7,
+    "temperature": 0.85,
     "max_tokens": 1024,
     "top_p": 1.0,
-    "frequency_penalty": 0.0,
-    "presence_penalty": 0.0,
+    "frequency_penalty": 0.1,
+    "presence_penalty": 0.1,
     "n": 1,
     "best_of": 1,
     "request_timeout": None,

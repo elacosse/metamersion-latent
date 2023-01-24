@@ -80,7 +80,6 @@ if verbose:
 # 3. Make scenes for the story
 #######################################################################################################################
 
-# Scene analysis
 story_scenes = "1:" + prompt(
     config.story_scenes_template.format(
         N_story_steps=config.N_story_steps,
@@ -96,7 +95,6 @@ if verbose:
 # 4. Create the landscapes
 #######################################################################################################################
 
-# Landscape analysis
 created_landscapes = "1:" + prompt(
     config.create_landscapes_template.format(story_scenes=story_scenes),
     config.create_landscapes_model,
@@ -106,13 +104,13 @@ if verbose:
 
 
 #######################################################################################################################
-# 4. Create the objects
+# 5. Create the objects
 #######################################################################################################################
   
-# Object analysis
 created_objects = "1:" + prompt(
     config.object_analysis_template.format(
-        story_scenes=story_scenes, N_story_steps=config.N_story_steps
+        story_scenes=story_scenes,
+        N_story_steps=config.N_story_steps
     ),
     config.create_object_model,
 )
@@ -120,27 +118,34 @@ if verbose:
     print("Created objects:\n" + created_objects)
 
 
+#######################################################################################################################
+# 6. Create captions
+#######################################################################################################################
 
-
-# Objects in landscape analysis
-surreal_landscapes = "1:" + prompt(
-    config.object_in_landscape_analysis_template.format(
-        created_landscapes=created_landscapes, created_objects=created_objects
+captions = "1:" + prompt(
+    config.captions_template.format(
+        created_landscapes=created_landscapes,
+        created_objects=created_objects
     ),
-    config.object_in_landscape_analysis_model,
+    config.captions_model,
 )
 if verbose:
-    print("Surreal landscapes:\n" + surreal_landscapes)
-# Poem analysis
+    print("Captions:\n" + captions)
+
+
+#######################################################################################################################
+# 7. Create poem
+#######################################################################################################################
+
 poem = "1:" + prompt(
-    config.poem_analysis_template.format(
+    config.create_poem_template.format(
         N_story_steps=config.N_story_steps,
         story_scenes=story_scenes,
         created_objects=created_objects,
         poem_style=config.poem_style,
         verse_length=config.verse_length,
     ),
-    config.poem_analysis_model,
+    config.create_poem_model,
 )
 # Split poem
 narration_list = re.split(r"\d:", poem, maxsplit=config.N_story_steps)
@@ -150,8 +155,14 @@ narration_list = [l.strip() for l in narration_list]
 
 if verbose:
     print("Poem:\n" + poem)
+
+
 #######################################################################################################################
-draft_prompts = surreal_landscapes
+# 8. Create captions
+#######################################################################################################################
+
+#######################################################################################################################
+draft_prompts = captions
 
 ### Put this into a function!
 draft_prompts = [
