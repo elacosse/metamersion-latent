@@ -253,9 +253,7 @@ dp_base = os.getenv("DIR_SUBJ_DATA") # to .env add  DIR_SUBJ_DATA='/Volumes/LXS/
 list_dns = os.listdir(dp_base)
 list_dns = [l for l in list_dns if l[0]=="2"]
 list_dns = [l for l in list_dns if os.path.isfile(os.path.join(dp_base, l, 'chat_analysis.yaml'))]
-
 list_dns.sort(reverse=True)
-
 dn = user_choice(list_dns, sort=False, suggestion=list_dns[0])
 dp_session = f'{dp_base}/{dn}'
 
@@ -294,28 +292,24 @@ scp_cmd = zmq_client.run_movie(dict_meta)
 
 print(scp_cmd)
 
-#%% Get the server timestamp
-
-
-
 
 
 #%% Download
 ts_server = scp_cmd[:-2].split("/")[-1]
 dp_computed = os.path.join(dp_session, f"computed_{ts_server}")
-os.makedirs(dp_incoming)
+os.makedirs(dp_computed)
 # copy the chat analysis
-shutil.copyfile(os.path.join(dp_session, 'chat_analysis.yaml'), os.path.join(dp_incoming, 'chat_analysis.yaml'))
+shutil.copyfile(os.path.join(dp_session, 'chat_analysis.yaml'), os.path.join(dp_computed, 'chat_analysis.yaml'))
 
 # SCP everything
-scp_cmd_mod = scp_cmd[:-2]+f"/* {dp_incoming}/"
+scp_cmd_mod = scp_cmd[:-2]+f"/* {dp_computed}/"
 subprocess.call(scp_cmd_mod, shell=True)
 print("SCP DONE!")
 
 list_files_prio = ['current.mp4', 'current.mp3']
 
 for fn in list_files_prio:
-    fp_source = os.path.join(dp_incoming, fn)
+    fp_source = os.path.join(dp_computed, fn)
     fp_target = os.path.join(dp_session, fn)
     shutil.copyfile(fp_source, fp_target)
-
+print("COPYING DONE!")
