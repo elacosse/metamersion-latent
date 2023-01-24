@@ -19,6 +19,13 @@ STABILITY_KEY=""
 python metamersion_latent/tools/chatbot.py -c metamersion_latent/configs/chat/minimal_working_example.py -v
 ``` 
 
+##### Running testing utilities
+If we want to run through a battery of chats
+
+```bash
+./metamersion_latent/tools/run_cards.sh metamersion_latent/examples/chats/ metamersion_latent/configs/chat/ls1_version_4.py data/ls1_version_4
+```
+
 ##### Customizing the configuration
 ```python
 # This is an example config file for a GPT model.
