@@ -14,13 +14,12 @@ from metamersion_latent.utils.translation import translate
 import os
 import re
 
-load_dotenv(find_dotenv(), verbose=False)  # load environment variables
-verbose = True
-
-dp_base = '/Volumes/LXS/test_sessions/'
+load_dotenv(find_dotenv(), verbose=False) 
+dp_base = os.getenv("DIR_SUBJ_DATA") # to .env add  DIR_SUBJ_DATA='/Volumes/LXS/test_sessions/'
 list_dns = os.listdir(dp_base)
 list_dns = [l for l in list_dns if l[0]=="2"]
 list_dns.sort(reverse=True)
+
 
 dn = user_choice(list_dns, sort=False, suggestion=list_dns[0])
 dp_session = f'{dp_base}/{dn}'

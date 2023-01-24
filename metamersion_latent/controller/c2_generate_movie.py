@@ -248,10 +248,12 @@ class Client():
 
 #%%
 # spawn remote connection to server
-
-dp_base = '/Volumes/LXS/test_sessions/'
-#dp_base = '/mnt/ls1_data/test_sessions/'
+load_dotenv(find_dotenv(), verbose=False) 
+dp_base = os.getenv("DIR_SUBJ_DATA") # to .env add  DIR_SUBJ_DATA='/Volumes/LXS/test_sessions/'
 list_dns = os.listdir(dp_base)
+list_dns = [l for l in list_dns if l[0]=="2"]
+list_dns = [l for l in list_dns if os.path.isfile(os.path.join(dp_base, l, 'chat_analysis.yaml'))]
+
 list_dns.sort(reverse=True)
 
 dn = user_choice(list_dns, sort=False, suggestion=list_dns[0])
