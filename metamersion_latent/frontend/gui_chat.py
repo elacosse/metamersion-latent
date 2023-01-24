@@ -716,7 +716,7 @@ if __name__ == "__main__":
     
     
     # Change Parameters below
-    fp_config="../configs/chat/ls1_version_4.py"
+    fp_config="../configs/chat/ls1_version_4_exp.py"
     use_ai_chat=True
     verbose_ai=True
     portugese_mode=False
