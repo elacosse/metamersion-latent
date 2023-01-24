@@ -385,7 +385,10 @@ class ChatGUI:
     def init_chat_session(self, username="NONE"):
         self.dp_out = os.path.join("/mnt/ls1_data/test_sessions/", f"{get_time('second')}_{username}")
         self.username = username
-        os.makedirs(self.dp_out)
+        try:
+            os.makedirs(self.dp_out)
+        except Exception as e:
+            print(f"failed making dp_out: {self.dp_out} {e}")
         
 
     def hit_enter(self):
@@ -455,7 +458,10 @@ class ChatGUI:
             "time": time.time(),
         }
         label = "chat_history"
-        save_to_yaml(items, label, output_dir=self.dp_out)
+        try:
+            save_to_yaml(items, label, output_dir=self.dp_out)
+        except Exception as e:
+            print(f"failed wrap_up_and_save: {e}")
         
         return output
 
@@ -706,7 +712,7 @@ if __name__ == "__main__":
     
     
     # Change Parameters below
-    fp_config="../configs/chat/ls1_version_2.py"
+    fp_config="../configs/chat/ls1_version_4.py"
     use_ai_chat=True
     verbose_ai=True
     portugese_mode=False
