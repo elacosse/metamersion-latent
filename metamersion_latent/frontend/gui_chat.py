@@ -383,13 +383,16 @@ class ChatGUI:
         self.send_message_timer = 3
         
     def init_chat_session(self, username="NONE"):
+        username.replace(" ", "_")
+        username = "".join([c for c in username if c.isalpha() or c.isnumeric()])
+        self.time_start = time.time()
         self.dp_out = os.path.join("/mnt/ls1_data/test_sessions/", f"{get_time('second')}_{username}")
         self.username = username
         try:
             os.makedirs(self.dp_out)
         except Exception as e:
             print(f"failed making dp_out: {self.dp_out} {e}")
-        
+      
 
     def hit_enter(self):
         if not self.last_input_ai():
@@ -400,8 +403,9 @@ class ChatGUI:
             text = self.text_typing
             if len(self.history_human) == 0:
                 print("STARTING TIME SET!")
-                self.init_chat_session()
-                self.time_start = time.time()
+                self.init_chat_session(text)
+                
+                
             self.history_human.append(text)
             if self.portugese_mode:
                 text = self.translate_PT2EN(text)
