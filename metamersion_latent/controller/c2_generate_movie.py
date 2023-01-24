@@ -249,15 +249,16 @@ class Client():
 #%%
 # spawn remote connection to server
 
-dp_base = '/mnt/ls1_data/test_sessions/'
+dp_base = '/Volumes/LXS/test_sessions/'
+#dp_base = '/mnt/ls1_data/test_sessions/'
 list_dns = os.listdir(dp_base)
 list_dns.sort(reverse=True)
 
 dn = user_choice(list_dns, sort=False, suggestion=list_dns[0])
-dp_session = f'/mnt/ls1_data/test_sessions/{dn}'
+dp_session = f'{dp_base}/{dn}'
 
 fp_chat_analysis = os.path.join(dp_session, 'chat_analysis.yaml')
-config = Config.fromfile("../configs/chat/ls1_jz1.py")
+config = Config.fromfile("../configs/chat/ls1_version_4.py")
 dict_meta = load_yaml(fp_chat_analysis)
 
 

@@ -92,12 +92,12 @@ negative_prompt = "ugly, blurry"
 #######################################################################################################################
 # 1. Analyze the chat
 #######################################################################################################################
-personal_analysis_template = """This is a conversation with the visitor:
+analyze_chat_template = """This is a conversation with the visitor:
 {chat_history}
 Based on the conversation, describe some important things about the visitor.
 1."""
 
-personal_analysis_model = {
+analyze_chat_model = {
     "model_name": "text-davinci-003",
     "temperature": 0.85,
     "max_tokens": 1024,
@@ -110,29 +110,29 @@ personal_analysis_model = {
     "_type": "openai",
 }
 # Output variable is:
-#personal_analysis
+# chat_analysis
 
 #######################################################################################################################
 # 2. Generate Story
 #######################################################################################################################
-N_story_steps = 6
+N_steps = 6
 
 # temperature important here
 # FIX: how to not go for the same objects all the time
 # consider
 #Think of 20 unusual dramatic landscapes and 20 strange and symbolic objects, which are man-made things or living creatures.
 
-amusing_story_template = """
+create_story_template = """
 This is an analysis what {human_prefix} is interested in:
-{personal_analysis}
-Create a story in {N_story_steps} steps that {human_prefix} would find amusing, surprising and help them learn about themselves.
+{chat_analysis}
+Create a story in {N_steps} steps that {human_prefix} would find amusing, surprising and help them learn about themselves.
 Be creative and concrete in describing the story.
 Make the story explicitly relevant to {human_prefix}'s analysis.
 Set the story in dramatic and unusual outdoor landscapes.
-Include a specific man-made thing or living creatures with symbolic significance in each step.
+Include a specific strange man-made thing or living creatures with symbolic significance to the person in each step.
 1:"""
 
-amusing_story_model = {
+create_story_model = {
     "model_name": "text-davinci-003",
     "temperature": 0.95,
     "max_tokens": 1024,
@@ -145,16 +145,16 @@ amusing_story_model = {
     "_type": "openai",
 }
 # Output variable is:
-# amusing_story
+# story
 
 #######################################################################################################################
 # 2.1 Critique the Story
 #######################################################################################################################
 critique_story_template = """
 This is what we know about the person:
-{personal_analysis}
+{chat_analysis}
 This is the story we created:
-{amusing_story}
+{story}
 How well does the story address what we know about the person?
 1:"""
 
@@ -176,15 +176,15 @@ critique_story_model = {
 #######################################################################################################################
 # 3. Make scenes for the story
 #######################################################################################################################
-story_scenes_template = """
-This is the story in {N_story_steps} steps:
-{amusing_story}
-Generate an natural landscape setting for each of the {N_story_steps} steps.
+create_scenes_template = """
+This is the story in {N_steps} steps:
+{story}
+Generate an natural landscape setting for each of the {N_steps} steps.
 An OBJ is a specific man-made thing or a living creature with some symbolic significance to the story.
 Include one OBJ in each scene other than visitor.
 1:"""
 
-story_scenes_model = {
+create_scenes_model = {
     "model_name": "text-davinci-003",
     "temperature": 0.75,
     "max_tokens": 1024,
@@ -197,7 +197,7 @@ story_scenes_model = {
     "_type": "openai",
 }
 # Output variable is:
-# story_scenes
+# scenes
 
 #######################################################################################################################
 # 4. Create the landscapes
@@ -205,11 +205,11 @@ story_scenes_model = {
 # notes, low noise & a little frequency penalty
 # Could use:
 # Write a caption for a photo taken of each step.
-landscape_analysis_template = """These are scenes:
-{story_scenes}
+create_landscapes_template = """These are scenes:
+{scenes}
 For each scene, the natural landscape in which it is set.
 1:"""
-landscape_analysis_model = {
+create_landscapes_model = {
     "model_name": "text-davinci-003",
     "temperature": 0.2,
     "max_tokens": 512,
@@ -222,17 +222,17 @@ landscape_analysis_model = {
     "_type": "openai",
 }
 # Output variable is:
-# created_landscapes
+# landscapes
 
 #######################################################################################################################
 # 5. Create the objects
 #######################################################################################################################
-x = """This is the story:
-{story_scenes}
+create_objects_template = """This is the story:
+{scenes}
 An OBJ is a specific man-made thing or a living creature.
-Choose the main OBJ in each of the {N_story_steps} scenes.
+Choose the main OBJ in each of the {N_steps} scenes.
 1:"""
-create_object_model = {
+create_objects_model = {
     "model_name": "text-davinci-003",
     "temperature": 0.2,
     "max_tokens": 256,
@@ -245,7 +245,7 @@ create_object_model = {
     "_type": "openai",
 }
 # Output variable is:
-# created_objects
+# objects
 
 #######################################################################################################################
 # 6. Create captions
@@ -256,9 +256,9 @@ create_object_model = {
 
 create_captions_template = """
 These are the chosen objects:
-{created_objects}
+{objects}
 These are the landscapes:
-{created_landscapes}
+{landscapes}
 For each landscape the corresponding object is inserted into the landscape.
 A really concise caption for each of the scenes follows.
 1:"""
@@ -277,20 +277,19 @@ create_captions_model = {
 # Output variable is:
 # captions
 
-
-
 #######################################################################################################################
 # 7. Create poem
 #######################################################################################################################
 
 # set poem style
-poem_style = "haiku"
+poem_style = "mystical"
 verse_length = 4
-create_poem_template = """This is a story in {N_story_steps} scenes:
-{story_scenes}
+
+create_poem_template = """This is a story in {N_steps} scenes:
+{scenes}
 Each scene has one symbolic object:
-{created_objects}
-Rewrite the scenes in the style of a {poem_style} in {N_story_steps} verses of {verse_length} lines.
+{objects}
+Rewrite the scenes in the style of a {poem_style} in {N_steps} verses of {verse_length} lines.
 The poem is in first person narration.
 1:"""
 # The symbolic object and its meaning appear in each verse.
@@ -306,6 +305,10 @@ create_poem_model = {
     "request_timeout": None,
     "_type": "openai",
 }
+
+# Output variable is:
+# poem
+
 
 # # Latent blending config dictionary
 # latent_blending_config = {}
