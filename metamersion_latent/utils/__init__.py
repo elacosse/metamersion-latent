@@ -60,7 +60,7 @@ def save_to_yaml(items, token, output_dir="data/yaml"):
     Path(output_dir).mkdir(parents=True, exist_ok=True)
     filepath = Path(output_dir) / f"{token}.yaml"
     with open(filepath, "w") as f:
-        yaml.dump(items, f)
+        yaml.safe_dump(items, f, explicit_start=True, default_style='"', width=4096)
     return filepath
 
 
