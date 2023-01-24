@@ -122,7 +122,7 @@ N_story_steps = 6
 # consider
 #Think of 20 unusual dramatic landscapes and 20 strange and symbolic objects, which are man-made things or living creatures.
 
-amusing_story_template = f"""
+amusing_story_template = """
 This is an analysis what {human_prefix} is interested in:
 {personal_analysis}
 Create a story in {N_story_steps} steps that {human_prefix} would find amusing, surprising and help them learn about themselves.
@@ -150,7 +150,7 @@ amusing_story_model = {
 #######################################################################################################################
 # 2.1 Critique the Story
 #######################################################################################################################
-critique_story_template = f"""
+critique_story_template = """
 This is what we know about the person:
 {personal_analysis}
 This is the story we created:
