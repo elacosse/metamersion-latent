@@ -1,4 +1,5 @@
 import logging
+import sys
 from datetime import datetime
 from pathlib import Path
 
@@ -59,38 +60,45 @@ def main(config_path, example_path, output_path, verbose):
             analysis=analysis_dict,
         )
     ]
-
     filepath = save_to_yaml(items, token, output_path)
     logger.info("Saved to %s", filepath)
 
     #######################################################################################################################
-    analysis_dict["narration_list"]
-    # negative_prompt = "ugly, blurry"
-    # seed = 420
-    # width = 768
-    # height = 512
-    # ip_server = "138.2.229.216"
-    # zmq_client = Client(ip_server, 7555, 7556, image_dims=IMAGE_DIMS, verbose=True)
-    # from tqdm import tqdm
-    # list_imgs = []
-    # for prompt in tqdm(prompts):
-    #     dict_meta = {}
-    #     dict_meta['prompt'] = prompt
-    #     dict_meta['neg_prompt'] = negative_prompt
-    #     dict_meta['seed'] = seed
-    #     dict_meta['width'] = width
-    #     dict_meta['height'] = height
-    #     img = zmq_client.run_image(dict_meta)
-    #     list_imgs.append(img)
+    narration_list = analysis_dict["narration_list"]
+    prompts = analysis_dict["list_prompts"]
+    from metamersion_latent.controller.c2_generate_movie import Client
 
-    # assign to list_imgs
+    negative_prompt = "ugly, blurry"
+    seed = 420
+    width = 768
+    height = 512
+    ip_server = "138.2.229.216"
+    zmq_client = Client(ip_server, 7555, 7556, (width, height), verbose=True)
+    from tqdm import tqdm
 
-    ######### Create cards
-    # collage = create_collage(list_imgs)
-    # card_output = Path(output_path) / f"{token}.png"
-    # write_text_under_image(collage, split_poem)
-    # collage = write_text_under_image(collage, split_poem)
-    # collage.save(card_output)
+    list_imgs = []
+    for prompt_item in tqdm(prompts):
+        dict_meta = {}
+        dict_meta["prompt"] = prompt_item
+        dict_meta["neg_prompt"] = negative_prompt
+        dict_meta["seed"] = seed
+        dict_meta["width"] = width
+        dict_meta["height"] = height
+        img = zmq_client.run_image(dict_meta)
+        list_imgs.append(img)
+    ######## Create cards
+    from metamersion_latent.image_generation.stability import (
+        create_collage,
+        write_text_under_image,
+    )
+
+    print(poem)
+    collage = create_collage(list_imgs)
+    card_output = Path(output_path) / f"{token}.png"
+    collage = write_text_under_image(collage, narration_list)
+    collage.save(card_output)
+
+    sys.exit()
 
 
 if __name__ == "__main__":
