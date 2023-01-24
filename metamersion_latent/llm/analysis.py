@@ -1,5 +1,5 @@
 from langchain.llms.loading import load_llm_from_config
-
+import re
 from metamersion_latent.llm.config import Config
 
 
@@ -18,73 +18,178 @@ def prompt(prompt: str, config: dict) -> str:
     return output
 
 
-def perform_analysis(chat_history: str, config: Config) -> dict:
-    # Short analysis
-    personal_analysis = "1." + prompt(
-        config.short_analysis_template.format(chat_history=chat_history),
-        config.short_analysis_model,
+def perform_analysis(chat_history: str, config: Config, verbose: bool=False) -> dict:
+    
+    dict_analysis = {}
+    #######################################################################################################################
+    # 1. Analyze the chat
+    #######################################################################################################################
+    if verbose:
+        print("\nStarting: 1. Analyze the chat")
+    chat_analysis = "1:" + prompt(
+        config.analyze_chat_template.format(chat_history=chat_history),
+        config.analyze_chat_model,
     )
-
-    # Story analysis
-    amusing_story = "1:" + prompt(
-        config.story_analysis_template.format(
+    if verbose:
+        print("\n\nChat analysis:\n" + chat_analysis)
+    dict_analysis['chat_analysis'] = chat_analysis
+    
+    #######################################################################################################################
+    # 2. Generate Story
+    #######################################################################################################################
+    if verbose:
+        print("\nStarting: 2. Generate Story")
+    story = "1:" + prompt(
+        config.create_story_template.format(
             chat_history=chat_history,
-            personal_analysis=personal_analysis,
-            N_story_steps=config.N_story_steps,
+            chat_analysis=chat_analysis,
+            N_steps=config.N_steps,
+            human_prefix=config.human_prefix
         ),
-        config.story_analysis_model,
+        config.create_story_model,
     )
-
-    # Scene analysis
-    story_scenes = "1:" + prompt(
-        config.scene_analysis_template.format(
-            N_story_steps=config.N_story_steps, amusing_story=amusing_story
+    if verbose:
+        print("\n\nThe story:\n" + story)
+    dict_analysis['story'] = story
+    #######################################################################################################################
+    # 2.1 Critique the Story
+    #######################################################################################################################
+    if verbose:
+        print("\nStarting: 2.1 Critique the Story)")
+    critique_story = "1:" + prompt(
+        config.critique_story_template.format(
+            N_steps=config.N_steps,
+            story=story,
+            chat_analysis=chat_analysis,
         ),
-        config.scene_analysis_model,
+        config.critique_story_model,
     )
-
-    # Landscape analysis
-    created_landscapes = "1:" + prompt(
-        config.landscape_analysis_template.format(story_scenes=story_scenes),
-        config.landscape_analysis_model,
-    )
-
-    # Object analysis
-    created_objects = "1:" + prompt(
-        config.object_analysis_template.format(
-            story_scenes=story_scenes, N_story_steps=config.N_story_steps
+    if verbose:
+        print("\n\nStory critique:\n" + critique_story)
+        
+    dict_analysis['critique_story'] = critique_story
+    
+    #######################################################################################################################
+    # 3. Make scenes for the story
+    #######################################################################################################################
+    if verbose:
+        print("\nStarting: 3. Make scenes for the story")
+    scenes = "1:" + prompt(
+        config.create_scenes_template.format(
+            N_steps=config.N_steps,
+            story=story
         ),
-        config.object_analysis_model,
+        config.create_scenes_model,
     )
-
-    # Objects in landscape analysis
-    surreal_landscapes = "1:" + prompt(
-        config.object_in_landscape_analysis_template.format(
-            created_landscapes=created_landscapes, created_objects=created_objects
+    if verbose:
+        print("\n\nScenes:\n" + scenes)
+    
+    dict_analysis['scenes'] = scenes
+    
+    #######################################################################################################################
+    # 4. Create the landscapes
+    #######################################################################################################################
+    if verbose:
+        print("\nStarting: 4. Create the landscapes")
+    landscapes = "1:" + prompt(
+        config.create_landscapes_template.format(
+            scenes=scenes
         ),
-        config.object_in_landscape_analysis_model,
+        config.create_landscapes_model,
     )
-
-    # Poem analysis
+    if verbose:
+        print("\n\nLandscapes:\n" + landscapes)
+    
+    dict_analysis['landscapes'] = landscapes
+    
+    #######################################################################################################################
+    # 5. Create the objects
+    #######################################################################################################################
+    if verbose:
+        print("\nStarting: 5. Create the objects")
+    objects = "1:" + prompt(
+        config.create_objects_template.format(
+            scenes=scenes,
+            N_steps=config.N_steps
+        ),
+        config.create_objects_model,
+    )
+    if verbose:
+        print("\n\nObjects:\n" + objects)
+    
+    dict_analysis['objects'] = objects
+    
+    #######################################################################################################################
+    # 6. Create captions
+    #######################################################################################################################
+    if verbose:
+        print("\nStarting: 6. Create captions")
+    captions = "1:" + prompt(
+        config.create_captions_template.format(
+            landscapes=landscapes,
+            objects=objects
+        ),
+        config.create_captions_model,
+    )
+    if verbose:
+        print("\n\nCaptions:\n" + captions)
+    
+    dict_analysis['captions'] = captions
+    
+    #######################################################################################################################
+    # 7. Create poem
+    #######################################################################################################################
+    if verbose:
+        print("\nStarting: 7. Create poem")
     poem = "1:" + prompt(
-        config.poem_analysis_template.format(
-            N_story_steps=config.N_story_steps,
-            story_scenes=story_scenes,
-            created_objects=created_objects,
+        config.create_poem_template.format(
+            N_steps=config.N_steps,
+            scenes=scenes,
+            objects=objects,
             poem_style=config.poem_style,
             verse_length=config.verse_length,
         ),
-        config.poem_analysis_model,
+        config.create_poem_model,
     )
+    # Split poem
+    narration_list = re.split(r"\d:", poem, maxsplit=config.N_steps)
+    narration_list = [l for l in narration_list if len(l) > 5]
+    narration_list = [l.replace('\n', ' ') for l in narration_list]
+    narration_list = [l.strip() for l in narration_list]
+    
+    if verbose:
+        print("\n\nPoem:\n")
+        for n in narration_list:
+            print(n)
+    
+    dict_analysis['narration_list'] = narration_list
+    
+    #######################################################################################################################
+    # 8. Create prompts
+    #######################################################################################################################
 
-    analysis_dict = dict(
-        personal_analysis=personal_analysis,
-        amusing_story=amusing_story,
-        story_scenes=story_scenes,
-        created_landscapes=created_landscapes,
-        created_objects=created_objects,
-        surreal_landscapes=surreal_landscapes,
-        poem=poem,
-    )
+    #######################################################################################################################
+    if verbose:
+        print("\nStarting: 8. Create prompts")
+    draft_prompts = captions
 
-    return analysis_dict
+    ### Put this into a function!
+    draft_prompts = [
+        line.split(":", 1)[1][1:].replace(". ", "")
+        for line in draft_prompts.split("\n")
+    ]
+    # draft_prompts = [line.split(":", 1)[1][1:] for line in draft_prompts.split("\n")]
+
+    prompts = [
+        config.prefix + prompt.rstrip(".") + ", " + config.postfix
+        for prompt in draft_prompts
+    ]
+    if verbose:
+        print("\n\nPrompts:\n")
+        for p in prompts:
+            print(p)
+    dict_analysis['list_prompts'] = prompts
+    
+    return dict_analysis
+
+
