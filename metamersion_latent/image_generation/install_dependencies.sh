@@ -30,6 +30,7 @@ pip install numpy==1.21
 pip install PyYAML
 
 # TTS installs
+cd ..
 git clone https://github.com/elacosse/metamersion-latent
 mv metamersion-latent metamersion_latent
 pip install git+https://github.com/neonbjb/tortoise-tts
@@ -47,5 +48,6 @@ pip install PyVimeo
 #wget https://huggingface.co/stabilityai/stable-diffusion-2-1-base/resolve/main/v2-1_512-ema-pruned.ckpt v2-1_512-ema-pruned.ckpt
 wget https://huggingface.co/stabilityai/stable-diffusion-2-1/resolve/main/v2-1_768-ema-pruned.ckpt v2-1_768-ema-pruned.ckpt 
 
+cd ..
 
 python first_run.py

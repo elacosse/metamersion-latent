@@ -6,6 +6,7 @@ sys.path.append("/home/ubuntu/latentblending/")
 sys.path.append("/home/ubuntu/metamersion_latent/")
 from latent_blending import LatentBlending, add_frames_linear_interp, get_time
 from stable_diffusion_holder import StableDiffusionHolder
+from metamersion_latent.audio.tts import assemble_tts_for_video
 
 import time
 import zmq
@@ -20,7 +21,7 @@ import librosa
 import os
 import wget
 import requests
-from metamersion_latent.audio.tts import generate_tts_audio_from_list_onsets
+
 
 
 
@@ -362,11 +363,16 @@ narration_list.append("Alan decides to take a piece of what he has learned back 
 silence_begin = 3
 transition_duration = 10
 start_times = list(np.arange(0,transition_duration*len(narration_list),transition_duration)+silence_begin)
-tts_model = 'tts_models/en/vctk/vits'
-speaker_indx = 0
-output_file = "/home/ubuntu/test_voice.wav"
 
-generate_tts_audio_from_list_onsets(narration_list, start_times, 90, tts_model, 0, output_file)
+# segment_duration = generate_tts_audio_from_list_onsets(narration_list, start_times, audio_duration, tts_model, speaker_indx, fp_voice)
+preset = "fast"
+voice = "train_dreams"
+devices = ["cuda:0"]
+
+fp_voice = "/home/ubuntu/test_voice.wav"
+assemble_tts_for_video(narration_list, audio_duration, start_times, fp_voice, preset, voice, devices)
+
+
 
 
 
