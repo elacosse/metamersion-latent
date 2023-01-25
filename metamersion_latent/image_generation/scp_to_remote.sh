@@ -4,6 +4,7 @@ dp_remote="/home/ubuntu/"
 user=ubuntu
 scp run_remote_server.py $user@$1:/$dp_remote/
 scp install_dependencies.sh $user@$1:/$dp_remote/
+scp first_run.py $user@$1:/$dp_remote/
 
 echo "scp'd everything."
 echo "ssh ubuntu@$1"
