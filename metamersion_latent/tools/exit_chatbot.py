@@ -34,20 +34,18 @@ def timeout_handler(signum, frame):
 
 
 def format_special_template(config, yaml_dict):
-
-    analysis_dict = yaml_dict["analysis"]
     # From yaml
     username = yaml_dict["username"]
-    # captions = analysis_dict["captions"]
-    chat_analysis = analysis_dict["chat_analysis"]
-    # critique_story = analysis_dict["critique_story"]
-    # landscapes = analysis_dict["landscapes"]
-    # list_prompts = analysis_dict["list_prompts"]
-    # narration_list = analysis_dict["narration_list"]
-    objects = analysis_dict["objects"]
-    poem = analysis_dict["poem"]
-    # scenes = analysis_dict["scenes"]
-    story = analysis_dict["story"]
+    # captions = yaml_dict["captions"]
+    chat_analysis = yaml_dict["chat_analysis"]
+    # critique_story = yaml_dict["critique_story"]
+    # landscapes = yaml_dict["landscapes"]
+    # list_prompts = yaml_dict["list_prompts"]
+    # narration_list = yaml_dict["narration_list"]
+    objects = yaml_dict["objects"]
+    poem = yaml_dict["poem"]
+    # scenes = yaml_dict["scenes"]
+    story = yaml_dict["story"]
     # chat_history = yaml_dict["chat_history"]
 
     # should really be moved to analysis...
@@ -134,7 +132,7 @@ def main(config_path, analysis_path, verbose, time_limit, save_to_example):
     #######################################################################################################################
     start_time = time.time()
     # Format the template with the initial message
-    yaml_dict = load_yaml(analysis_path)[0]
+    yaml_dict = load_yaml(analysis_path)
     username = yaml_dict["username"]
     # Format the template
     config.template = format_special_template(config, yaml_dict)
@@ -203,7 +201,7 @@ def main(config_path, analysis_path, verbose, time_limit, save_to_example):
 
 if __name__ == "__main__":
     log_fmt = "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
-    logging.basicConfig(level=logging.INFO, format=log_fmt)
+    logging.basicConfig(level=logging.WARNING, format=log_fmt)
     # not used in this stub but often useful for finding various files
     project_dir = Path(__file__).resolve().parents[2]
     # find .env automagically by walking up directories until it's found, then
