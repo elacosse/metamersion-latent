@@ -20,7 +20,7 @@ def prompt(prompt: str, config: dict) -> str:
     return output
 
 
-def perform_analysis(chat_history: str, config: Config, verbose: bool = False) -> dict:
+def perform_analysis(chat_history: str, config: Config, verbose: bool = False, nmb_retries=5) -> dict:
 
     dict_analysis = {}
     #######################################################################################################################
@@ -28,10 +28,17 @@ def perform_analysis(chat_history: str, config: Config, verbose: bool = False) -
     #######################################################################################################################
     if verbose:
         print("\nStarting: 1. Analyze the chat")
-    chat_analysis = "1:" + prompt(
-        config.analyze_chat_template.format(chat_history=chat_history),
-        config.analyze_chat_model,
-    )
+    for i in range(nmb_retries):
+        try:
+            chat_analysis = "1:" + prompt(
+                config.analyze_chat_template.format(chat_history=chat_history),
+                config.analyze_chat_model,
+            )
+        except Exception as e:
+            print("API Fail {i+1}/{nmb_retries}")
+        break
+
+
     if verbose:
         print("\n\nChat analysis:\n" + chat_analysis)
     dict_analysis["chat_analysis"] = chat_analysis
@@ -41,15 +48,22 @@ def perform_analysis(chat_history: str, config: Config, verbose: bool = False) -
     #######################################################################################################################
     if verbose:
         print("\nStarting: 2. Generate Story")
-    story = "1:" + prompt(
-        config.create_story_template.format(
-            chat_history=chat_history,
-            chat_analysis=chat_analysis,
-            N_steps=config.N_steps,
-            human_prefix=config.human_prefix,
-        ),
-        config.create_story_model,
-    )
+
+    for i in range(nmb_retries):
+        try:
+            story = "1:" + prompt(
+                config.create_story_template.format(
+                    chat_history=chat_history,
+                    chat_analysis=chat_analysis,
+                    N_steps=config.N_steps,
+                    human_prefix=config.human_prefix,
+                ),
+                config.create_story_model,
+            )
+        except Exception as e:
+            print("API Fail {i+1}/{nmb_retries}")
+        break
+
     if verbose:
         print("\n\nThe story:\n" + story)
     dict_analysis["story"] = story
@@ -58,14 +72,20 @@ def perform_analysis(chat_history: str, config: Config, verbose: bool = False) -
     #######################################################################################################################
     if verbose:
         print("\nStarting: 2.1 Critique the Story)")
-    critique_story = "1:" + prompt(
-        config.critique_story_template.format(
-            N_steps=config.N_steps,
-            story=story,
-            chat_analysis=chat_analysis,
-        ),
-        config.critique_story_model,
-    )
+    for i in range(nmb_retries):
+        try:
+            critique_story = "1:" + prompt(
+                config.critique_story_template.format(
+                    N_steps=config.N_steps,
+                    story=story,
+                    chat_analysis=chat_analysis,
+                ),
+                config.critique_story_model,
+            )
+        except Exception as e:
+            print("API Fail {i+1}/{nmb_retries}")
+        break
+
     if verbose:
         print("\n\nStory critique:\n" + critique_story)
 
@@ -76,10 +96,14 @@ def perform_analysis(chat_history: str, config: Config, verbose: bool = False) -
     #######################################################################################################################
     if verbose:
         print("\nStarting: 3. Make scenes for the story")
-    scenes = "1:" + prompt(
-        config.create_scenes_template.format(N_steps=config.N_steps, story=story),
-        config.create_scenes_model,
-    )
+    for i in range(nmb_retries):
+        try:
+            scenes = "1:" + prompt(
+                config.create_scenes_template.format(N_steps=config.N_steps, story=story),
+                config.create_scenes_model,
+            )
+        except Exception as e:
+            print("API Fail {i+1}/{nmb_retries}")
     if verbose:
         print("\n\nScenes:\n" + scenes)
 
