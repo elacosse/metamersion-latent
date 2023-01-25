@@ -111,7 +111,7 @@ exit_qualifier_dict = {
     " is being very happy": 1,
 }
 exit_model = {
-    "model_name": "text-davinci-003",
+    "model_name": "text-davinci-002",
     "temperature": 0.95,
     "max_tokens": 1024,
     "top_p": 1.0,

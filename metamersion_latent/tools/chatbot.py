@@ -88,7 +88,7 @@ def main(config_path, verbose, time_limit, save_to_example):
     # Display initialization message
     #######################################################################################################################
     if bool_translate:
-        text = translate(config.initialization_message, "PT")
+        text = translate(config.initialization_message, "PT-PT")
         print(text)
     else:
         print(config.initialization_message)
@@ -110,10 +110,10 @@ def main(config_path, verbose, time_limit, save_to_example):
 
     chat = Chat(config, verbose)
     if bool_translate:
-        human_input = input(translate(config.initial_bot_message, "PT") + "\n")
+        human_input = input(translate(config.initial_bot_message, "PT-PT") + "\n")
         # human_input = translate(human_input, "EN")
         output = chat(human_input)
-        print(translate(output, "PT"))
+        print(translate(output, "PT-PT"))
     else:
         human_input = input(config.initial_bot_message + "\n")
         output = chat(human_input)
