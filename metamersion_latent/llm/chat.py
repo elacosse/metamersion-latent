@@ -1,7 +1,5 @@
 import re
 
-from dotenv import find_dotenv, load_dotenv
-
 # from langchain.chains import ConversationChain, LLMChain
 from langchain.chains import LLMChain
 from langchain.chains.conversation.memory import (
@@ -50,18 +48,13 @@ class Chat:
         verbose (bool): prints out buffer text highlighted
     """
 
-    def __init__(
-        self, config: Config, verbose: bool = False, exit_conversation: bool = False
-    ):
+    def __init__(self, config: Config, verbose: bool = False):
 
         self.verbose = verbose
         self.config = config
-        load_dotenv(find_dotenv(), verbose=False)
-        self.llm = load_llm_from_config(config.model)
-        self.template = self.config.template
-        if exit_conversation:
-            self.template = self.config.exit_conversation_template
 
+        self.template = self.config.template
+        self.llm = load_llm_from_config(config.model)
         qualifier_dict = self.config.qualifier_dict
         # Get p values for each qualifier and set them in the config
         pvals = get_p(list(qualifier_dict.values()))

@@ -141,6 +141,7 @@ def main(config_path, analysis_path, verbose, time_limit, save_to_example):
     config.exit_initial_bot_message = config.exit_initial_bot_message.format(
         username=username
     )
+    config.model = config.exit_model
     # config.template = config.template.format(
     #     initial_bot_message=config.initial_bot_message,
     #     history="{history}",
