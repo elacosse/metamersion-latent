@@ -41,3 +41,5 @@ dict_meta.update(dict_analysis)
 
 # Saving
 save_to_yaml(dict_meta, 'chat_analysis', dp_session)
+
+print(f"ALL DONE! SAVED TO: {dp_session}")

@@ -14,6 +14,7 @@ from dotenv import find_dotenv, load_dotenv
 from metamersion_latent.llm.chat import Chat
 from metamersion_latent.llm.config import Config
 from metamersion_latent.utils import save_to_yaml
+import argparse
 
 """
 TODO: 
@@ -282,27 +283,27 @@ class ChatGUI:
     def init_parameters(self):
         self.escape_and_save = "x"  # when this is submitted by human, then save chat
         self.fp_font = "kongtext.ttf"
-        self.font_size = 15
+        self.font_size = 12
 
         # Display props
-        self.display_height = int(0.9 * pygame.display.Info().current_h)
+        self.display_height = int(0.99 * pygame.display.Info().current_h)
         self.display_width = pygame.display.Info().current_w
 
-        self.x_begin_text = 150
+        self.x_begin_text = 50
         self.x_end_text = self.display_width - self.x_begin_text - 50
         self.y_begin_text_history = 10
         self.y_end_text_history = self.display_height - 200
         self.y_end_text_typing = self.display_height - 50
 
-        self.line_distance = 15
-        self.person_separation = 35
+        self.line_distance = 12
+        self.person_separation = 25
 
         self.text_color_human = (200, 200, 200)
-        self.text_color_ai = (0, 200, 0)
+        self.text_color_ai = (99, 99, 255)
         self.background_color = (0, 0, 0)
 
         # Little images next to human/AI
-        self.show_imgs = True
+        self.show_imgs = False
         self.x_fract_img = 0.5
         self.fp_img_human = "img_human.png"
         self.fp_img_ai = "img_ai.png"
@@ -730,21 +731,32 @@ class ChatGUI:
 if __name__ == "__main__":
 
     # Change Parameters below
-    fp_config = "../configs/chat/ls1_version_4_exp.py"
-    use_ai_chat = True
-    verbose_ai = True
-    portugese_mode = False
-    ai_fake_typing = True
-    run_fullscreen = False
+    
+    
+    parser = argparse.ArgumentParser(description="ChatGUI")
+    parser.add_argument("--fp_config", type=str, default="../configs/chat/ls1_version_4_exp.py")
+    parser.add_argument("--verbose_ai", type=bool, default=True)
+    parser.add_argument("--portugese_mode", type=bool, default=False)
+    parser.add_argument("--ai_fake_typing", type=bool, default=True)
+    parser.add_argument("--run_fullscreen", type=bool, default=True)
+    parser.add_argument("--use_ai_chat", type=bool, default=True)
+    args = parser.parse_args()
+
+    # fp_config = "../configs/chat/ls1_version_4_exp.py"
+    # use_ai_chat = True
+    # verbose_ai = True
+    # portugese_mode = False
+    # ai_fake_typing = True
+    # run_fullscreen = True
 
     # Let's instantiate the ChatGUI object and conveniantly name it self...
     self = ChatGUI(
-        fp_config=fp_config,
-        use_ai_chat=use_ai_chat,
-        verbose_ai=verbose_ai,
-        portugese_mode=portugese_mode,
-        ai_fake_typing=ai_fake_typing,
-        run_fullscreen=run_fullscreen,
+        fp_config=args.fp_config,
+        use_ai_chat=args.use_ai_chat,
+        verbose_ai=args.verbose_ai,
+        portugese_mode=args.portugese_mode,
+        ai_fake_typing=args.ai_fake_typing,
+        run_fullscreen=args.run_fullscreen,
     )
 
     while True:
