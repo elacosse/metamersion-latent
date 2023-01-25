@@ -67,18 +67,20 @@ def assemble_tts_for_video(
     ]
     for i, narration in enumerate(narration_list):
         create_tts_from_text(narration, segment_filepaths[i], voice, preset, devices[0])
-
+    print("Finished TTS generation...")
     # for i, narration_list in enumerate(narration_list):
     #     device = devices[i % len(devices)]
     #     thread_list.append(threading.Thread(target=create_tts_from_thread,args=(narration_list[0], segment_filepaths[0], voice, preset, device)))
     #     thread_list[-1].start()
-
+    print("Asembled TTS audio files...")
     assemble_audio_files_with_silence_and_save(
         segment_filepaths, audio_duration, start_times, output_filepath
     )
     # check if too long
+    print("Checking output length")
     check_tts_output_concatenation_and_clip(output_filepath, audio_duration)
     # convert to mp3 44.1khz 2 channels
+    print("Converting to mp3")
     sound = AudioSegment.from_wav(output_filepath)
     sound = sound.set_channels(2)
     sound = sound.set_frame_rate(44100)

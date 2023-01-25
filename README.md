@@ -33,11 +33,12 @@ python metamersion_latent/tools/chatbot.py -c metamersion_latent/configs/chat/ls
 ##### Running an Example - Initial Chatbot - Analysis - Exit Chatbot
 
 ###### Initial Chatbot
+Run the chatbot
 ```bash 
 python metamersion_latent/tools/chatbot.py -c metamersion_latent/configs/chat/ls1_version_6.py -s
 ```
 ###### Analysis (generate card)
-Using the name you introduced yourself to the chatbot as {username}
+Using the name you introduced yourself to the chatbot as {username} where the example was saved, a example "card" could be generated and corresponding analysis.
 
 ```bash 
 python metamersion_latent/tools/run_card.py -c metamersion_latent/configs/chat/ls1_version_6.py -e metamersion_latent/examples/chats/{username}.yaml -o {OUTPUT_DIRECTORY}
