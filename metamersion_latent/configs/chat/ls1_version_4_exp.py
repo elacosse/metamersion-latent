@@ -59,7 +59,7 @@ Current conversation:
 AI: {initial_bot_message}{history}
 Visitor: {input}
 AI{qualifier}:"""  # note these must be history and input!
-conversation_stop_list = [f"{ai_prefix}: ", f"{human_prefix}: "]
+conversation_stop_list = [f"\n{ai_prefix[0]}: ", f"\n{human_prefix[0]}: "]
 initial_bot_message = """Can you tell me your name or what I should call you?"""
 last_bot_pre_message_injection = f"""\nThis was enough information for the {ai_prefix}. In the next statement, the {ai_prefix} politely thanked the {human_prefix} and said that the VR experience can now begin in the next room."""
 
