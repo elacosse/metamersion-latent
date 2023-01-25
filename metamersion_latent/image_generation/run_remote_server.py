@@ -653,21 +653,9 @@ while True:
             else:
                 list_seeds = len(list_prompts)*[seed]
 
-            # MUSIC
-            print("GENERATING MUSIC...")
+
+            # DEFINE SOME STUFF...
             audio_duration = (len(list_prompts)+1)*duration_single_trans
-            try:
-
-                generate_soundtrack_new(fp_music, fp_voice, soundtrack_duration=audio_duration, segments=len(list_prompts)-1)
-
-                # ChosenSet = safe_dict_read(dict_meta, 'ChosenSet', 1)
-                # if ChosenSet < 1 or ChosenSet > 14:
-                #     print("WARNING! BAD ChosenSet! FORCING ChosenSet=1")
-                #     ChosenSet=1
-                # generate_soundtrack(fp_music, ChosenSet)
-            except Exception as e:
-                print(f"EXCEPTION! {e}")
-            print("DONE GENERATING MUSIC")
 
 
             # VOICE
@@ -692,15 +680,32 @@ while True:
                 preset = "fast"
                 voice = "train_dreams"
                 devices = ["cuda:0"]
-                
                 assemble_tts_for_video(narration_list, audio_duration, start_times, fp_voice, preset, voice, devices)
 
             except Exception as e:
                 print(f"EXCEPTION! {e}")
 
+            print("DONE GENERATING VOICE")
+
+
+            # MUSIC
+            print("GENERATING MUSIC...")
+            
+            try:
+                if os.path.isfile(fp_voice):
+                    generate_soundtrack_new(fp_music, fp_voice, soundtrack_duration=audio_duration, segments=len(list_prompts)-1)
+                else:
+                    ChosenSet = np.random.randint(1, 13)
+                    if ChosenSet < 1 or ChosenSet > 14:
+                        print("WARNING! BAD ChosenSet! FORCING ChosenSet=1")
+                        ChosenSet=1
+                    generate_soundtrack(fp_music, ChosenSet)
+                    
+            except Exception as e:
+                print(f"EXCEPTION! {e}")
+            print("DONE GENERATING MUSIC")
             # txt_save(f"{dp_subj}/voice_segment_onsets.txt", start_times)
             # txt_save(f"{dp_subj}/voice_segment_duration.txt", segment_duration)
-            print("DONE GENERATING VOICE")
 
             # MIX MUSIC AND VOICE
             # Load the audio tracks
