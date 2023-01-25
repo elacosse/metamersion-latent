@@ -35,7 +35,7 @@ def perform_analysis(chat_history: str, config: Config, verbose: bool = False, n
                 config.analyze_chat_model,
             )
         except Exception as e:
-            print("API Fail {i+1}/{nmb_retries}")
+            print(f"API Fail {i+1}/{nmb_retries}. {e}")
         break
 
 
@@ -61,7 +61,7 @@ def perform_analysis(chat_history: str, config: Config, verbose: bool = False, n
                 config.create_story_model,
             )
         except Exception as e:
-            print("API Fail {i+1}/{nmb_retries}")
+            print(f"API Fail {i+1}/{nmb_retries}. {e}")
         break
 
     if verbose:
@@ -83,7 +83,7 @@ def perform_analysis(chat_history: str, config: Config, verbose: bool = False, n
                 config.critique_story_model,
             )
         except Exception as e:
-            print("API Fail {i+1}/{nmb_retries}")
+            print(f"API Fail {i+1}/{nmb_retries}. {e}")
         break
 
     if verbose:
@@ -103,7 +103,7 @@ def perform_analysis(chat_history: str, config: Config, verbose: bool = False, n
                 config.create_scenes_model,
             )
         except Exception as e:
-            print("API Fail {i+1}/{nmb_retries}")
+            print(f"API Fail {i+1}/{nmb_retries}. {e}")
     if verbose:
         print("\n\nScenes:\n" + scenes)
 
@@ -121,7 +121,7 @@ def perform_analysis(chat_history: str, config: Config, verbose: bool = False, n
                 config.create_landscapes_model,
             )
         except Exception as e:
-            print("API Fail {i+1}/{nmb_retries}")
+            print(f"API Fail {i+1}/{nmb_retries}. {e}")
     if verbose:
         print("\n\nLandscapes:\n" + landscapes)
 
@@ -139,7 +139,7 @@ def perform_analysis(chat_history: str, config: Config, verbose: bool = False, n
                 config.create_objects_model,
             )
         except Exception as e:
-            print("API Fail {i+1}/{nmb_retries}")
+            print(f"API Fail {i+1}/{nmb_retries}. {e}")
     if verbose:
         print("\n\nObjects:\n" + objects)
 
@@ -157,7 +157,7 @@ def perform_analysis(chat_history: str, config: Config, verbose: bool = False, n
                 config.create_captions_model,
             )
         except Exception as e:
-            print("API Fail {i+1}/{nmb_retries}")
+            print(f"API Fail {i+1}/{nmb_retries}. {e}")
     if verbose:
         print("\n\nCaptions:\n" + captions)
 
@@ -181,7 +181,7 @@ def perform_analysis(chat_history: str, config: Config, verbose: bool = False, n
                 config.create_poem_model,
             )
         except Exception as e:
-            print("API Fail {i+1}/{nmb_retries}")
+            print(f"API Fail {i+1}/{nmb_retries}. {e}")
 
     dict_analysis["poem"] = poem
     # Split poem
@@ -219,7 +219,7 @@ def perform_analysis(chat_history: str, config: Config, verbose: bool = False, n
                 for prompt in draft_prompts
             ]
         except Exception as e:
-            print("API Fail {i+1}/{nmb_retries}")
+            print(f"API Fail {i+1}/{nmb_retries}. {e}")
     if verbose:
         print("\n\nPrompts:\n")
         for p in prompts:
