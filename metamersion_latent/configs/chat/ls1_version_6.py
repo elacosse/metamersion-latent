@@ -8,7 +8,7 @@
 # ZFM Requests
 #
 # Fix hard coded directories in gui_chat.py
-# 1: 
+# 1:
 # self.dp_out = os.path.join(
 #            "/mnt/ls1_data/test_sessions/", f"{get_time('second')}_{username}"
 # 2:
@@ -17,13 +17,13 @@
 
 # Set LLM parameters here
 model_name = "text-curie-001"
-#model_name = "text-davinci-003"
+# model_name = "text-davinci-003"
 
 # Be careful!
 best_of = 1
 
-### 
-        
+###
+
 human_prefix = "Visitor"
 ai_prefix = "AI"
 conversation_stop_list = [f"{ai_prefix}: ", f"{human_prefix}: "]
@@ -44,7 +44,7 @@ qualifier_dict = {
     " politely and empathically replies": 5,
     " politely and empathically delves deeper": 5,
     " makes a funny self-deprecating remark and replies": 5,
-    ", changing the subject, replies":5,
+    ", changing the subject, replies": 5,
 }
 model = {
     "model_name": "text-davinci-003",
@@ -54,7 +54,7 @@ model = {
     "frequency_penalty": 0.5,
     "presence_penalty": 0.5,
     "n": 1,
-    "best_of": 1,
+    "best_of": best_of,
     "request_timeout": None,
     "_type": "openai",
 }
@@ -134,7 +134,7 @@ exit_model = {
     "frequency_penalty": 0.5,
     "presence_penalty": 0.5,
     "n": 1,
-    "best_of": 1,
+    "best_of": best_of,
     "request_timeout": None,
     "_type": "openai",
 }
@@ -163,7 +163,7 @@ scene_object_model = {
     "frequency_penalty": 0.0,
     "presence_penalty": 0.0,
     "n": 1,
-    "best_of": 1,
+    "best_of": best_of,
     "request_timeout": None,
     "_type": "openai",
 }
@@ -254,7 +254,7 @@ analyze_chat_model = {
     "frequency_penalty": 0.2,
     "presence_penalty": 0.2,
     "n": 1,
-    "best_of": 1,
+    "best_of": best_of,
     "request_timeout": None,
     "_type": "openai",
 }
@@ -289,7 +289,7 @@ create_story_model = {
     "frequency_penalty": 0.2,
     "presence_penalty": 0.2,
     "n": 1,
-    "best_of": 1,
+    "best_of": best_of,
     "request_timeout": None,
     "_type": "openai",
 }
@@ -315,7 +315,7 @@ critique_story_model = {
     "frequency_penalty": 0.0,
     "presence_penalty": 0.0,
     "n": 1,
-    "best_of": 1,
+    "best_of": best_of,
     "request_timeout": None,
     "_type": "openai",
 }
@@ -341,7 +341,7 @@ create_scenes_model = {
     "frequency_penalty": 0.0,
     "presence_penalty": 0.0,
     "n": 1,
-    "best_of": 1,
+    "best_of": best_of,
     "request_timeout": None,
     "_type": "openai",
 }
@@ -366,7 +366,7 @@ create_landscapes_model = {
     "frequency_penalty": 0.3,
     "presence_penalty": 0.3,
     "n": 1,
-    "best_of": 1,
+    "best_of": best_of,
     "request_timeout": None,
     "_type": "openai",
 }
@@ -389,7 +389,7 @@ create_objects_model = {
     "frequency_penalty": 0,
     "presence_penalty": 0,
     "n": 1,
-    "best_of": 1,
+    "best_of": best_of,
     "request_timeout": None,
     "_type": "openai",
 }
@@ -419,7 +419,7 @@ create_captions_model = {
     "frequency_penalty": 0,
     "presence_penalty": 0,
     "n": 1,
-    "best_of": 1,
+    "best_of": best_of,
     "request_timeout": None,
     "_type": "openai",
 }
@@ -450,7 +450,7 @@ create_poem_model = {
     "frequency_penalty": 0.1,
     "presence_penalty": 0.1,
     "n": 1,
-    "best_of": 1,
+    "best_of": best_of,
     "request_timeout": None,
     "_type": "openai",
 }
