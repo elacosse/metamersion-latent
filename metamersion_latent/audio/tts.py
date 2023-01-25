@@ -76,10 +76,13 @@ def assemble_tts_for_video(
     assemble_audio_files_with_silence_and_save(
         segment_filepaths, audio_duration, start_times, output_filepath
     )
-
+    # check if too long
     check_tts_output_concatenation_and_clip(output_filepath, audio_duration)
-    # convert to mp3
+    # convert to mp3 44.1khz 2 channels
     sound = AudioSegment.from_wav(output_filepath)
+    sound = sound.set_channels(2)
+    sound = sound.set_frame_rate(44100)
+    sound = sound.set_sample_width(2)
     sound.export(output_filepath.replace(".wav", ".mp3"), format="mp3")
 
 
@@ -118,8 +121,12 @@ def assemble_audio_files_with_silence_and_save(
         # make sure they are same length
         if end_time_indx - start_time_indx != len(next_audio_data):
             next_audio_data = next_audio_data[: end_time_indx - start_time_indx]
-        # Insert the audio data into the audio_data array
-        audio_data[start_time_indx:end_time_indx] = next_audio_data
+        # Check that the end time is not greater than the length of the audio_data array
+        if (end_time_indx <= len(audio_data)) and (
+            (end_time_indx - start_time_indx) == len(next_audio_data)
+        ):
+            # Insert the audio data into the audio_data array
+            audio_data[start_time_indx:end_time_indx] = next_audio_data
 
     sf.write(output_filepath, audio_data, sample_rate)
     return list_onsets, list_durations
