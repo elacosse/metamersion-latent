@@ -3,7 +3,7 @@ import re
 from langchain.llms.loading import load_llm_from_config
 
 from metamersion_latent.llm.config import Config
-
+import copy
 
 def prompt(prompt: str, config: dict) -> str:
     """Call GPT-3 with a prompt and return the output.
@@ -21,7 +21,7 @@ def prompt(prompt: str, config: dict) -> str:
 
 
 def perform_analysis(chat_history: str, config: Config, verbose: bool = False, nmb_retries=5) -> dict:
-
+    config_base = copy.deepcopy(config)
     dict_analysis = {}
     #######################################################################################################################
     # 1. Analyze the chat
@@ -30,13 +30,15 @@ def perform_analysis(chat_history: str, config: Config, verbose: bool = False, n
         print("\nStarting: 1. Analyze the chat")
     for i in range(nmb_retries):
         try:
+            config = copy.deepcopy(config_base)
             chat_analysis = "1:" + prompt(
                 config.analyze_chat_template.format(chat_history=chat_history),
                 config.analyze_chat_model,
             )
+            break
         except Exception as e:
             print(f"API Fail {i+1}/{nmb_retries}. {e}")
-        break
+        
 
 
     if verbose:
@@ -48,9 +50,9 @@ def perform_analysis(chat_history: str, config: Config, verbose: bool = False, n
     #######################################################################################################################
     if verbose:
         print("\nStarting: 2. Generate Story")
-
     for i in range(nmb_retries):
         try:
+            config = copy.deepcopy(config_base)
             story = "1:" + prompt(
                 config.create_story_template.format(
                     chat_history=chat_history,
@@ -60,9 +62,10 @@ def perform_analysis(chat_history: str, config: Config, verbose: bool = False, n
                 ),
                 config.create_story_model,
             )
+            break
         except Exception as e:
             print(f"API Fail {i+1}/{nmb_retries}. {e}")
-        break
+        
 
     if verbose:
         print("\n\nThe story:\n" + story)
@@ -74,6 +77,7 @@ def perform_analysis(chat_history: str, config: Config, verbose: bool = False, n
         print("\nStarting: 2.1 Critique the Story)")
     for i in range(nmb_retries):
         try:
+            config = copy.deepcopy(config_base)
             critique_story = "1:" + prompt(
                 config.critique_story_template.format(
                     N_steps=config.N_steps,
@@ -82,9 +86,10 @@ def perform_analysis(chat_history: str, config: Config, verbose: bool = False, n
                 ),
                 config.critique_story_model,
             )
+            break
         except Exception as e:
             print(f"API Fail {i+1}/{nmb_retries}. {e}")
-        break
+        
 
     if verbose:
         print("\n\nStory critique:\n" + critique_story)
@@ -98,10 +103,12 @@ def perform_analysis(chat_history: str, config: Config, verbose: bool = False, n
         print("\nStarting: 3. Make scenes for the story")
     for i in range(nmb_retries):
         try:
+            config = copy.deepcopy(config_base)
             scenes = "1:" + prompt(
                 config.create_scenes_template.format(N_steps=config.N_steps, story=story),
                 config.create_scenes_model,
             )
+            break
         except Exception as e:
             print(f"API Fail {i+1}/{nmb_retries}. {e}")
     if verbose:
@@ -116,10 +123,12 @@ def perform_analysis(chat_history: str, config: Config, verbose: bool = False, n
         print("\nStarting: 4. Create the landscapes")
     for i in range(nmb_retries):
         try:
+            config = copy.deepcopy(config_base)
             landscapes = "1:" + prompt(
                 config.create_landscapes_template.format(scenes=scenes),
                 config.create_landscapes_model,
             )
+            break
         except Exception as e:
             print(f"API Fail {i+1}/{nmb_retries}. {e}")
     if verbose:
@@ -134,10 +143,12 @@ def perform_analysis(chat_history: str, config: Config, verbose: bool = False, n
         print("\nStarting: 5. Create the objects")
     for i in range(nmb_retries):
         try:
+            config = copy.deepcopy(config_base)
             objects = "1:" + prompt(
                 config.create_objects_template.format(scenes=scenes, N_steps=config.N_steps),
                 config.create_objects_model,
             )
+            break
         except Exception as e:
             print(f"API Fail {i+1}/{nmb_retries}. {e}")
     if verbose:
@@ -152,10 +163,12 @@ def perform_analysis(chat_history: str, config: Config, verbose: bool = False, n
         print("\nStarting: 6. Create captions")
     for i in range(nmb_retries):
         try:
+            config = copy.deepcopy(config_base)
             captions = "1:" + prompt(
                 config.create_captions_template.format(landscapes=landscapes, objects=objects),
                 config.create_captions_model,
             )
+            break
         except Exception as e:
             print(f"API Fail {i+1}/{nmb_retries}. {e}")
     if verbose:
@@ -170,6 +183,7 @@ def perform_analysis(chat_history: str, config: Config, verbose: bool = False, n
         print("\nStarting: 7. Create poem")
     for i in range(nmb_retries):
         try:
+            config = copy.deepcopy(config_base)
             poem = "1:" + prompt(
                 config.create_poem_template.format(
                     N_steps=config.N_steps,
@@ -180,6 +194,7 @@ def perform_analysis(chat_history: str, config: Config, verbose: bool = False, n
                 ),
                 config.create_poem_model,
             )
+            break
         except Exception as e:
             print(f"API Fail {i+1}/{nmb_retries}. {e}")
 
@@ -214,10 +229,12 @@ def perform_analysis(chat_history: str, config: Config, verbose: bool = False, n
     # draft_prompts = [line.split(":", 1)[1][1:] for line in draft_prompts.split("\n")]
     for i in range(nmb_retries):
         try:
+            config = copy.deepcopy(config_base)
             prompts = [
                 config.prefix + prompt.rstrip(".") + ", " + config.postfix
                 for prompt in draft_prompts
             ]
+            break
         except Exception as e:
             print(f"API Fail {i+1}/{nmb_retries}. {e}")
     if verbose:
