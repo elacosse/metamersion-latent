@@ -114,10 +114,14 @@ def perform_analysis(chat_history: str, config: Config, verbose: bool = False, n
     #######################################################################################################################
     if verbose:
         print("\nStarting: 4. Create the landscapes")
-    landscapes = "1:" + prompt(
-        config.create_landscapes_template.format(scenes=scenes),
-        config.create_landscapes_model,
-    )
+    for i in range(nmb_retries):
+        try:
+            landscapes = "1:" + prompt(
+                config.create_landscapes_template.format(scenes=scenes),
+                config.create_landscapes_model,
+            )
+        except Exception as e:
+            print("API Fail {i+1}/{nmb_retries}")
     if verbose:
         print("\n\nLandscapes:\n" + landscapes)
 
@@ -128,10 +132,14 @@ def perform_analysis(chat_history: str, config: Config, verbose: bool = False, n
     #######################################################################################################################
     if verbose:
         print("\nStarting: 5. Create the objects")
-    objects = "1:" + prompt(
-        config.create_objects_template.format(scenes=scenes, N_steps=config.N_steps),
-        config.create_objects_model,
-    )
+    for i in range(nmb_retries):
+        try:
+            objects = "1:" + prompt(
+                config.create_objects_template.format(scenes=scenes, N_steps=config.N_steps),
+                config.create_objects_model,
+            )
+        except Exception as e:
+            print("API Fail {i+1}/{nmb_retries}")
     if verbose:
         print("\n\nObjects:\n" + objects)
 
@@ -142,10 +150,14 @@ def perform_analysis(chat_history: str, config: Config, verbose: bool = False, n
     #######################################################################################################################
     if verbose:
         print("\nStarting: 6. Create captions")
-    captions = "1:" + prompt(
-        config.create_captions_template.format(landscapes=landscapes, objects=objects),
-        config.create_captions_model,
-    )
+    for i in range(nmb_retries):
+        try:
+            captions = "1:" + prompt(
+                config.create_captions_template.format(landscapes=landscapes, objects=objects),
+                config.create_captions_model,
+            )
+        except Exception as e:
+            print("API Fail {i+1}/{nmb_retries}")
     if verbose:
         print("\n\nCaptions:\n" + captions)
 
@@ -156,16 +168,21 @@ def perform_analysis(chat_history: str, config: Config, verbose: bool = False, n
     #######################################################################################################################
     if verbose:
         print("\nStarting: 7. Create poem")
-    poem = "1:" + prompt(
-        config.create_poem_template.format(
-            N_steps=config.N_steps,
-            scenes=scenes,
-            objects=objects,
-            poem_style=config.poem_style,
-            verse_length=config.verse_length,
-        ),
-        config.create_poem_model,
-    )
+    for i in range(nmb_retries):
+        try:
+            poem = "1:" + prompt(
+                config.create_poem_template.format(
+                    N_steps=config.N_steps,
+                    scenes=scenes,
+                    objects=objects,
+                    poem_style=config.poem_style,
+                    verse_length=config.verse_length,
+                ),
+                config.create_poem_model,
+            )
+        except Exception as e:
+            print("API Fail {i+1}/{nmb_retries}")
+
     dict_analysis["poem"] = poem
     # Split poem
     narration_list = re.split(r"\d:", poem, maxsplit=config.N_steps)
@@ -195,11 +212,14 @@ def perform_analysis(chat_history: str, config: Config, verbose: bool = False, n
         for line in draft_prompts.split("\n")
     ]
     # draft_prompts = [line.split(":", 1)[1][1:] for line in draft_prompts.split("\n")]
-
-    prompts = [
-        config.prefix + prompt.rstrip(".") + ", " + config.postfix
-        for prompt in draft_prompts
-    ]
+    for i in range(nmb_retries):
+        try:
+            prompts = [
+                config.prefix + prompt.rstrip(".") + ", " + config.postfix
+                for prompt in draft_prompts
+            ]
+        except Exception as e:
+            print("API Fail {i+1}/{nmb_retries}")
     if verbose:
         print("\n\nPrompts:\n")
         for p in prompts:
