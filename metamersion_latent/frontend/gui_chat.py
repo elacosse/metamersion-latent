@@ -282,27 +282,27 @@ class ChatGUI:
     def init_parameters(self):
         self.escape_and_save = "x"  # when this is submitted by human, then save chat
         self.fp_font = "kongtext.ttf"
-        self.font_size = 15
+        self.font_size = 12
 
         # Display props
-        self.display_height = int(0.9 * pygame.display.Info().current_h)
+        self.display_height = int(0.99 * pygame.display.Info().current_h)
         self.display_width = pygame.display.Info().current_w
 
-        self.x_begin_text = 150
+        self.x_begin_text = 50
         self.x_end_text = self.display_width - self.x_begin_text - 50
         self.y_begin_text_history = 10
         self.y_end_text_history = self.display_height - 200
         self.y_end_text_typing = self.display_height - 50
 
-        self.line_distance = 15
-        self.person_separation = 35
+        self.line_distance = 12
+        self.person_separation = 25
 
         self.text_color_human = (200, 200, 200)
-        self.text_color_ai = (0, 200, 0)
+        self.text_color_ai = (99, 99, 255)
         self.background_color = (0, 0, 0)
 
         # Little images next to human/AI
-        self.show_imgs = True
+        self.show_imgs = False
         self.x_fract_img = 0.5
         self.fp_img_human = "img_human.png"
         self.fp_img_ai = "img_ai.png"
@@ -730,12 +730,14 @@ class ChatGUI:
 if __name__ == "__main__":
 
     # Change Parameters below
+
+    fp_config = "../configs/chat/ls1_version_4_exp.py"
     fp_config = "../configs/chat/ls1_version_4_exp.py"
     use_ai_chat = True
     verbose_ai = True
     portugese_mode = False
     ai_fake_typing = True
-    run_fullscreen = False
+    run_fullscreen = True
 
     # Let's instantiate the ChatGUI object and conveniantly name it self...
     self = ChatGUI(
