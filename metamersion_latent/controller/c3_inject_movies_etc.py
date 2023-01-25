@@ -44,6 +44,38 @@ fp = os.path.join(dp_session, 'current.mp*')
 scp_cmd = f"scp {fp} CCU-VROOM-WIN10@192.168.50.254:/C:/media/"
 print("RUN THE FOLLOWING COMMAND:\n")
 print(scp_cmd)
+print("Hint: If this doesnt work: did you start openssh server on windows")
 
-print("\nCOMPLETED UPLOAD TO VR WINDOWS COMPUTER.")
-print("If this doesnt work: start the openssh server on windows")
+dp_top_projection = os.path.join(dp_session, "top_projection")
+os.makedirs(dp_top_projection)
+
+fp_current = os.path.join(dp_session, 'current.mp4')
+fp_cropped = os.path.join(dp_top_projection, 'current_cropped.mp4')
+
+# first crop the video into half
+p = subprocess.Popen(['ffmpeg', '-i', fp_current, '-filter:v', 'crop=256:512:0:0', 'playback_crop.mp4'], cwd=dp_top_projection)
+
+# wait for the process to finish
+p.wait()
+
+# now create a mirror of the cropped video
+p = subprocess.Popen(['ffmpeg', '-i', 'playback_crop.mp4', '-vf', 'hflip', '-c:a', 'copy', 'playback_crop2.mp4'], cwd=dp_top_projection)
+
+# wait for the process to finish
+p.wait()
+
+# concatenate the two videos together
+# and call it "playback.mp4"
+p = subprocess.Popen(['ffmpeg', '-i', 'playback_crop.mp4', '-i', 'playback_crop2.mp4', '-filter_complex', '[0:v:0]pad=iw*2:ih[bg]; [bg][1:v:0]overlay=w', fp_cropped], cwd=dp_top_projection)
+
+# wait for the process to finish
+p.wait()
+
+# define the raspberrypi address:
+host = 'raspberrypi14.local'
+
+# upload the video to raspberrypi14 in the /home/pi/LS1 using scp
+p = subprocess.Popen(['scp', fp_cropped, 'pi@'+host+':/home/pi/LS1'], cwd=dp_top_projection)
+
+# wait for the process to finish
+p.wait()
