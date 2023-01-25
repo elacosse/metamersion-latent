@@ -6,13 +6,13 @@ from pathlib import Path
 import click
 from dotenv import find_dotenv, load_dotenv
 
+from metamersion_latent.image_generation.stability import (
+    create_collage,
+    write_text_under_image,
+)
 from metamersion_latent.llm.analysis import perform_analysis
 from metamersion_latent.llm.config import Config
-from metamersion_latent.utils import save_to_yaml
-
-
-# from metamersion_latent.image_generation.stability import create_collage
-# from metamersion_latent.image_generation.stability import write_text_under_image
+from metamersion_latent.utils import load_yaml, save_to_yaml
 
 
 @click.command()
@@ -32,28 +32,46 @@ from metamersion_latent.utils import save_to_yaml
     help="Output directory",
 )
 @click.option("-v", "--verbose", is_flag=True, help="Verbose mode.")
-def main(config_path, example_path, output_path, verbose):
+@click.option(
+    "-p",
+    "--police_config",
+    is_flag=True,
+    help="Checks if configuration file was the same for the chatbot",
+)
+def main(config_path, example_path, output_path, verbose, police_config):
     logger = logging.getLogger(__name__)
     logger.info("Loading configuration file from %s", config_path)
     config = Config.fromfile(config_path)
     logger.info("Loading example conversation file from %s", example_path)
-    example = Config.fromfile(example_path)
+    # read yaml
+    example = load_yaml(example_path)
+    chat_history = example["chat_history"]
+    username = example["username"]
+    example["language"]
+
+    # check if config file is the same as the one used in the chatbot
+    if police_config:
+        config_filename = os.path.basename(config_path)
+        if config_filename != example["configuration"]:
+            logger.error(
+                "Configuration file used in the chatbot is different from the one used in the analysis."
+            )
+            return
 
     # Format the datetime as a string
     now = datetime.now()
     date = now.strftime("%Y%m%d_%H%M")
-    token = f"{date}_{example.username}"
+    token = f"{date}_{username}"
 
     logger.info("Chat token: %s", token)
     logger.info("Saving to %s", output_path)
-
-    chat_history = example.chat_history
 
     # Perform Analysis
     logger.info("Performing analysis on chat history...")
     analysis_dict = perform_analysis(chat_history, config)
     items = [
         dict(
+            username=username,
             example_path=example_path,
             config_path=config_path,
             chat_history=chat_history,
@@ -68,11 +86,11 @@ def main(config_path, example_path, output_path, verbose):
     prompts = analysis_dict["list_prompts"]
     from metamersion_latent.controller.c2_generate_movie import Client
 
-    negative_prompt = "ugly, blurry"
-    seed = 420
-    width = 768
-    height = 512
-    ip_server = "138.2.229.216"
+    negative_prompt = config.negative_prompt
+    seed = config.seed
+    width = config.width
+    height = config.height
+    ip_server = config.ip_server
     zmq_client = Client(ip_server, 7555, 7556, (width, height), verbose=True)
     from tqdm import tqdm
 
@@ -86,11 +104,6 @@ def main(config_path, example_path, output_path, verbose):
         dict_meta["height"] = height
         img = zmq_client.run_image(dict_meta)
         list_imgs.append(img)
-    ######## Create cards
-    from metamersion_latent.image_generation.stability import (
-        create_collage,
-        write_text_under_image,
-    )
 
     poem = analysis_dict["poem"]
     split_poem = [phrase[:-1] for phrase in poem.split(":")[1:]]
@@ -99,6 +112,8 @@ def main(config_path, example_path, output_path, verbose):
     collage = write_text_under_image(collage, split_poem)
     collage.save(card_output)
 
+    # kill process because of thread issues from zmq client
+    # TODO: fix this
     os.system("kill %d" % os.getpid())
 
 

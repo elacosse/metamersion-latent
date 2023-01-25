@@ -234,3 +234,5 @@ latent_blending_config["duration_fade"] = 10
 latent_blending_config["seed"] = 420
 latent_blending_config["width"] = 768
 latent_blending_config["height"] = 512
+
+ip_server = "138.2.229.216"

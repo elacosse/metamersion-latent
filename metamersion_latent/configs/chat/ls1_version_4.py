@@ -100,7 +100,7 @@ seed = 420
 width = 768
 height = 512
 negative_prompt = "ugly, blurry"
-
+ip_server = "138.2.229.216"
 
 #######################################################################################################################
 # 1. Analyze the chat
@@ -319,20 +319,17 @@ create_poem_model = {
     "_type": "openai",
 }
 
-# Output variable is:
-# poem
-
-
-# # Latent blending config dictionary
-# latent_blending_config = {}
-# latent_blending_config['duration_single_trans'] = 25
-# latent_blending_config['ip_server'] = "138.2.229.216"
-# latent_blending_config['quality'] = 'medium'
-# latent_blending_config['depth_strength'] = 0.5
-# latent_blending_config['silence_begin'] = -2
-# latent_blending_config['speaker_indx'] = 1
-# latent_blending_config['tts_length_scale'] = 1
-# latent_blending_config['duration_fade'] = 10
-# latent_blending_config['seed'] = 420
-# latent_blending_config['width'] = 768
-# latent_blending_config['height'] = 512
+# Latent blending config dictionary
+latent_blending_config = {}
+latent_blending_config["negative_prompt"] = "ugly, blurry"
+latent_blending_config["duration_single_trans"] = 25
+latent_blending_config["ip_server"] = "138.2.229.216"
+latent_blending_config["quality"] = "medium"
+latent_blending_config["depth_strength"] = 0.5
+latent_blending_config["silence_begin"] = -2
+latent_blending_config["speaker_indx"] = 1
+latent_blending_config["tts_length_scale"] = 1
+latent_blending_config["duration_fade"] = 10
+latent_blending_config["seed"] = 420
+latent_blending_config["width"] = 768
+latent_blending_config["height"] = 512

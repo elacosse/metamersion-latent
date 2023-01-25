@@ -1,0 +1,5 @@
+---
+"chat_history": "AI: Can you tell me your name or what I should call you?\nVisitor: Eric\nAI: Hi Eric, do you know why you're here?\n\nVisitor: No\nAI: Awww, don't worry Eric. My name is YY and I'm an AI. I know a lot of things, but sometimes get confused. Can you tell me a little bit about yourself?\nVisitor: bye\nAI: Nice to meet you Eric! It's nice to meet someone who is interested in exploring with me. I hope our conversation will be beneficial and entertaining."
+"configuration": "ls1_version_5.py"
+"language": !!int "1"
+"username": "Eric"

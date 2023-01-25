@@ -1,19 +1,18 @@
+import logging
+import os
 import signal
 import time
+from pathlib import Path
 
 import click
 from dotenv import find_dotenv, load_dotenv
 
-from metamersion_latent.llm.analysis import perform_analysis
 from metamersion_latent.llm.chat import Chat
 from metamersion_latent.llm.config import Config
-from metamersion_latent.utils import (
-    create_output_directory_with_identifier,
-    save_to_yaml,
-)
+from metamersion_latent.utils import load_yaml, save_to_yaml
 from metamersion_latent.utils.translation import translate
 
-CHAT_HISTORY_OUTPUT_DIR = "data/chat_history"
+SAVE_EXIT_CHAT_DIR_PATH = Path("data/exit_chats")
 
 
 def select_language() -> int:
@@ -34,16 +33,85 @@ def timeout_handler(signum, frame):
     raise TimeoutError("Timeout")
 
 
+def format_special_template(config, yaml_dict):
+
+    analysis_dict = yaml_dict["analysis"]
+    # From yaml
+    username = yaml_dict["username"]
+    # captions = analysis_dict["captions"]
+    chat_analysis = analysis_dict["chat_analysis"]
+    # critique_story = analysis_dict["critique_story"]
+    # landscapes = analysis_dict["landscapes"]
+    # list_prompts = analysis_dict["list_prompts"]
+    # narration_list = analysis_dict["narration_list"]
+    objects = analysis_dict["objects"]
+    poem = analysis_dict["poem"]
+    # scenes = analysis_dict["scenes"]
+    story = analysis_dict["story"]
+    # chat_history = yaml_dict["chat_history"]
+
+    # should really be moved to analysis...
+    # but for now, just put it here
+    scene_object_template = config.scene_object_template
+    scene_object_template = scene_object_template.format(
+        username=username,
+        story=story,
+        objects=objects,
+    )
+    from metamersion_latent.llm.analysis import prompt
+
+    explain_scene_objects = prompt(scene_object_template, config.scene_object_model)
+
+    LSI_process = config.LSI_process
+    LSI_process = LSI_process.format(
+        username=username,
+        chat_analysis=chat_analysis,
+        AI_name=config.AI_name,
+        explain_scene_objects=explain_scene_objects,
+        story=story,
+        poem=poem,
+    )
+
+    post_chat_directions = config.post_chat_directions
+    post_chat_directions = post_chat_directions.format(
+        username=username,
+    )
+
+    initial_bot_message = config.exit_initial_bot_message.format(username=username)
+    exit_template = config.exit_template
+    exit_template = exit_template.format(
+        Exhibit_background=config.Exhibit_background,
+        LSI_background=config.LSI_background,
+        AI_background=config.AI_background.format(AI_name=config.AI_name),
+        LSI_process=LSI_process,
+        post_chat_directions=post_chat_directions,
+        initial_bot_message=initial_bot_message,
+        history="{history}",  # !
+        input="{input}",  # !
+        qualifier="{qualifier}",  # !
+    )
+
+    return exit_template
+
+
 @click.command()
 @click.option(
     "-c", "--config_path", type=click.Path(exists=True), help="Configuration file path."
+)
+@click.option(
+    "-a",
+    "--analysis_path",
+    type=click.Path(exists=True),
+    help="Analysis yaml file path.",
 )
 @click.option("-v", "--verbose", is_flag=True, help="Verbose mode.")
 @click.option(
     "-t", "--time_limit", is_flag=True, help="Run bot with time limits on chat."
 )
-def main(config_path, verbose, time_limit):
-    load_dotenv(find_dotenv(), verbose=False)  # load environment variables
+@click.option(
+    "-s", "--save_to_example", is_flag=True, help="Save example as username.py."
+)
+def main(config_path, analysis_path, verbose, time_limit, save_to_example):
     config = Config.fromfile(config_path)
     #######################################################################################################################
     # Select Language
@@ -66,23 +134,30 @@ def main(config_path, verbose, time_limit):
     #######################################################################################################################
     start_time = time.time()
     # Format the template with the initial message
-    config.template = config.template.format(
-        initial_bot_message=config.initial_bot_message,
-        history="{history}",
-        qualifier="{qualifier}",
-        input="{input}",
+    yaml_dict = load_yaml(analysis_path)[0]
+    username = yaml_dict["username"]
+    # Format the template
+    config.template = format_special_template(config, yaml_dict)
+    config.exit_initial_bot_message = config.exit_initial_bot_message.format(
+        username=username
     )
-    chat = Chat(config, verbose, exit_conversation=True)
+    # config.template = config.template.format(
+    #     initial_bot_message=config.initial_bot_message,
+    #     history="{history}",
+    #     qualifier="{qualifier}",
+    #     input="{input}",
+    # )
+
+    chat = Chat(config, verbose)
     if bool_translate:
-        human_input = input(translate(config.initial_bot_message, "PT") + "\n")
+        human_input = input(translate(config.exit_initial_bot_message, "PT") + "\n")
         # human_input = translate(human_input, "EN")
         output = chat(human_input)
         print(translate(output, "PT"))
     else:
-        human_input = input(config.initial_bot_message + "\n")
+        human_input = input(config.exit_initial_bot_message + "\n")
         output = chat(human_input)
         print(output)
-    username = human_input
     # Start chat loop
     while True:
         signal.signal(signal.SIGALRM, timeout_handler)
@@ -109,36 +184,28 @@ def main(config_path, verbose, time_limit):
         if human_input == "bye":
             break
 
-    # Format chat history properly
+    # Format chat history properly and save to yaml
     chat_history = (
-        config.ai_prefix + ": " + config.initial_bot_message + chat.get_history()
+        config.ai_prefix + ": " + config.exit_initial_bot_message + chat.get_history()
     )
-    output_dir = create_output_directory_with_identifier(
-        CHAT_HISTORY_OUTPUT_DIR, username
-    )
-    items = {
+
+    example_dict = {
         "chat_history": chat_history,
         "username": username,
+        "configuration": os.path.basename(config_path),
         "language": language_selection,
     }
-    label = "chat_history"
-    save_to_yaml(items, label, output_dir=output_dir)
-    # Create directory if it does not exist
-
-    #######################################################################################################################
-    # Perform Analysis
-    #######################################################################################################################
-    analysis_dict = perform_analysis(chat_history, config)
-    if verbose:
-        print("Personal analysis:\n" + analysis_dict["personal_analysis"])
-        print("Amusing story:\n" + analysis_dict["amusing_story"])
-        print("Story scenes:\n" + analysis_dict["story_scenes"])
-        print("Created landscapes:\n" + analysis_dict["created_landscapes"])
-        print("Created objects:\n" + analysis_dict["created_objects"])
-        print("Surreal landscapes:\n" + analysis_dict["surreal_landscapes"])
-        print("Poem:\n" + analysis_dict["poem"])
-    #######################################################################################################################
+    if save_to_example:
+        example_path = project_dir / SAVE_EXIT_CHAT_DIR_PATH
+        save_to_yaml(example_dict, username, example_path)
 
 
 if __name__ == "__main__":
+    log_fmt = "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+    logging.basicConfig(level=logging.INFO, format=log_fmt)
+    # not used in this stub but often useful for finding various files
+    project_dir = Path(__file__).resolve().parents[2]
+    # find .env automagically by walking up directories until it's found, then
+    # load up the .env entries as environment variables
+    load_dotenv(find_dotenv(), verbose=True)
     main()
