@@ -150,7 +150,7 @@ if __name__ == "__main__":
 
     from metamersion_latent.utils import load_yaml
 
-    analysis = load_yaml("metamersion_latent/examples/chats/analysis/Alan.yaml")
+    analysis = load_yaml("metamersion_latent/examples/chats/analysis/Niklas.yaml")
     narration_list = analysis["narration_list"]
     config_path = analysis["config_path"]
     from metamersion_latent.llm.config import Config

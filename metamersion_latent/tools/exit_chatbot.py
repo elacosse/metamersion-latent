@@ -140,6 +140,7 @@ def main(config_path, analysis_path, verbose, time_limit, save_to_example):
         username=username
     )
     config.model = config.exit_model
+    config.qualifier_dict = config.exit_qualifier_dict
     # config.template = config.template.format(
     #     initial_bot_message=config.initial_bot_message,
     #     history="{history}",
