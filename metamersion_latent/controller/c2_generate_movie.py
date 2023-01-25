@@ -105,7 +105,7 @@ class Client:
         )
 
         self.code_last = "NONE"
-        self.t_timeout = 600
+        self.t_timeout = 1000
 
     def __listen_to_updates(self):
         self.subscriber = self.__init_sub_socket(self.context)
@@ -327,12 +327,18 @@ if __name__ == "__main__":
     subprocess.call(scp_cmd_mod, shell=True)
     print("SCP DONE!")
 
-    list_files_prio = ["current.mp4", "current.mp3"]
+    try:
+        shutil.copyfile(os.path.join(dp_computed, "current.mp4"), os.path.join(dp_session, "current.mp4"))
+    except Exception as e:
+        print(f"FAIL! VOICE? {e}.")
+        shutil.copyfile(os.path.join(dp_computed, "current_nosound.mp4"), os.path.join(dp_session, "current.mp4"))
 
-    for fn in list_files_prio:
-        fp_source = os.path.join(dp_computed, fn)
-        fp_target = os.path.join(dp_session, fn)
-        shutil.copyfile(fp_source, fp_target)
+    try:
+        shutil.copyfile(os.path.join(dp_computed, "current.mp3"), os.path.join(dp_session, "current.mp3"))
+    except Exception as e:
+        print(f"FAIL! VOICE? {e}.")
+        shutil.copyfile(os.path.join(dp_computed, "music.mp3"), os.path.join(dp_session, "current.mp3"))
+        
     print("COPYING DONE!")
 
 
