@@ -31,14 +31,19 @@ list_dns.sort(reverse=True)
 dn = user_choice(list_dns, sort=False, suggestion=list_dns[0])
 dp_session = f'{dp_base}/{dn}'
 
-files_copy_win = ['current.mp4', 'current.mp3']
 
-print("STARTING UPLOAD TO VR WINDOWS COMPUTER...")
-for fn in files_copy_win:
-    fp = os.path.join(dp_session, fn)
-    # scp_cmd = f"scp {fp} CCU-VROOM-WIN10@192.168.50.254:/C:/media/"
-    
-    subprocess.call(scp_cmd, shell=True)
+# THIS AINT WORKING
+# files_copy_win = ['current.mp4', 'current.mp3']
 
-print("COMPLETED UPLOAD TO VR WINDOWS COMPUTER.")
-    
+# print("STARTING UPLOAD TO VR WINDOWS COMPUTER...")
+# for fn in files_copy_win:
+#     fp = os.path.join(dp_session, fn)
+#     scp_cmd = f"scp {fp} CCU-VROOM-WIN10@192.168.50.254:/C:/media/"
+#     # subprocess.call(scp_cmd, shell=True)
+fp = os.path.join(dp_session, 'current.mp*')
+scp_cmd = f"scp {fp} CCU-VROOM-WIN10@192.168.50.254:/C:/media/"
+print("RUN THE FOLLOWING COMMAND:\n")
+print(scp_cmd)
+
+print("\nCOMPLETED UPLOAD TO VR WINDOWS COMPUTER.")
+print("If this doesnt work: start the openssh server on windows")
