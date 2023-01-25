@@ -14,7 +14,6 @@ from dotenv import find_dotenv, load_dotenv
 from metamersion_latent.llm.chat import Chat
 from metamersion_latent.llm.config import Config
 from metamersion_latent.utils import save_to_yaml
-import argparse
 
 """
 TODO: 
@@ -322,12 +321,12 @@ class ChatGUI:
         self.line_height_ai = self.font_history_ai.size("HohoInit")[1]
 
         # Cursors
-        self.cursor_period = 1.0  # Period time in seconds
+        self.cursor_period = 0.7  # Period time in seconds
         self.cursor_fract_on = 0.35  # How much of the period time cursor is on
 
         self.col_cursor_human = self.text_color_human
-        self.width_cursor_human = 3  # px
-        self.fract_cursor_height_human = 1.2  # Relative to text field height
+        self.width_cursor_human = 5  # px
+        self.fract_cursor_height_human = 1.5  # Relative to text field height
         self.cursor_xdist_human = 10
         self.cursor_height_human = int(
             self.fract_cursor_height_human * self.line_height_typing
@@ -731,32 +730,22 @@ class ChatGUI:
 if __name__ == "__main__":
 
     # Change Parameters below
-    
-    
-    parser = argparse.ArgumentParser(description="ChatGUI")
-    parser.add_argument("--fp_config", type=str, default="../configs/chat/ls1_version_4_exp.py")
-    parser.add_argument("--verbose_ai", type=bool, default=True)
-    parser.add_argument("--portugese_mode", type=bool, default=False)
-    parser.add_argument("--ai_fake_typing", type=bool, default=True)
-    parser.add_argument("--run_fullscreen", type=bool, default=True)
-    parser.add_argument("--use_ai_chat", type=bool, default=True)
-    args = parser.parse_args()
 
-    # fp_config = "../configs/chat/ls1_version_4_exp.py"
-    # use_ai_chat = True
-    # verbose_ai = True
-    # portugese_mode = False
-    # ai_fake_typing = True
-    # run_fullscreen = True
+    fp_config = "../configs/chat/ls1_version_4_exp.py"
+    use_ai_chat = True
+    verbose_ai = True
+    portugese_mode = False
+    ai_fake_typing = True
+    run_fullscreen = True
 
     # Let's instantiate the ChatGUI object and conveniantly name it self...
     self = ChatGUI(
-        fp_config=args.fp_config,
-        use_ai_chat=args.use_ai_chat,
-        verbose_ai=args.verbose_ai,
-        portugese_mode=args.portugese_mode,
-        ai_fake_typing=args.ai_fake_typing,
-        run_fullscreen=args.run_fullscreen,
+        fp_config=fp_config,
+        use_ai_chat=use_ai_chat,
+        verbose_ai=verbose_ai,
+        portugese_mode=portugese_mode,
+        ai_fake_typing=ai_fake_typing,
+        run_fullscreen=run_fullscreen,
     )
 
     while True:
