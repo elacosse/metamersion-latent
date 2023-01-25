@@ -2,7 +2,7 @@
 # Chatbot Configuration
 #######################################################################################################################
 
-openai_model = "text-davinci-002"
+openai_model = "text-davinci-003"
 human_prefix = "Visitor"
 ai_prefix = "AI"
 qualifier_dict = {
