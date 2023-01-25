@@ -69,16 +69,11 @@ def main(config_path, example_path, output_path, verbose, police_config):
     # Perform Analysis
     logger.info("Performing analysis on chat history...")
     analysis_dict = perform_analysis(chat_history, config)
-    items = [
-        dict(
-            username=username,
-            example_path=example_path,
-            config_path=config_path,
-            chat_history=chat_history,
-            analysis=analysis_dict,
-        )
-    ]
-    filepath = save_to_yaml(items, token, output_path)
+    analysis_dict["username"] = username
+    analysis_dict["example_path"] = example_path
+    analysis_dict["config_path"] = config_path
+    analysis_dict["chat_history"] = chat_history
+    filepath = save_to_yaml(analysis_dict, token, output_path)
     logger.info("Saved to %s", filepath)
 
     #######################################################################################################################
@@ -119,7 +114,7 @@ def main(config_path, example_path, output_path, verbose, police_config):
 
 if __name__ == "__main__":
     log_fmt = "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
-    logging.basicConfig(level=logging.INFO, format=log_fmt)
+    logging.basicConfig(level=logging.WARNING, format=log_fmt)
     # not used in this stub but often useful for finding various files
     project_dir = Path(__file__).resolve().parents[2]
     # find .env automagically by walking up directories until it's found, then

@@ -17,14 +17,14 @@
 
 # Set LLM parameters here
 # model_name = "text-curie-001"
-model_name = "text-davinci-003"
+model_name = "j1-jumbo"
 
 # Be careful!
 best_of = 1
 
 human_prefix = "Visitor"
 ai_prefix = "AI"
-conversation_stop_list = [f"{ai_prefix}: ", f"{human_prefix}: "]
+conversation_stop_list = [":", ai_prefix, human_prefix, "\n"]
 memory_type = "Buffer"  # "Buffer" "BufferWindow" "Summary"
 window_size = 3
 default_chat_input = "I don't know what to say."
@@ -44,17 +44,42 @@ qualifier_dict = {
     " makes a funny self-deprecating remark and replies": 5,
     ", changing the subject, replies": 5,
 }
+
+
+# model: str = "j1-jumbo"
+# """Model name to use."""
+# temperature: float = 0.7
+# """What sampling temperature to use."""
+# maxTokens: int = 256
+# """The maximum number of tokens to generate in the completion."""
+# minTokens: int = 0
+# """The minimum number of tokens to generate in the completion."""
+# topP: float = 1.0
+# """Total probability mass of tokens to consider at each step."""
+# presencePenalty: AI21PenaltyData = AI21PenaltyData()
+# """Penalizes repeated tokens."""
+# countPenalty: AI21PenaltyData = AI21PenaltyData()
+# """Penalizes repeated tokens according to count."""
+# frequencyPenalty: AI21PenaltyData = AI21PenaltyData()
+# """Penalizes repeated tokens according to frequency."""
+# numResults: int = 1
+# """How many completions to generate for each prompt."""
+# logitBias: Optional[Dict[str, float]] = None
+# """Adjust the probability of specific tokens being generated."""
+# ai21_api_key: Optional[str] = None
+
 model = {
-    "model_name": model_name,
-    "temperature": 0.95,
-    "max_tokens": 1024,
-    "top_p": 1.0,
-    "frequency_penalty": 0.5,
-    "presence_penalty": 0.5,
-    "n": 1,
-    "best_of": best_of,
-    "request_timeout": None,
-    "_type": "openai",
+    "model": model_name,  # j1-jumbo
+    "temperature": 0.7,  # sampling temperature
+    "maxTokens": 1024,  # max number of tokens to generate
+    "minTokens": 10,  # min number of tokens to generate
+    "topP": 1.0,  # total probability mass of tokens to consider at each step
+    # "presencePenalty": 0.0,  # penalizes repeated tokens
+    # "countPenalty": 0.0,  # penalizes repeated tokens according to count
+    # "frequencyPenalty": 0.0,  # penalizes repeated tokens according to frequency
+    "numResults": best_of,  # how many completions to generate for each prompt
+    "logitBias": None,  # adjust the probability of specific tokens being generated
+    "_type": "ai21",
 }
 
 initialization_message = """
@@ -103,7 +128,7 @@ template = """{Exhibit_background}
 {AI_background}
 {First_chat_directions}
 
-Current conversation:
+
 AI: {initial_bot_message}{history}
 Visitor: {input}
 AI{qualifier}:"""  # note these must be history and input!

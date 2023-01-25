@@ -30,6 +30,23 @@ To run chatbot with these flags, run
 python metamersion_latent/tools/chatbot.py -c metamersion_latent/configs/chat/ls1_version_5.py -v -s
 ```
 
+##### Running an Example - Initial Chatbot - Analysis - Exit Chatbot
+
+###### Initial Chatbot
+```bash 
+python metamersion_latent/tools/chatbot.py -c metamersion_latent/configs/chat/ls1_version_6.py -s
+```
+###### Analysis (generate card)
+Using the name you introduced yourself to the chatbot as {username}
+
+```bash 
+python metamersion_latent/tools/run_card.py -c metamersion_latent/configs/chat/ls1_version_6.py -e metamersion_latent/examples/chats/{username}.yaml -o {OUTPUT_DIRECTORY}
+```
+###### Exit Chatbot
+```bash 
+ python metamersion_latent/tools/exit_chatbot.py -c metamersion_latent/configs/chat/ls1_version_6.py -a {PATH_TO_ANALYSIS_YAML_OUTPUT} -v -s
+```
+
 ##### Customizing the chatbot configurations
 To customize your chatbot, refer to example configuration files in
 ```bash
