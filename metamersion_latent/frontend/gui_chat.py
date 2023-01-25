@@ -14,6 +14,7 @@ from dotenv import find_dotenv, load_dotenv
 from metamersion_latent.llm.chat import Chat
 from metamersion_latent.llm.config import Config
 from metamersion_latent.utils import save_to_yaml
+import argparse
 
 """
 TODO: 
@@ -730,23 +731,32 @@ class ChatGUI:
 if __name__ == "__main__":
 
     # Change Parameters below
+    
+    
+    parser = argparse.ArgumentParser(description="ChatGUI")
+    parser.add_argument("--fp_config", type=str, default="../configs/chat/ls1_version_4_exp.py")
+    parser.add_argument("--verbose_ai", type=bool, default=True)
+    parser.add_argument("--portugese_mode", type=bool, default=False)
+    parser.add_argument("--ai_fake_typing", type=bool, default=True)
+    parser.add_argument("--run_fullscreen", type=bool, default=True)
+    parser.add_argument("--use_ai_chat", type=bool, default=True)
+    args = parser.parse_args()
 
-    fp_config = "../configs/chat/ls1_version_4_exp.py"
-    fp_config = "../configs/chat/ls1_version_4_exp.py"
-    use_ai_chat = True
-    verbose_ai = True
-    portugese_mode = False
-    ai_fake_typing = True
-    run_fullscreen = True
+    # fp_config = "../configs/chat/ls1_version_4_exp.py"
+    # use_ai_chat = True
+    # verbose_ai = True
+    # portugese_mode = False
+    # ai_fake_typing = True
+    # run_fullscreen = True
 
     # Let's instantiate the ChatGUI object and conveniantly name it self...
     self = ChatGUI(
-        fp_config=fp_config,
-        use_ai_chat=use_ai_chat,
-        verbose_ai=verbose_ai,
-        portugese_mode=portugese_mode,
-        ai_fake_typing=ai_fake_typing,
-        run_fullscreen=run_fullscreen,
+        fp_config=args.fp_config,
+        use_ai_chat=args.use_ai_chat,
+        verbose_ai=args.verbose_ai,
+        portugese_mode=args.portugese_mode,
+        ai_fake_typing=args.ai_fake_typing,
+        run_fullscreen=args.run_fullscreen,
     )
 
     while True:
