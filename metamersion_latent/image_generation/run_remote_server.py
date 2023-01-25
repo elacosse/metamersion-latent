@@ -580,9 +580,9 @@ def download_file(filename, url_folder, local_folder):
 download_music()
 # ChosenSet = random.randint(1, 14) 
 # generate_soundtrack("/home/ubuntu/test.mp3", ChosenSet)
-#fp_voice = "/home/ubuntu/movies/230124_183833_NONEX/voice.wav"
-#fp_music = "/home/ubuntu/music.mp3"
-#generate_soundtrack_new(fp_music, fp_voice, soundtrack_duration=180, segments=5)
+# fp_voice = "/home/ubuntu/movies/230125_172619_NONAME/voice.wav"
+# fp_music = "/home/ubuntu/music.mp3"
+# generate_soundtrack_new(fp_music, fp_voice, soundtrack_duration=180, segments=5)
 
 # LATENT BLENDING
 model_512 = True
@@ -631,7 +631,7 @@ while True:
             fp_movie_wfading = f"{dp_subj}/current_nosound.mp4"
             fp_movie_fadein = f"{dp_subj}/tmp_fadein.mp4"
             fp_movie_fadeout = f"{dp_subj}/tmp_fadeout.mp4"
-            fp_voice = f"{dp_subj}/voice.wav"
+            fp_voice = f"{dp_subj}/voice.mp3"
             fp_music = f"{dp_subj}/music.mp3"
             fp_mixed = f"{dp_subj}/current.mp3"
             fp_yml = f"{dp_subj}/info.txt"
@@ -655,12 +655,16 @@ while True:
 
             # MUSIC
             print("GENERATING MUSIC...")
+            audio_duration = (len(list_prompts)+1)*duration_single_trans
             try:
-                ChosenSet = safe_dict_read(dict_meta, 'ChosenSet', 1)
-                if ChosenSet < 1 or ChosenSet > 14:
-                    print("WARNING! BAD ChosenSet! FORCING ChosenSet=1")
-                    ChosenSet=1
-                generate_soundtrack(fp_music, ChosenSet)
+
+                generate_soundtrack_new(fp_music, fp_voice, soundtrack_duration=audio_duration, segments=len(list_prompts)-1)
+
+                # ChosenSet = safe_dict_read(dict_meta, 'ChosenSet', 1)
+                # if ChosenSet < 1 or ChosenSet > 14:
+                #     print("WARNING! BAD ChosenSet! FORCING ChosenSet=1")
+                #     ChosenSet=1
+                # generate_soundtrack(fp_music, ChosenSet)
             except Exception as e:
                 print(f"EXCEPTION! {e}")
             print("DONE GENERATING MUSIC")
@@ -674,7 +678,7 @@ while True:
                 narration_list = safe_dict_read(dict_meta, 'narration_list', len(list_prompts)*["nothing to say"])
                 tts_length_scale = safe_dict_read(dict_meta, 'tts_length_scale', 1.0)
                 tts_model = 'tts_models/en/vctk/vits'
-                audio_duration = (len(list_prompts)+1)*duration_single_trans
+                
                 offset = duration_fade
                 start_times = list(np.arange(0,duration_single_trans*len(narration_list),duration_single_trans)+silence_begin+offset)
                 print(f"audio_duration={audio_duration} start_times={start_times}")

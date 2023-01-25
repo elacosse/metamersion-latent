@@ -300,7 +300,7 @@ def upload_vimeo(fp_movie, name_video):
 
 # LATENT BLENDING
 # LATENT BLENDING
-model_512 = True
+model_512 = False
 if model_512:
     fp_ckpt = "latentblending/v2-1_512-ema-pruned.ckpt"
     fp_config = 'latentblending/configs/v2-inference.yaml'
@@ -368,7 +368,7 @@ start_times = list(np.arange(0,transition_duration*len(narration_list),transitio
 preset = "fast"
 voice = "train_dreams"
 devices = ["cuda:0"]
-
+audio_duration = (len(list_prompts)+1)*duration_single_trans
 fp_voice = "/home/ubuntu/test_voice.wav"
 assemble_tts_for_video(narration_list, audio_duration, start_times, fp_voice, preset, voice, devices)
 
