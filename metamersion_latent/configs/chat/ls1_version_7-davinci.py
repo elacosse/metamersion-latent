@@ -111,24 +111,36 @@ AI: {initial_bot_message}{history}
 Visitor: {input}
 AI{qualifier}:"""  # note these must be history and input!
 
+
+
 initial_bot_message = """Can you tell me your name or what I should call you?"""
 last_bot_pre_message_injection = """\nThis was enough information for the {ai_prefix}. In the next statement, the {ai_prefix} politely thanked the {human_prefix} and said that the VR experience can now begin in the next room."""
+
+
 
 #######################################################################################################################
 # Exit Conversation
 #######################################################################################################################
+#exit_qualifier_dict = {
+#    "": 10,
+#    " is being sneaky and deceptive": 1,
+#    " is being very light hearted": 1,
+#    " is being very serious": 1,
+#    " is being very funny": 1,
+#    " is being very sad": 1,
+#    " is being very angry": 1,
+#    " is being very happy": 1,
+#}
 exit_qualifier_dict = {
-    "": 10,
-    " is being sneaky and deceptive": 1,
-    " is being very light hearted": 1,
-    " is being very serious": 1,
-    " is being very funny": 1,
-    " is being very sad": 1,
-    " is being very angry": 1,
-    " is being very happy": 1,
+    " politely in the style of the visitor, kindly soliciting the visitor's opinion": 5,
+    " politely and empathically delves deeper, kindly soliciting the visitor's opinion": 5,
+    " making a funny self-deprecating remark, kindly soliciting the visitor's opinion": 5,
+    " politely asks a more personal question": 5,
+    ", changing the subject, replies, kindly soliciting the visitor's opinion": 5,
 }
+
 exit_model = {
-    "model_name": "text-davinci-002",
+    "model_name": model_name,
     "temperature": 0.95,
     "max_tokens": 1024,
     "top_p": 1.0,
@@ -213,6 +225,8 @@ Visitor: {input}
 AI{qualifier}:"""
 
 exit_initial_bot_message = "Hi, {username}! How was your experience in the VR? What did you see? What did you feel? What did you think about the experience?"
+exit_last_bot_pre_message_injection = """\nIn the next statement, the {ai_prefix} politely thanked the {human_prefix} and expressed hopes that they would meet again."""
+
 
 #######################################################################################################################
 # TTS Configuration
