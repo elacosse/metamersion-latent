@@ -602,6 +602,7 @@ def safe_dict_read(dict_stuff, key_load, default_value):
     if key_load in dict_stuff.keys():
         return dict_stuff[key_load]
     else:
+        print(f"WARNING safe_dict_read: did not find {key_load}")
         return default_value
 
 # RUNS
@@ -631,7 +632,7 @@ while True:
             fp_movie_wfading = f"{dp_subj}/current_nosound.mp4"
             fp_movie_fadein = f"{dp_subj}/tmp_fadein.mp4"
             fp_movie_fadeout = f"{dp_subj}/tmp_fadeout.mp4"
-            fp_voice = f"{dp_subj}/voice.mp3"
+            fp_voice = f"{dp_subj}/voice.wav"
             fp_music = f"{dp_subj}/music.mp3"
             fp_mixed = f"{dp_subj}/current.mp3"
             fp_yml = f"{dp_subj}/info.txt"
@@ -700,7 +701,7 @@ while True:
                         print("WARNING! BAD ChosenSet! FORCING ChosenSet=1")
                         ChosenSet=1
                     generate_soundtrack(fp_music, ChosenSet)
-                    
+
             except Exception as e:
                 print(f"EXCEPTION! {e}")
             print("DONE GENERATING MUSIC")

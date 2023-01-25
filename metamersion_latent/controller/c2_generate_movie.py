@@ -285,28 +285,17 @@ if __name__ == "__main__":
     ip_server = "138.2.229.216"
     zmq_client = Client(ip_server, 7555, 7556, image_dims=IMAGE_DIMS, verbose=True)
 
-    # duration_single_trans = 15
-    # ChosenSet = 1 #music set! needs to be between 1 and 13
-    # duration_fade = 20
-    # silence_begin = -3
-    # quality = 'lowest'
-    # depth_strength = 0.5
-    # seed = 420
-    # width = 768
-    # height = 512
-    # negative_prompt = "ugly, blurry"
-
-    # dict_meta["duration_single_trans"] = config.duration_single_trans
-    # dict_meta["ip_server"] = ip_server
-    # dict_meta["negative_prompt"] = config.negative_prompt
-    # dict_meta["quality"] = config.quality
-    # dict_meta["depth_strength"] = config.depth_strength
-    # dict_meta["silence_begin"] = config.silence_begin
-    # dict_meta["ChosenSet"] = config.ChosenSet
-    # dict_meta["width"] = config.width
-    # dict_meta["height"] = config.height
-    # dict_meta["duration_fade"] = config.duration_fade
-    # dict_meta["seed"] = config.seed
+    dict_meta["duration_single_trans"] = config.duration_single_trans
+    dict_meta["ip_server"] = ip_server
+    dict_meta["negative_prompt"] = config.negative_prompt
+    dict_meta["quality"] = config.quality
+    dict_meta["depth_strength"] = config.depth_strength
+    dict_meta["silence_begin"] = config.silence_begin
+    dict_meta["ChosenSet"] = config.ChosenSet
+    dict_meta["width"] = config.width
+    dict_meta["height"] = config.height
+    dict_meta["duration_fade"] = config.duration_fade
+    dict_meta["seed"] = config.seed
 
     scp_cmd = zmq_client.run_movie(dict_meta)
 
