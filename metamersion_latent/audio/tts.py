@@ -146,17 +146,30 @@ def check_tts_output_concatenation_and_clip(
 
 if __name__ == "__main__":
 
-    narration_list = []
-    narration_list.append(
-        "painting of a forest. it was like really beautiful and stuff"
-    )
-    narration_list.append("painting of a house. super nice house. really.")
-    narration_list.append("painting of a ocean. the ocean was very cold and blue.")
+    from metamersion_latent.utils import load_yaml
 
-    segment_duration = 30  # seconds
+    analysis = load_yaml("metamersion_latent/examples/chats/analysis/Alan.yaml")
+    narration_list = analysis["narration_list"]
+    config_path = analysis["config_path"]
+    from metamersion_latent.llm.config import Config
+
+    config = Config.fromfile(config_path)
+
+    # duration_single_trans = 25
+    # ChosenSet = 3  # music set! needs to be between 1 and 13
+    # duration_fade = 15
+    # silence_begin = -3
+    # quality = "medium"
+    # depth_strength = 0.5
+    # seed = 420
+    # width = 768
+    # height = 512
+    # negative_prompt = "ugly, blurry"
+
+    segment_duration = 25  # seconds
     start_after = 3  # seconds after beginning of segment
-    fade_in_segment = 30  # seconds
-    fade_out_segment = 30  # seconds
+    fade_in_segment = 15  # seconds
+    fade_out_segment = 15  # seconds
     n_segments = len(narration_list)
     start_times = [
         fade_in_segment + start_after + (i * segment_duration)

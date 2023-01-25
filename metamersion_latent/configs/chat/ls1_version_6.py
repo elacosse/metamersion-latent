@@ -8,7 +8,7 @@
 # ZFM Requests
 #
 # Fix hard coded directories in gui_chat.py
-# 1: 
+# 1:
 # self.dp_out = os.path.join(
 #            "/mnt/ls1_data/test_sessions/", f"{get_time('second')}_{username}"
 # 2:
@@ -16,14 +16,14 @@
 #
 
 # Set LLM parameters here
-model_name = "text-curie-001"
-#model_name = "text-davinci-003"
+# model_name = "text-curie-001"
+model_name = "text-davinci-003"
 
 # Be careful!
 best_of = 1
 
-### 
-        
+###
+
 human_prefix = "Visitor"
 ai_prefix = "AI"
 conversation_stop_list = [f"{ai_prefix}: ", f"{human_prefix}: "]
@@ -44,17 +44,17 @@ qualifier_dict = {
     " politely and empathically replies": 5,
     " politely and empathically delves deeper": 5,
     " makes a funny self-deprecating remark and replies": 5,
-    ", changing the subject, replies":5,
+    ", changing the subject, replies": 5,
 }
 model = {
-    "model_name": "text-davinci-003",
+    "model_name": model_name,
     "temperature": 0.95,
     "max_tokens": 1024,
     "top_p": 1.0,
     "frequency_penalty": 0.5,
     "presence_penalty": 0.5,
     "n": 1,
-    "best_of": 1,
+    "best_of": best_of,
     "request_timeout": None,
     "_type": "openai",
 }
@@ -134,7 +134,7 @@ exit_model = {
     "frequency_penalty": 0.5,
     "presence_penalty": 0.5,
     "n": 1,
-    "best_of": 1,
+    "best_of": best_of,
     "request_timeout": None,
     "_type": "openai",
 }
@@ -156,14 +156,14 @@ Why I chose these objects for {username}:
 # LSI_process, Post_chat_directions, Closing_AI_question
 
 scene_object_model = {
-    "model_name": "text-davinci-003",
+    "model_name": model_name,
     "temperature": 0.0,
     "max_tokens": 512,
     "top_p": 1.0,
     "frequency_penalty": 0.0,
     "presence_penalty": 0.0,
     "n": 1,
-    "best_of": 1,
+    "best_of": best_of,
     "request_timeout": None,
     "_type": "openai",
 }
@@ -247,14 +247,14 @@ Based on the conversation, describe some important things about the visitor.
 1."""
 
 analyze_chat_model = {
-    "model_name": "text-davinci-003",
+    "model_name": model_name,
     "temperature": 0.85,
     "max_tokens": 1024,
     "top_p": 1.0,
     "frequency_penalty": 0.2,
     "presence_penalty": 0.2,
     "n": 1,
-    "best_of": 1,
+    "best_of": best_of,
     "request_timeout": None,
     "_type": "openai",
 }
@@ -282,14 +282,14 @@ Include a specific strange man-made thing or living creatures with symbolic sign
 1:"""
 
 create_story_model = {
-    "model_name": "text-davinci-003",
+    "model_name": model_name,
     "temperature": 0.95,
     "max_tokens": 1024,
     "top_p": 1.0,
     "frequency_penalty": 0.2,
     "presence_penalty": 0.2,
     "n": 1,
-    "best_of": 1,
+    "best_of": best_of,
     "request_timeout": None,
     "_type": "openai",
 }
@@ -308,14 +308,14 @@ How well does the story address what we know about the person?
 1:"""
 
 critique_story_model = {
-    "model_name": "text-davinci-003",
+    "model_name": model_name,
     "temperature": 0.75,
     "max_tokens": 1024,
     "top_p": 1.0,
     "frequency_penalty": 0.0,
     "presence_penalty": 0.0,
     "n": 1,
-    "best_of": 1,
+    "best_of": best_of,
     "request_timeout": None,
     "_type": "openai",
 }
@@ -334,14 +334,14 @@ Include one OBJ in each scene other than visitor.
 1:"""
 
 create_scenes_model = {
-    "model_name": "text-davinci-003",
+    "model_name": model_name,
     "temperature": 0.75,
     "max_tokens": 1024,
     "top_p": 1.0,
     "frequency_penalty": 0.0,
     "presence_penalty": 0.0,
     "n": 1,
-    "best_of": 1,
+    "best_of": best_of,
     "request_timeout": None,
     "_type": "openai",
 }
@@ -359,14 +359,14 @@ create_landscapes_template = """These are scenes:
 For each scene, the natural landscape in which it is set.
 1:"""
 create_landscapes_model = {
-    "model_name": "text-davinci-003",
+    "model_name": model_name,
     "temperature": 0.2,
     "max_tokens": 512,
     "top_p": 1.0,
     "frequency_penalty": 0.3,
     "presence_penalty": 0.3,
     "n": 1,
-    "best_of": 1,
+    "best_of": best_of,
     "request_timeout": None,
     "_type": "openai",
 }
@@ -382,14 +382,14 @@ An OBJ is a specific man-made thing or a living creature.
 Choose the main OBJ in each of the {N_steps} scenes.
 1:"""
 create_objects_model = {
-    "model_name": "text-davinci-003",
+    "model_name": model_name,
     "temperature": 0.2,
     "max_tokens": 256,
     "top_p": 1.0,
     "frequency_penalty": 0,
     "presence_penalty": 0,
     "n": 1,
-    "best_of": 1,
+    "best_of": best_of,
     "request_timeout": None,
     "_type": "openai",
 }
@@ -412,14 +412,14 @@ For each landscape the corresponding object is inserted into the landscape.
 A really concise caption for each of the scenes follows.
 1:"""
 create_captions_model = {
-    "model_name": "text-davinci-003",
+    "model_name": model_name,
     "temperature": 0.2,
     "max_tokens": 256,
     "top_p": 1.0,
     "frequency_penalty": 0,
     "presence_penalty": 0,
     "n": 1,
-    "best_of": 1,
+    "best_of": best_of,
     "request_timeout": None,
     "_type": "openai",
 }
@@ -443,14 +443,14 @@ The poem is in first person narration.
 1:"""
 # The symbolic object and its meaning appear in each verse.
 create_poem_model = {
-    "model_name": "text-davinci-003",
+    "model_name": model_name,
     "temperature": 0.85,
     "max_tokens": 1024,
     "top_p": 1.0,
     "frequency_penalty": 0.1,
     "presence_penalty": 0.1,
     "n": 1,
-    "best_of": 1,
+    "best_of": best_of,
     "request_timeout": None,
     "_type": "openai",
 }
