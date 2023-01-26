@@ -19,6 +19,7 @@ import subprocess
 
 from metamersion_latent.llm.config import Config
 from metamersion_latent.utils import load_yaml, user_choice
+import argparse
 
 IMAGE_DIMS = (400, 400, 3)
 EMO_STRING_LEN = 2  # In bytes
@@ -283,7 +284,7 @@ dn = user_choice(list_dns, sort=False, suggestion=list_dns[0])
 dp_session = f"{dp_base}/{dn}"
 
 fp_chat_analysis = os.path.join(dp_session, "chat_analysis.yaml")
-config = Config.fromfile(args.fp_config")
+config = Config.fromfile(args.fp_config)
 # config = Config.fromfile("../configs/chat/ls1_version_4.py")
 dict_meta = load_yaml(fp_chat_analysis)
 
