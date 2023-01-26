@@ -392,8 +392,15 @@ class ChatGUI:
         self.send_message_timer = 3
 
     def init_chat_session(self, username="NONE"):
-        username.replace(" ", "_")
-        username = "".join([c for c in username if c.isalpha() or c.isnumeric()])
+        
+        username_clean = ""
+        for x in username:
+            if x.isalpha() or x.isnumeric():
+                username_clean+=x
+            if x==" ":
+                username_clean+="_"
+        username = username_clean
+        
         self.time_start = time.time()
         self.dp_out = os.path.join(
             "/mnt/ls1_data/test_sessions/", f"{get_time('second')}_{username}"
