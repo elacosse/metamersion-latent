@@ -299,8 +299,8 @@ dict_meta["quality"] = config.quality
 dict_meta["depth_strength"] = config.depth_strength
 dict_meta["silence_begin"] = config.silence_begin
 dict_meta["ChosenSet"] = config.ChosenSet
-dict_meta["width"] = config.width
-dict_meta["height"] = config.height
+dict_meta["width"] = 1280#config.width
+dict_meta["height"] = 768 #config.height
 dict_meta["duration_fade"] = config.duration_fade
 dict_meta["seed"] = config.seed
 
