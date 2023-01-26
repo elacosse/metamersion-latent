@@ -201,5 +201,5 @@ if __name__ == "__main__":
     assemble_tts_for_video(narration_list, audio_duration, start_times, fp_voice, preset, voice, devices)
     t1 = time.time()
     print("TIME") # multi - 170.02198219299316, 526.7729606628418
-    print(t1 - t0)    print("TIME") # multi - 170.02198219299316, 526.7729606628418
+    print(t1 - t0)    #print("TIME") # multi - 170.02198219299316, 526.7729606628418
     print(t1 - t0)
