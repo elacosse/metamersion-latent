@@ -484,6 +484,7 @@ class ChatGUI:
             save_to_yaml(items, label, output_dir="/tmp/")
             print(f"failed wrap_up_and_save: {e}")
 
+        print("WRAP UP AND SAVE CALLED")
         return output
 
     def last_input_ai(self):
