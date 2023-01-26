@@ -30,6 +30,8 @@ import glob
 import os
 import pydub
 
+from metamersion_latent.utils import save_to_yaml, load_yaml
+
 IMAGE_DIMS = (512,512,3)
 EMO_STRING_LEN = 2 # In bytes
 TOPIC = b'\x00'
@@ -585,18 +587,19 @@ download_music()
 # generate_soundtrack_new(fp_music, fp_voice, soundtrack_duration=180, segments=5)
 
 # LATENT BLENDING
-model_512 = True
-if model_512:
+use_multi_gpu = False
+if not use_multi_gpu:
     fp_ckpt = "latentblending/v2-1_512-ema-pruned.ckpt"
     fp_config = 'latentblending/configs/v2-inference.yaml'
-
+    fp_ckpt = "latentblending/v2-1_768-ema-pruned.ckpt"
+    fp_config = 'latentblending/configs/v2-inference-v.yaml'
+    sdh = StableDiffusionHolder(fp_ckpt, fp_config)
+    lb = LatentBlending(sdh)
+else:
 # 768
-if not model_512:
     fp_ckpt = "latentblending/v2-1_768-ema-pruned.ckpt"
     fp_config = 'latentblending/configs/v2-inference-v.yaml'
 
-sdh = StableDiffusionHolder(fp_ckpt, fp_config)
-lb = LatentBlending(sdh)
 
 def safe_dict_read(dict_stuff, key_load, default_value):
     if key_load in dict_stuff.keys():
@@ -641,11 +644,12 @@ while True:
             list_prompts = safe_dict_read(dict_meta, 'list_prompts', 6*["painting of the moon"])
             list_prompts = [l for l in list_prompts if len(l) > 10]
             neg_prompt = safe_dict_read(dict_meta, 'neg_prompt', "")
+            fps = 30
 
             width = int(safe_dict_read(dict_meta, 'width', 768))
             height = int(safe_dict_read(dict_meta, 'height', 768))
             duration_single_trans = safe_dict_read(dict_meta, 'duration_single_trans', 20)
-            depth_strength = safe_dict_read(dict_meta, 'depth_strength', 0.5)
+            depth_strength = safe_dict_read(dict_meta, 'depth_strength', 0.5)   
             quality = safe_dict_read(dict_meta, 'quality', 'medium')
             seed = safe_dict_read(dict_meta, 'seed', 420)
             duration_fade = safe_dict_read(dict_meta, 'duration_fade', 10)
@@ -680,7 +684,11 @@ while True:
                 # segment_duration = generate_tts_audio_from_list_onsets(narration_list, start_times, audio_duration, tts_model, speaker_indx, fp_voice)
                 preset = "fast"
                 voice = "train_dreams"
-                devices = ["cuda:0"]
+                if use_multi_gpu:
+                    num_gpus = 8
+                else:
+                    num_gpus = 1
+                devices = [f"cuda:{i}" for i in range(num_gpus)]
                 assemble_tts_for_video(narration_list, audio_duration, start_times, fp_voice, preset, voice, devices)
 
             except Exception as e:
@@ -724,24 +732,60 @@ while True:
 
             print("STARTING LATENT BLENDING...")
             try:
-                # Start latent blending
-                lb.set_width(width)
-                lb.set_height(height)
+                # Single GPU Instance
+                if not use_multi_gpu:
+                    # Start latent blending
+                    lb.set_width(width)
+                    lb.set_height(height)
 
-                lb.load_branching_profile(quality=quality, depth_strength=depth_strength)
-                fps = 30
-                
-                print(f"found {len(list_prompts)} prompts. They are:")
-                for prompt in list_prompts:
-                    print(prompt)
+                    lb.load_branching_profile(quality=quality, depth_strength=depth_strength)
+                    
+                    
+                    print(f"found {len(list_prompts)} prompts. They are:")
+                    for prompt in list_prompts:
+                        print(prompt)
 
-                lb.run_multi_transition(
-                        fp_movie, 
-                        list_prompts, 
-                        list_seeds=list_seeds, 
-                        fps=fps, 
-                        duration_single_trans=duration_single_trans
-                    )
+                    lb.run_multi_transition(
+                            fp_movie, 
+                            list_prompts, 
+                            list_seeds=list_seeds, 
+                            fps=fps, 
+                            duration_single_trans=duration_single_trans
+                        )
+
+                # Multi GPUs
+                else: 
+                    # Save out yaml file with dict_meta
+                    save_to_yaml(dict_meta, 'dict_meta', dp_subj)
+
+                    # Run parallel process for each segment
+                    fn_base_movie = os.path.join(dp_subj, "movie_segment")
+
+                    def run_lb_parallel(dp_subj):
+
+                        with open("parallel_blending.sh", 'w+') as f:
+                            f.writelines('#!/bin/bash\n')
+                            
+                            for idx_prompt in range(len(list_prompts)-1):
+                                gpu_id = idx_prompt
+                                f.writelines(f'(CUDA_VISIBLE_DEVICES={gpu_id} python latent_blending_segment.py "{dp_subj} {gpu_id} {fn_base_movie}")& \n')
+                                
+                            f.writelines('wait')
+                        
+                        rc = subprocess.call(["bash","parallel_blending.sh"])
+                        
+                        print('run_parallel: finished')
+                        
+                        list_fn_output = [fn_base_movie+str(idx)+'.mp4' for idx in range(len(list_prompts)-1)]
+                        list_fp_output = [os.path.join(dp_subj, l) for l in list_fn_output]
+                        return list_fp_output
+
+                    list_fp_output = run_lb_parallel(dp_subj)
+
+                    # Concatenate the segments
+                    concatenate_movies(fp_movie, list_fp_output)
+
+
             except Exception as e:
                 print(f"EXCEPTION! {e}")
             print("DONE LATENT BLENDING.")
