@@ -50,7 +50,7 @@ def format_special_template(config, yaml_dict):
 
     # should really be moved to analysis...
     # but for now, just put it here
-    scene_object_template = config.scene_object_template
+    scene_object_template = config.scene_
     scene_object_template = scene_object_template.format(
         username=username,
         story=story,
@@ -134,28 +134,53 @@ def main(config_path, analysis_path, verbose, time_limit, save_to_example):
     # Format the template with the initial message
     yaml_dict = load_yaml(analysis_path)
     username = yaml_dict["username"]
+    # captions = yaml_dict["captions"]
+    # chat_analysis = yaml_dict["chat_analysis"]
+    # critique_story = yaml_dict["critique_story"]
+    # landscapes = yaml_dict["landscapes"]
+    # list_prompts = yaml_dict["list_prompts"]
+    # narration_list = yaml_dict["narration_list"]
+    objects = yaml_dict["objects"]
+    # poem = yaml_dict["poem"]
+    # scenes = yaml_dict["scenes"]
+    story = yaml_dict["story"]
     # Format the template
-    config.template = format_special_template(config, yaml_dict)
-    config.exit_initial_bot_message = config.exit_initial_bot_message.format(
-        username=username
-    )
-    config.model = config.exit_model
-    config.qualifier_dict = config.exit_qualifier_dict
-    # config.template = config.template.format(
-    #     initial_bot_message=config.initial_bot_message,
-    #     history="{history}",
-    #     qualifier="{qualifier}",
-    #     input="{input}",
+    # config.template = format_special_template(config, yaml_dict)
+
+    # config.exit_initial_bot_message = config.exit_initial_bot_message.format(
+    #     username=username
     # )
+    scene_object_template = config.scene_object_template.format(
+        username=username,
+        story=story,
+        objects=objects,
+    )
+    from metamersion_latent.llm.analysis import prompt
+
+    scene_object_output = prompt(scene_object_template, config.scene_object_model)
+    config.model = config.exit_model
+    # config.qualifier_dict = config.exit_qualifier_dict
+    config.template = config.exit_template.format(
+        initial_bot_message=config.exit_initial_bot_message.format(username=username),
+        scene_object_output=scene_object_output,
+        history="{history}",
+        qualifier="{qualifier}",
+        input="{input}",
+    )
 
     chat = Chat(config, verbose)
     if bool_translate:
-        human_input = input(translate(config.exit_initial_bot_message, "PT") + "\n")
+        human_input = input(
+            translate(config.exit_initial_bot_message.format(username=username), "PT")
+            + "\n"
+        )
         # human_input = translate(human_input, "EN")
         output = chat(human_input)
         print(translate(output, "PT"))
     else:
-        human_input = input(config.exit_initial_bot_message + "\n")
+        human_input = input(
+            config.exit_initial_bot_message.format(username=username) + "\n"
+        )
         output = chat(human_input)
         print(output)
     # Start chat loop
@@ -178,11 +203,10 @@ def main(config_path, analysis_path, verbose, time_limit, save_to_example):
             else:
                 print(config.default_time_limit_message)
             break
-        output = chat(human_input)
-        print(output)
-
         if human_input == "bye":
             break
+        output = chat(human_input)
+        print(output)
 
     # Format chat history properly and save to yaml
     chat_history = (

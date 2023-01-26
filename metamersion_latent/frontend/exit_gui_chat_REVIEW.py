@@ -1,4 +1,3 @@
-import argparse
 import datetime
 import os
 import sys
@@ -7,6 +6,7 @@ import time
 import deepl  # pip install deepl
 import numpy as np
 import pygame
+import argparse
 
 sys.path.append("../..")
 sys.path.append("..")
@@ -285,6 +285,8 @@ class ChatGUI:
         self.fp_font = "kongtext.ttf"
         self.font_size = 12
 
+        self.exit_breaker = "bye"
+
         # Display props
         self.display_height = int(0.99 * pygame.display.Info().current_h)
         self.display_width = pygame.display.Info().current_w
@@ -440,6 +442,8 @@ class ChatGUI:
                 # Check if this was the last chat statement -- inject stop text if so
                 if time.time() > self.time_start + self.config.initial_chat_time_limit:
                     output = self.wrap_up_and_save()
+                elif self.last_text_human == self.exit_breaker:
+                    output = self.wrap_up_and_save()
                 else:
                     output = self.chat(self.last_text_human)
                 output = output.strip()
@@ -451,9 +455,7 @@ class ChatGUI:
                 self.check_if_init_ai_typing()
 
     def wrap_up_and_save(self):
-        output = self.chat(
-            self.last_text_human + self.config.last_bot_pre_message_injection
-        )
+        output = self.chat(self.last_text_human + self.config.last_bot_pre_message_injection)
         self.chat_active = False
         self.time_finish = time.time()
 
@@ -479,8 +481,10 @@ class ChatGUI:
         try:
             save_to_yaml(items, label, output_dir=self.dp_out)
         except Exception as e:
+            save_to_yaml(items, label, output_dir="/tmp/")
             print(f"failed wrap_up_and_save: {e}")
 
+        print("WRAP UP AND SAVE CALLED")
         return output
 
     def last_input_ai(self):
@@ -733,9 +737,7 @@ if __name__ == "__main__":
     # Change Parameters below
 
     parser = argparse.ArgumentParser(description="ChatGUI")
-    parser.add_argument(
-        "--fp_config", type=str, default="../configs/chat/ls1_version_4_exp.py"
-    )
+    parser.add_argument("--fp_config", type=str, default="../configs/chat/lfs1_version_4.2oldintro.py")
     parser.add_argument("--verbose_ai", type=bool, default=True)
     parser.add_argument("--portugese_mode", type=bool, default=False)
     parser.add_argument("--ai_fake_typing", type=bool, default=True)
@@ -759,6 +761,7 @@ if __name__ == "__main__":
         ai_fake_typing=args.ai_fake_typing,
         run_fullscreen=args.run_fullscreen,
     )
+
 
     while True:
 
