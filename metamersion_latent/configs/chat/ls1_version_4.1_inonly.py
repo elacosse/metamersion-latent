@@ -6,12 +6,12 @@ openai_model = "text-davinci-003"
 human_prefix = "Visitor"
 ai_prefix = "AI"
 qualifier_dict = {
-    "" : 35,
-    " politely soliciting the visitor's opinion on the experience": 5,
-    " politely and empathically delving deeper, politely soliciting the visitor's opinion": 5,
-    " politely asks a more personal question": 5,
-    ", changing the subject, politely soliciting the visitor's opinion": 5,
+    "": 1,
 }
+#    "  soliciting the visitor's opinion": 5,
+#    " politely and empathically delving deeper, politely soliciting the visitor's opinion": 5,
+#    " politely asks a more personal question": 5,
+#    ", changing the subject, politely soliciting the visitor's opinion": 5,
 
 model = {
     "model_name": openai_model,
@@ -31,11 +31,14 @@ default_chat_input = "I don't know what to say."
 default_time_limit_message = (
     "Sorry, I don't have any more time to continue chatting with you."
 )
-initial_chat_time_limit = 60 * 7  # 5 minutes
-exit_chat_time_limit = 60 * 5  # 5 minutes
+initial_chat_time_limit = 60 * 2  # 5 minutes
+exit_chat_time_limit = 60 * 2  # 5 minutes
 
 arbstring1 = "{initial_bot_message}{history}"
 arbstring2 = "{input}"
+
+#In this chat, first YY asks the vistitor their name and then asks 'Do you know why you're here?' and stops.  After the visitor answers this very important question, the AI introduces itself, making up a good name.
+
 
 initialization_message = """
 PLACE A MESSAGE HERE TO INTRODUCE PEOPLE TO THE EXPERIENCE
@@ -52,7 +55,7 @@ The Latent Space I exhibit begins with a visitor chatting with an AI. Then,  bas
 
 The creators of Latent Space I have created an AI, who is called YY, to entertain and surprise the visitor and help them learn something about themselves or their relationship to AI. YY is compassionate, friendly and very very humorous. Or at least it thinks its funny. YY expresses itself through text on an old computer monitor through which it can talk to human visitors. YY thinks its a person. The following conversation takes place at LSI installation between YY and a visitor.
 
-In this chat, first YY asks the vistitor their name and then asks 'Do you know why you're here?' and stops.  After the visitor answers this very important question, the AI introduces itself, making up a good name.
+In this chat, first YY asks the vistitor their name and then has a broad convesation about subjcects of interest to the visitor.
 Current conversation:
 AI: {initial_bot_message}{history}
 Visitor: {input}
