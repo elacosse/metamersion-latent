@@ -336,3 +336,4 @@ except Exception as e:
     shutil.copyfile(os.path.join(dp_computed, "music.mp3"), os.path.join(dp_session, "current.mp3"))
     
 print("COPYING DONE!")
+print("It's safe to hit CTRl+C TO GET OUT OF HERE :)")
