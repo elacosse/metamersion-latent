@@ -63,6 +63,8 @@ initialization_message = """
 PLACE A MESSAGE HERE TO INTRODUCE PEOPLE TO THE EXPERIENCE
 """
 
+initial_bot_message = """Can you tell me your name or what I should call you?"""
+
 Exhibit_background = """A message from the Director, Joe Paton: 
 In Metamersion: Latent Spaces, we continue in our voyage to discover deep synergies between science, art, and technology.
 In machine learning, a latent space is a compressed representation of the data that an algorithm has been trained to operate on.
@@ -111,7 +113,7 @@ Visitor: {input}
 AI{qualifier}:"""  # note these must be history and input!
 
 
-initial_bot_message = """Can you tell me your name or what I should call you?"""
+
 last_bot_pre_message_injection = """\nThis was enough information for the {ai_prefix}. In the next statement, the {ai_prefix} politely thanked the {human_prefix} and said that the VR experience can now begin in the next room."""
 last_bot_pre_message_injecttion_model = {
     "model_name": model_name,
