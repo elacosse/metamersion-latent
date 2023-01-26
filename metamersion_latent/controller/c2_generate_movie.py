@@ -299,8 +299,8 @@ dict_meta["quality"] = config.quality
 dict_meta["depth_strength"] = config.depth_strength
 dict_meta["silence_begin"] = config.silence_begin
 dict_meta["ChosenSet"] = config.ChosenSet
-dict_meta["width"] = config.width
-dict_meta["height"] = config.height
+dict_meta["width"] = 1280#config.width
+dict_meta["height"] = 768 #config.height
 dict_meta["duration_fade"] = config.duration_fade
 dict_meta["seed"] = config.seed
 
@@ -336,3 +336,4 @@ except Exception as e:
     shutil.copyfile(os.path.join(dp_computed, "music.mp3"), os.path.join(dp_session, "current.mp3"))
     
 print("COPYING DONE!")
+print("It's safe to hit CTRl+C TO GET OUT OF HERE :)")
