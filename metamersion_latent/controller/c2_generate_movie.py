@@ -260,69 +260,78 @@ class Client:
                 return
 
 
-#%%
-# spawn remote connection to server
-if __name__ == "__main__":
-    load_dotenv(find_dotenv(), verbose=False)
-    dp_base = os.getenv(
-        "DIR_SUBJ_DATA"
-    )  # to .env add  DIR_SUBJ_DATA='/Volumes/LXS/test_sessions/'
-    list_dns = os.listdir(dp_base)
-    list_dns = [l for l in list_dns if l[0] == "2"]
-    list_dns = [l for l in list_dns if os.path.isfile(os.path.join(dp_base, l, "chat_analysis.yaml"))]
-    list_dns.sort(reverse=True)
-    dn = user_choice(list_dns, sort=False, suggestion=list_dns[0])
-    dp_session = f"{dp_base}/{dn}"
+parser = argparse.ArgumentParser(description="c2_generate_movies")
+parser.add_argument("--id_server", type=int)
+parser.add_argument("--fp_config", type=str, default="../configs/chat/ls1_version_4_exp.py")
+args = parser.parse_args()
 
-    fp_chat_analysis = os.path.join(dp_session, "chat_analysis.yaml")
-    config = Config.fromfile("../configs/chat/ls1_version_4.py")
-    dict_meta = load_yaml(fp_chat_analysis)
+id_server = args.id_server
+if id_server == 0:
+    ip_server = "150.136.117.84"
+elif id_server == 1:
+    ip_server = "129.213.150.221"
+elif id_server == 2:
+    ip_server = "150.136.65.91"
 
-    ip_server = "138.2.229.216"
-    zmq_client = Client(ip_server, 7555, 7556, image_dims=IMAGE_DIMS, verbose=True)
+load_dotenv(find_dotenv(), verbose=False)
+dp_base = os.getenv("DIR_SUBJ_DATA")
+list_dns = os.listdir(dp_base)
+list_dns = [l for l in list_dns if l[0] == "2"]
+list_dns = [l for l in list_dns if os.path.isfile(os.path.join(dp_base, l, "chat_analysis.yaml"))]
+list_dns.sort(reverse=True)
+dn = user_choice(list_dns, sort=False, suggestion=list_dns[0])
+dp_session = f"{dp_base}/{dn}"
 
-    dict_meta["duration_single_trans"] = config.duration_single_trans
-    dict_meta["negative_prompt"] = config.negative_prompt
-    dict_meta["ip_server"] = ip_server
-    dict_meta["negative_prompt"] = config.negative_prompt
-    dict_meta["quality"] = config.quality
-    dict_meta["depth_strength"] = config.depth_strength
-    dict_meta["silence_begin"] = config.silence_begin
-    dict_meta["ChosenSet"] = config.ChosenSet
-    dict_meta["width"] = config.width
-    dict_meta["height"] = config.height
-    dict_meta["duration_fade"] = config.duration_fade
-    dict_meta["seed"] = config.seed
+fp_chat_analysis = os.path.join(dp_session, "chat_analysis.yaml")
+config = Config.fromfile(args.fp_config")
+# config = Config.fromfile("../configs/chat/ls1_version_4.py")
+dict_meta = load_yaml(fp_chat_analysis)
 
-    scp_cmd = zmq_client.run_movie(dict_meta)
+# ip_server = "138.2.229.216"
+zmq_client = Client(ip_server, 7555, 7556, image_dims=IMAGE_DIMS, verbose=True)
 
-    print(scp_cmd)
+dict_meta["duration_single_trans"] = config.duration_single_trans
+dict_meta["negative_prompt"] = config.negative_prompt
+dict_meta["ip_server"] = ip_server
+dict_meta["negative_prompt"] = config.negative_prompt
+dict_meta["quality"] = config.quality
+dict_meta["depth_strength"] = config.depth_strength
+dict_meta["silence_begin"] = config.silence_begin
+dict_meta["ChosenSet"] = config.ChosenSet
+dict_meta["width"] = config.width
+dict_meta["height"] = config.height
+dict_meta["duration_fade"] = config.duration_fade
+dict_meta["seed"] = config.seed
 
-    #%% Download
-    ts_server = scp_cmd[:-2].split("/")[-1]
-    dp_computed = os.path.join(dp_session, f"computed_{ts_server}")
-    os.makedirs(dp_computed)
-    # copy the chat analysis
-    shutil.copyfile(
-        os.path.join(dp_session, "chat_analysis.yaml"),
-        os.path.join(dp_computed, "chat_analysis.yaml"),
-    )
+scp_cmd = zmq_client.run_movie(dict_meta)
 
-    # SCP everything
-    scp_cmd_mod = scp_cmd[:-2] + f"/* {dp_computed}/"
-    subprocess.call(scp_cmd_mod, shell=True)
-    print("SCP DONE!")
+print(scp_cmd)
 
-    try:
-        shutil.copyfile(os.path.join(dp_computed, "current.mp4"), os.path.join(dp_session, "current.mp4"))
-    except Exception as e:
-        print(f"FAIL! VOICE? {e}.")
-        shutil.copyfile(os.path.join(dp_computed, "current_nosound.mp4"), os.path.join(dp_session, "current.mp4"))
+#%% Download
+ts_server = scp_cmd[:-2].split("/")[-1]
+dp_computed = os.path.join(dp_session, f"computed_{ts_server}")
+os.makedirs(dp_computed)
+# copy the chat analysis
+shutil.copyfile(
+    os.path.join(dp_session, "chat_analysis.yaml"),
+    os.path.join(dp_computed, "chat_analysis.yaml"),
+)
 
-    try:
-        shutil.copyfile(os.path.join(dp_computed, "current.mp3"), os.path.join(dp_session, "current.mp3"))
-    except Exception as e:
-        print(f"FAIL! VOICE? {e}.")
-        shutil.copyfile(os.path.join(dp_computed, "music.mp3"), os.path.join(dp_session, "current.mp3"))
-        
-    print("COPYING DONE!")
+# SCP everything
+scp_cmd_mod = scp_cmd[:-2] + f"/* {dp_computed}/"
+subprocess.call(scp_cmd_mod, shell=True)
+print("SCP DONE!")
+
+try:
+    shutil.copyfile(os.path.join(dp_computed, "current.mp4"), os.path.join(dp_session, "current.mp4"))
+except Exception as e:
+    print(f"FAIL! VOICE? {e}.")
+    shutil.copyfile(os.path.join(dp_computed, "current_nosound.mp4"), os.path.join(dp_session, "current.mp4"))
+
+try:
+    shutil.copyfile(os.path.join(dp_computed, "current.mp3"), os.path.join(dp_session, "current.mp3"))
+except Exception as e:
+    print(f"FAIL! VOICE? {e}.")
+    shutil.copyfile(os.path.join(dp_computed, "music.mp3"), os.path.join(dp_session, "current.mp3"))
+    
+print("COPYING DONE!")
