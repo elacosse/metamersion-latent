@@ -23,6 +23,7 @@ list_dns = os.listdir(dp_base)
 list_dns = [l for l in list_dns if l[0]=="2"]
 list_dns = [l for l in list_dns if os.path.isfile(os.path.join(dp_base, l, 'chat_history.yaml'))]
 list_dns.sort(reverse=True)
+list_dns = list_dns[0:10]
 dn = user_choice(list_dns, sort=False, suggestion=list_dns[0])
 
 # Load the chat
