@@ -1,37 +1,14 @@
-
-import sys
-sys.path.append("/home/ubuntu/metamersion_latent/")
-sys.path.append("/home/ubuntu/metamersion_latent/metamersion_latent")
-sys.path.append("/home/ubuntu/metamersion_latent/metamersion_latent/audio")
 import math
-
-# import threading
-import multiprocessing
 import os
-import wave
 
 import numpy as np
 import soundfile as sf
 import torchaudio
 from pydub import AudioSegment  # got that anyway from andre
+
+# from metamersion_latent.audio.my_tortoise import TextToSpeech
+from tortoise.api import TextToSpeech
 from tortoise.utils.audio import load_voice
-
-from metamersion_latent.audio.my_tortoise import TextToSpeech
-
-
-def resample_wav(filepath, new_filepath, sr=44100):
-    from scipy.io import wavfile
-    from scipy.signal import resample
-    # Open the wav file using the wave module
-    with wave.open(filepath, "rb") as wav_file:
-        # Get the current sample rate of the wav file
-        current_rate = wav_file.getframerate()
-        
-        data = wavfile.read(filepath)[1]
-        
-        # Resample the wav file to 44.1kHz using the scipy.signal.resample function
-        resampled_data = resample(data, int(data.shape[0] * sr / current_rate))
-        wavfile.write(new_filepath, sr, resampled_data)
 
 
 def create_tts_from_text(
@@ -54,7 +31,7 @@ def create_tts_from_text(
         preset=preset,
     )
     data = gen.squeeze(0).cpu()
-    torchaudio.save(output_path, data, 24000, format="wav")
+    torchaudio.save(output_path, data, 441000, format="wav")
 
 
 def assemble_tts_for_video(
@@ -76,38 +53,34 @@ def assemble_tts_for_video(
         voice (str): Voice of speaker.
         devices (list): List of cuda devices to use for TTS.
     """
-
+    # MAX_CHAR_LENGTH = 220
+    # # Get length of narrations and truncate if too long
+    # new_narration_list = []
+    # for i, narration in enumerate(narration_list):
+    #     while len(narration) > MAX_CHAR_LENGTH:
+    #         # Get rid of the last sentence assuming formatting with \n
+    #         narration = narration[: narration.rfind("\n") + 1]
+    #     new_narration_list.append(narration)
     output_dir = os.path.dirname(output_filepath)
     segment_filepaths = [
         os.path.join(output_dir, f"segment{i}.wav") for i in range(len(narration_list))
     ]
-
-    if len(devices) > 1:
-        narration_stack = narration_list.copy()
-        i = 0
-        process_list = []
-        while len(narration_stack) > 0:
-            text_segment = narration_stack.pop()
-            device = devices[i % len(devices)]
-            process = multiprocessing.Process(target=create_tts_from_text,args=(text_segment, segment_filepaths[i], voice, preset, device,))
-            # thread = threading.Thread(target=create_tts_from_text,args=(text_segment, segment_filepaths[i], voice, preset, device,))
-            process.start()
-            process_list.append(process)
-            if len(process_list) == len(devices):
-                for process in process_list:
-                    process.join()
-                process_list = []
-            i += 1
-    else:
-        for i, narration in enumerate(narration_list):
-            create_tts_from_text(narration, segment_filepaths[i], voice, preset, devices[0])
-    
+    for i, narration in enumerate(narration_list):
+        create_tts_from_text(narration, segment_filepaths[i], voice, preset, devices[0])
+    print("Finished TTS generation...")
+    # for i, narration_list in enumerate(narration_list):
+    #     device = devices[i % len(devices)]
+    #     thread_list.append(threading.Thread(target=create_tts_from_thread,args=(narration_list[0], segment_filepaths[0], voice, preset, device)))
+    #     thread_list[-1].start()
+    print("Asembled TTS audio files...")
     assemble_audio_files_with_silence_and_save(
         segment_filepaths, audio_duration, start_times, output_filepath
     )
     # check if too long
+    print("Checking output length")
     check_tts_output_concatenation_and_clip(output_filepath, audio_duration)
     # convert to mp3 44.1khz 2 channels
+    print("Converting to mp3")
     sound = AudioSegment.from_wav(output_filepath)
     sound = sound.set_channels(2)
     sound = sound.set_frame_rate(44100)
@@ -177,12 +150,23 @@ if __name__ == "__main__":
 
     from metamersion_latent.utils import load_yaml
 
-    analysis = load_yaml("metamersion_latent/examples/analysis/Caligula.yaml")
+    analysis = load_yaml("metamersion_latent/examples/chats/analysis/Niklas.yaml")
     narration_list = analysis["narration_list"]
     config_path = analysis["config_path"]
     from metamersion_latent.llm.config import Config
 
     config = Config.fromfile(config_path)
+
+    # duration_single_trans = 25
+    # ChosenSet = 3  # music set! needs to be between 1 and 13
+    # duration_fade = 15
+    # silence_begin = -3
+    # quality = "medium"
+    # depth_strength = 0.5
+    # seed = 420
+    # width = 768
+    # height = 512
+    # negative_prompt = "ugly, blurry"
 
     segment_duration = 25  # seconds
     start_after = 3  # seconds after beginning of segment
@@ -196,15 +180,13 @@ if __name__ == "__main__":
     audio_duration = (
         fade_in_segment + fade_out_segment + (n_segments * segment_duration)
     )
-    import time
-    t0 = time.time()
+    print(start_times, audio_duration)
+
     preset = "fast"
     voice = "train_dreams"
-    num_gpus = 1
-    devices = [f"cuda:{i}" for i in range(num_gpus)]
-    fp_voice = "res1.wav"
-    assemble_tts_for_video(narration_list, audio_duration, start_times, fp_voice, preset, voice, devices)
-    t1 = time.time()
-    print("TIME") # multi - 170.02198219299316, 526.7729606628418
-    print(t1 - t0)    #print("TIME") # multi - 170.02198219299316, 526.7729606628418
-    print(t1 - t0)
+    devices = ["cuda:0"]
+    fp_voice = "bubu.wav"
+
+    assemble_tts_for_video(
+        narration_list, audio_duration, start_times, fp_voice, preset, voice, devices
+    )
