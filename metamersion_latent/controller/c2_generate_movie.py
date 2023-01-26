@@ -269,11 +269,7 @@ if __name__ == "__main__":
     )  # to .env add  DIR_SUBJ_DATA='/Volumes/LXS/test_sessions/'
     list_dns = os.listdir(dp_base)
     list_dns = [l for l in list_dns if l[0] == "2"]
-    list_dns = [
-        l
-        for l in list_dns
-        if os.path.isfile(os.path.join(dp_base, l, "chat_analysis.yaml"))
-    ]
+    list_dns = [l for l in list_dns if os.path.isfile(os.path.join(dp_base, l, "chat_analysis.yaml"))]
     list_dns.sort(reverse=True)
     dn = user_choice(list_dns, sort=False, suggestion=list_dns[0])
     dp_session = f"{dp_base}/{dn}"
@@ -286,6 +282,7 @@ if __name__ == "__main__":
     zmq_client = Client(ip_server, 7555, 7556, image_dims=IMAGE_DIMS, verbose=True)
 
     dict_meta["duration_single_trans"] = config.duration_single_trans
+    dict_meta["negative_prompt"] = config.negative_prompt
     dict_meta["ip_server"] = ip_server
     dict_meta["negative_prompt"] = config.negative_prompt
     dict_meta["quality"] = config.quality
@@ -329,31 +326,3 @@ if __name__ == "__main__":
         shutil.copyfile(os.path.join(dp_computed, "music.mp3"), os.path.join(dp_session, "current.mp3"))
         
     print("COPYING DONE!")
-
-
-# <<<<<<< HEAD
-
-# #%% Download
-# ts_server = scp_cmd[:-2].split("/")[-1]
-# dp_computed = os.path.join(dp_session, f"computed_{ts_server}")
-# os.makedirs(dp_computed)
-# # copy the chat analysis
-# shutil.copyfile(os.path.join(dp_session, 'chat_analysis.yaml'), os.path.join(dp_computed, 'chat_analysis.yaml'))
-
-# # SCP everything
-# scp_cmd_mod = scp_cmd[:-2]+f"/* {dp_computed}/"
-# subprocess.call(scp_cmd_mod, shell=True)
-# print(f"SCP DONE: {dp_computed}")
-
-# list_files_prio = ['current.mp4', 'current.mp3']
-
-# for fn in list_files_prio:
-#     fp_source = os.path.join(dp_computed, fn)
-#     fp_target = os.path.join(dp_session, fn)
-#     shutil.copyfile(fp_source, fp_target)
-#     print(f"copied: {fp_target}")
-# print("COPYING DONE!")
-# =======
-# if __name__ == "__main__":
-#     main()
-# >>>>>>> 8ddd42ab6eac2cccda653018575411927aedd1a3
