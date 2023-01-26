@@ -27,24 +27,42 @@ dp_base = os.getenv("DIR_SUBJ_DATA") # to .env add  DIR_SUBJ_DATA='/Volumes/LXS/
 list_dns = os.listdir(dp_base)
 list_dns = [l for l in list_dns if l[0]=="2"]
 list_dns = [l for l in list_dns if os.path.isfile(os.path.join(dp_base, l, 'current.mp4'))]
+list_dns = [l for l in list_dns if not os.path.isfile(os.path.join(dp_base, l, 'injected.txt'))]
 list_dns.sort(reverse=True)
 list_dns = list_dns[0:10]
 dn = user_choice(list_dns, sort=False, suggestion=list_dns[0])
 
-
-
-
 dp_session = f'{dp_base}/{dn}'
 fp_chat_analysis = os.path.join(dp_session, "chat_analysis.yaml")
 
-# THIS AINT WORKING
-# files_copy_win = ['current.mp4', 'current.mp3']
 
-# print("STARTING UPLOAD TO VR WINDOWS COMPUTER...")
-# for fn in files_copy_win:
-#     fp = os.path.join(dp_session, fn)
-#     scp_cmd = f"scp {fp} CCU-VROOM-WIN10@192.168.50.254:/C:/media/"
-#     # subprocess.call(scp_cmd, shell=True)
+def txt_save(fp_txt, list_blabla, append=False):
+    if append:
+        mode = "a+"
+    else:
+        mode = "w"
+    with open(fp_txt, mode) as fa:
+        for item in list_blabla:
+            fa.write("%s\n" % item)
+
+
+def get_time(resolution=None):
+    if resolution is None:
+        resolution = "second"
+    if resolution == "day":
+        t = time.strftime("%y%m%d", time.localtime())
+    elif resolution == "minute":
+        t = time.strftime("%y%m%d_%H%M", time.localtime())
+    elif resolution == "second":
+        t = time.strftime("%y%m%d_%H%M%S", time.localtime())
+    elif resolution == "millisecond":
+        t = time.strftime("%y%m%d_%H%M%S", time.localtime())
+        t += "_"
+        t += str("{:03d}".format(int(int(datetime.utcnow().strftime("%f")) / 1000)))
+    else:
+        raise ValueError("bad resolution provided: %s" % resolution)
+    return t
+
 
 # OCTI COPYING
 try:
@@ -86,6 +104,9 @@ try:
 	p.wait()
 except Exception as e:
 	print(f"Bad Octi / Johannes: {e}")
+    
+fp_txt = os.path.join(dp_session, "injected.txt")
+txt_save(fp_txt, [f"injected at {get_time('second')}"])
 
 fp = os.path.join(dp_session, 'current.mp*')
 scp_cmd = f"scp {fp} CCU-VROOM-WIN10@192.168.50.254:/C:/media/"

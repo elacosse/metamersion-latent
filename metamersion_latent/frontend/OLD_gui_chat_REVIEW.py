@@ -14,7 +14,7 @@ from dotenv import find_dotenv, load_dotenv
 
 from metamersion_latent.llm.chat import Chat
 from metamersion_latent.llm.config import Config
-from metamersion_latent.utils import save_to_yaml
+from metamersion_latent.utils import save_to_yaml, load_yaml, user_choice
 
 """
 TODO: 
@@ -223,6 +223,7 @@ class ChatGUI:
 
     def __init__(
         self,
+        fp_chat_analysis: str,
         fp_config: str,
         use_ai_chat: bool = True,
         verbose_ai: bool = False,
@@ -230,7 +231,8 @@ class ChatGUI:
         ai_fake_typing: bool = False,
         run_fullscreen: bool = False,
     ):
-
+        
+        self.fp_chat_analysis = fp_chat_analysis
         pygame.init()
         self.use_ai_chat = use_ai_chat
         self.portugese_mode = portugese_mode
@@ -381,7 +383,7 @@ class ChatGUI:
         # Load yaml analysis
         from metamersion_latent.utils import load_yaml
 
-        YAML_ANALYSIS_PATH = "../examples/analysis/Caligula.yaml"
+        YAML_ANALYSIS_PATH = self.fp_chat_analysis
         yaml_dict = load_yaml(YAML_ANALYSIS_PATH)
         username = yaml_dict["username"]
         # captions = yaml_dict["captions"]
@@ -512,7 +514,7 @@ class ChatGUI:
             "language": language_selection,
             "time": time.time(),
         }
-        label = "chat_history"
+        label = "chat_post_experience"
         try:
             save_to_yaml(items, label, output_dir=self.dp_out)
         except Exception as e:
@@ -781,6 +783,20 @@ if __name__ == "__main__":
     parser.add_argument("--run_fullscreen", type=bool, default=True)
     parser.add_argument("--use_ai_chat", type=bool, default=True)
     args = parser.parse_args()
+    
+    load_dotenv(find_dotenv(), verbose=False) 
+    dp_base = os.getenv("DIR_SUBJ_DATA") # to .env add  DIR_SUBJ_DATA='/Volumes/LXS/test_sessions/'
+    list_dns = os.listdir(dp_base)
+    list_dns = [l for l in list_dns if l[0]=="2"]
+    list_dns = [l for l in list_dns if os.path.isfile(os.path.join(dp_base, l, 'current.mp4'))]
+    list_dns = [l for l in list_dns if os.path.isfile(os.path.join(dp_base, l, 'injected.txt'))]
+    list_dns.sort(reverse=True)
+    list_dns = list_dns[0:10]
+    dn = user_choice(list_dns, sort=False, suggestion=list_dns[0])
+    
+    dp_session = f'{dp_base}/{dn}'
+    fp_chat_analysis = os.path.join(dp_session, "chat_analysis.yaml")
+    
 
     # fp_config = "../configs/chat/ls1_version_4_exp.py"
     # use_ai_chat = True
@@ -791,6 +807,7 @@ if __name__ == "__main__":
 
     # Let's instantiate the ChatGUI object and conveniantly name it self...
     self = ChatGUI(
+        fp_chat_analysis,
         fp_config=args.fp_config,
         use_ai_chat=args.use_ai_chat,
         verbose_ai=args.verbose_ai,

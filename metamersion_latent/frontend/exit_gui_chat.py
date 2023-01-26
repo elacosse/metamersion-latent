@@ -1,3 +1,4 @@
+import argparse
 import datetime
 import os
 import sys
@@ -6,7 +7,6 @@ import time
 import deepl  # pip install deepl
 import numpy as np
 import pygame
-import argparse
 
 sys.path.append("../..")
 sys.path.append("..")
@@ -14,7 +14,7 @@ from dotenv import find_dotenv, load_dotenv
 
 from metamersion_latent.llm.chat import Chat
 from metamersion_latent.llm.config import Config
-from metamersion_latent.utils import save_to_yaml
+from metamersion_latent.utils import save_to_yaml, load_yaml, user_choice
 
 """
 TODO: 
@@ -223,6 +223,7 @@ class ChatGUI:
 
     def __init__(
         self,
+        dp_out: str,
         fp_config: str,
         use_ai_chat: bool = True,
         verbose_ai: bool = False,
@@ -230,7 +231,9 @@ class ChatGUI:
         ai_fake_typing: bool = False,
         run_fullscreen: bool = False,
     ):
-
+        
+        self.dp_out = dp_out
+        self.fp_chat_analysis = os.path.join(dp_out, "chat_analysis.yaml")
         pygame.init()
         self.use_ai_chat = use_ai_chat
         self.portugese_mode = portugese_mode
@@ -376,35 +379,61 @@ class ChatGUI:
         # self.history_sham()
 
     def init_ai_chat(self, fp_config, verbose=False):
+
         config = Config.fromfile(fp_config)
-        config.template = config.template.format(
-            initial_bot_message=config.initial_bot_message,
+        # Load yaml analysis
+        from metamersion_latent.utils import load_yaml
+
+        YAML_ANALYSIS_PATH = self.fp_chat_analysis
+        yaml_dict = load_yaml(YAML_ANALYSIS_PATH)
+        username = yaml_dict["username"]
+        # captions = yaml_dict["captions"]
+        # chat_analysis = yaml_dict["chat_analysis"]
+        # critique_story = yaml_dict["critique_story"]
+        # landscapes = yaml_dict["landscapes"]
+        # list_prompts = yaml_dict["list_prompts"]
+        # narration_list = yaml_dict["narration_list"]
+        objects = yaml_dict["objects"]
+        # poem = yaml_dict["poem"]
+        # scenes = yaml_dict["scenes"]
+        story = yaml_dict["story"]
+        scene_object_template = config.scene_object_template.format(
+            username=username,
+            story=story,
+            objects=objects,
+        )
+        from metamersion_latent.llm.analysis import prompt
+
+        config.model = config.exit_model
+        scene_object_output = prompt(scene_object_template, config.scene_object_model)
+        initial_bot_message = config.initial_exit_bot_message.format(username=username)
+        config.model = config.exit_model
+        # config.qualifier_dict = config.exit_qualifier_dict
+        config.template = config.exit_template.format(
+            initial_bot_message=config.initial_exit_bot_message.format(
+                username=username
+            ),
+            scene_object_output=scene_object_output,
             history="{history}",
             qualifier="{qualifier}",
             input="{input}",
         )
         self.config = config
+
         self.chat = Chat(config, self.verbose_ai)
-        initial_bot_message = config.initial_bot_message
+
         if self.portugese_mode:
             initial_bot_message = self.translate_EN2PT(initial_bot_message)
         self.history_ai.append(initial_bot_message)
         self.send_message_timer = 3
 
     def init_chat_session(self, username="NONE"):
-        
-        username_clean = ""
-        for x in username:
-            if x.isalpha() or x.isnumeric():
-                username_clean+=x
-            if x==" ":
-                username_clean+="_"
-        username = username_clean
-        
+        username.replace(" ", "_")
+        username = "".join([c for c in username if c.isalpha() or c.isnumeric()])
         self.time_start = time.time()
-        self.dp_out = os.path.join(
-            "/mnt/ls1_data/test_sessions/", f"{get_time('second')}_{username}"
-        )
+        # self.dp_out = os.path.join(
+        #     "/mnt/ls1_data/test_sessions/", f"{get_time('second')}_{username}"
+        # )
         self.username = username
         try:
             os.makedirs(self.dp_out)
@@ -462,14 +491,16 @@ class ChatGUI:
                 self.check_if_init_ai_typing()
 
     def wrap_up_and_save(self):
-        output = self.chat(self.last_text_human + self.config.last_bot_pre_message_injection)
+        output = self.chat(
+            self.last_text_human + self.config.last_exit_bot_pre_message_injection
+        )
         self.chat_active = False
         self.time_finish = time.time()
 
         chat_history = (
             self.config.ai_prefix
             + ": "
-            + self.config.initial_bot_message
+            + self.config.initial_exit_bot_message
             + self.chat.get_history()
         )
 
@@ -484,7 +515,7 @@ class ChatGUI:
             "language": language_selection,
             "time": time.time(),
         }
-        label = "chat_history"
+        label = "chat_post_experience"
         try:
             save_to_yaml(items, label, output_dir=self.dp_out)
         except Exception as e:
@@ -744,13 +775,29 @@ if __name__ == "__main__":
     # Change Parameters below
 
     parser = argparse.ArgumentParser(description="ChatGUI")
-    parser.add_argument("--fp_config", type=str, default="../configs/chat/ls1_version_4.2oldintro.py")
+    parser.add_argument(
+        "--fp_config", type=str, default="../configs/chat/ls1_version_4_2_w_exit.py"
+    )
     parser.add_argument("--verbose_ai", type=bool, default=True)
     parser.add_argument("--portugese_mode", type=bool, default=False)
     parser.add_argument("--ai_fake_typing", type=bool, default=True)
     parser.add_argument("--run_fullscreen", type=bool, default=True)
     parser.add_argument("--use_ai_chat", type=bool, default=True)
     args = parser.parse_args()
+    
+    load_dotenv(find_dotenv(), verbose=False) 
+    dp_base = os.getenv("DIR_SUBJ_DATA") # to .env add  DIR_SUBJ_DATA='/Volumes/LXS/test_sessions/'
+    list_dns = os.listdir(dp_base)
+    list_dns = [l for l in list_dns if l[0]=="2"]
+    list_dns = [l for l in list_dns if os.path.isfile(os.path.join(dp_base, l, 'current.mp4'))]
+    list_dns = [l for l in list_dns if os.path.isfile(os.path.join(dp_base, l, 'injected.txt'))]
+    list_dns.sort(reverse=True)
+    list_dns = list_dns[0:10]
+    dn = user_choice(list_dns, sort=False, suggestion=list_dns[0])
+    
+    dp_session = f'{dp_base}/{dn}'
+    # fp_chat_analysis = os.path.join(dp_session, "chat_analysis.yaml")
+    
 
     # fp_config = "../configs/chat/ls1_version_4_exp.py"
     # use_ai_chat = True
@@ -761,6 +808,7 @@ if __name__ == "__main__":
 
     # Let's instantiate the ChatGUI object and conveniantly name it self...
     self = ChatGUI(
+        dp_session,
         fp_config=args.fp_config,
         use_ai_chat=args.use_ai_chat,
         verbose_ai=args.verbose_ai,
@@ -768,7 +816,6 @@ if __name__ == "__main__":
         ai_fake_typing=args.ai_fake_typing,
         run_fullscreen=args.run_fullscreen,
     )
-
 
     while True:
 
