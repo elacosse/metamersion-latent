@@ -107,7 +107,7 @@ class Chat:
         qualifier = select_dict_key_by_probability(self.config.qualifier_dict)
 
         iterations = 0
-        while True or iterations > 10:
+        while True or iterations > 3:
             try:
                 # TODO make sure output is at least something!
                 output = self.conversation.predict(

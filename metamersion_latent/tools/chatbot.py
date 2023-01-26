@@ -7,6 +7,7 @@ from pathlib import Path
 import click
 from dotenv import find_dotenv, load_dotenv
 
+from metamersion_latent.llm.analysis import prompt
 from metamersion_latent.llm.chat import Chat
 from metamersion_latent.llm.config import Config
 from metamersion_latent.utils import save_to_yaml
@@ -101,12 +102,6 @@ def main(config_path, verbose, time_limit, save_to_example):
     # Format the template
     config.template = format_special_template(config)
     print(config.template)
-    # config.template = config.template.format(
-    #     initial_bot_message=config.initial_bot_message,
-    #     history="{history}",
-    #     qualifier="{qualifier}",
-    #     input="{input}",
-    # )
 
     chat = Chat(config, verbose)
     if bool_translate:
@@ -134,11 +129,24 @@ def main(config_path, verbose, time_limit, save_to_example):
             human_input = config.default_chat_input
             continue
         elif time_limit and time.time() - start_time > config.initial_chat_time_limit:
-            if bool_translate:
-                print(config.default_time_limit_message)
-            else:
-                print(config.default_time_limit_message)
-            break
+            last_call = config.template.format(
+                history=chat.get_history(),
+                input=human_input
+                + "\n"
+                + config.last_bot_pre_message_injection.format(
+                    ai_prefix=config.ai_prefix, human_prefix=config.human_prefix
+                )
+                + "\n",
+                qualifier="",
+            )
+            # Call vanilla
+            output = prompt(last_call, config.last_bot_pre_message_injecttion_model)
+            print(output)
+            # if bool_translate:
+            #     print(config.default_time_limit_message)
+            # else:
+            #     print(config.default_time_limit_message)
+            # break
         output = chat(human_input)
         print(output)
 
@@ -169,4 +177,5 @@ if __name__ == "__main__":
     # find .env automagically by walking up directories until it's found, then
     # load up the .env entries as environment variables
     load_dotenv(find_dotenv(), verbose=True)
+    main()
     main()

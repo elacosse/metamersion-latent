@@ -37,7 +37,7 @@ default_time_limit_message = (
 # Initial Conversation
 #######################################################################################################################
 
-initial_chat_time_limit = 60 * 1  # in seconds
+initial_chat_time_limit = 30 * 1  # in seconds
 
 qualifier_dict = {
     " politely replies in the style of the visitor, kindly soliciting the visitor's opinion": 10,
@@ -112,16 +112,24 @@ Visitor: {input}
 AI{qualifier}:"""  # note these must be history and input!
 
 
-
 initial_bot_message = """Can you tell me your name or what I should call you?"""
 last_bot_pre_message_injection = """\nThis was enough information for the {ai_prefix}. In the next statement, the {ai_prefix} politely thanked the {human_prefix} and said that the VR experience can now begin in the next room."""
-
-
-
+last_bot_pre_message_injecttion_model = {
+    "model_name": model_name,
+    "temperature": 0.95,
+    "max_tokens": 1024,
+    "top_p": 1.0,
+    "frequency_penalty": 0.5,
+    "presence_penalty": 0.5,
+    "n": 1,
+    "best_of": best_of,
+    "request_timeout": None,
+    "_type": "openai",
+}
 #######################################################################################################################
 # Exit Conversation
 #######################################################################################################################
-#exit_qualifier_dict = {
+# exit_qualifier_dict = {
 #    "": 10,
 #    " is being sneaky and deceptive": 1,
 #    " is being very light hearted": 1,
@@ -130,7 +138,7 @@ last_bot_pre_message_injection = """\nThis was enough information for the {ai_pr
 #    " is being very sad": 1,
 #    " is being very angry": 1,
 #    " is being very happy": 1,
-#}
+# }
 exit_qualifier_dict = {
     " politely in the style of the visitor, kindly soliciting the visitor's opinion": 5,
     " politely and empathically delves deeper, kindly soliciting the visitor's opinion": 5,
@@ -154,9 +162,9 @@ exit_model = {
 exit_chat_time_limit = 60 * 5  # 5 minutes
 
 # Needs to be functionalized to allow insertion of analysis outputs from the yaml file
-#exit_initialization_message = """
-#PLACE A MESSAGE HERE TO INTRODUCE PEOPLE TO THE EXPERIENCE
-#"""
+# exit_initialization_message = """
+# PLACE A MESSAGE HERE TO INTRODUCE PEOPLE TO THE EXPERIENCE
+# """
 exit_initialization_message = """
 """
 
