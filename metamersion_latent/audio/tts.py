@@ -1,3 +1,8 @@
+
+import sys
+sys.path.append("/home/ubuntu/metamersion_latent/")
+sys.path.append("/home/ubuntu/metamersion_latent/metamersion_latent")
+sys.path.append("/home/ubuntu/metamersion_latent/metamersion_latent/audio")
 import math
 
 # import threading
