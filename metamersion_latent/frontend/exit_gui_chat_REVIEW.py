@@ -1,3 +1,4 @@
+import argparse
 import datetime
 import os
 import sys
@@ -6,7 +7,6 @@ import time
 import deepl  # pip install deepl
 import numpy as np
 import pygame
-import argparse
 
 sys.path.append("../..")
 sys.path.append("..")
@@ -376,16 +376,49 @@ class ChatGUI:
         # self.history_sham()
 
     def init_ai_chat(self, fp_config, verbose=False):
+
         config = Config.fromfile(fp_config)
-        config.template = config.template.format(
-            initial_bot_message=config.initial_bot_message,
+        # Load yaml analysis
+        from metamersion_latent.utils import load_yaml
+
+        YAML_ANALYSIS_PATH = "../examples/analysis/Caligula.yaml"
+        yaml_dict = load_yaml(YAML_ANALYSIS_PATH)
+        username = yaml_dict["username"]
+        # captions = yaml_dict["captions"]
+        # chat_analysis = yaml_dict["chat_analysis"]
+        # critique_story = yaml_dict["critique_story"]
+        # landscapes = yaml_dict["landscapes"]
+        # list_prompts = yaml_dict["list_prompts"]
+        # narration_list = yaml_dict["narration_list"]
+        objects = yaml_dict["objects"]
+        # poem = yaml_dict["poem"]
+        # scenes = yaml_dict["scenes"]
+        story = yaml_dict["story"]
+        scene_object_template = config.scene_object_template.format(
+            username=username,
+            story=story,
+            objects=objects,
+        )
+        from metamersion_latent.llm.analysis import prompt
+
+        config.model = config.exit_model
+        scene_object_output = prompt(scene_object_template, config.scene_object_model)
+        initial_bot_message = config.initial_exit_bot_message.format(username=username)
+        config.model = config.exit_model
+        # config.qualifier_dict = config.exit_qualifier_dict
+        config.template = config.exit_template.format(
+            initial_bot_message=config.exit_initial_bot_message.format(
+                username=username
+            ),
+            scene_object_output=scene_object_output,
             history="{history}",
             qualifier="{qualifier}",
             input="{input}",
         )
         self.config = config
+
         self.chat = Chat(config, self.verbose_ai)
-        initial_bot_message = config.initial_bot_message
+
         if self.portugese_mode:
             initial_bot_message = self.translate_EN2PT(initial_bot_message)
         self.history_ai.append(initial_bot_message)
@@ -455,14 +488,16 @@ class ChatGUI:
                 self.check_if_init_ai_typing()
 
     def wrap_up_and_save(self):
-        output = self.chat(self.last_text_human + self.config.last_bot_pre_message_injection)
+        output = self.chat(
+            self.last_text_human + self.config.last_bot_pre_message_injection
+        )
         self.chat_active = False
         self.time_finish = time.time()
 
         chat_history = (
             self.config.ai_prefix
             + ": "
-            + self.config.initial_bot_message
+            + self.config.initial_exit_bot_message
             + self.chat.get_history()
         )
 
@@ -737,7 +772,9 @@ if __name__ == "__main__":
     # Change Parameters below
 
     parser = argparse.ArgumentParser(description="ChatGUI")
-    parser.add_argument("--fp_config", type=str, default="../configs/chat/lfs1_version_4.2oldintro.py")
+    parser.add_argument(
+        "--fp_config", type=str, default="../configs/chat/ls1_version_4_2_w_exit.py"
+    )
     parser.add_argument("--verbose_ai", type=bool, default=True)
     parser.add_argument("--portugese_mode", type=bool, default=False)
     parser.add_argument("--ai_fake_typing", type=bool, default=True)
@@ -761,7 +798,6 @@ if __name__ == "__main__":
         ai_fake_typing=args.ai_fake_typing,
         run_fullscreen=args.run_fullscreen,
     )
-
 
     while True:
 
