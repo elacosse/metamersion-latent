@@ -106,7 +106,7 @@ except Exception as e:
 	print(f"Bad Octi / Johannes: {e}")
     
 fp_txt = os.path.join(dp_session, "injected.txt")
-txt_save(fp_txt, [f"injected at {get_time('second')"])
+txt_save(fp_txt, [f"injected at {get_time('second')}"])
 
 fp = os.path.join(dp_session, 'current.mp*')
 scp_cmd = f"scp {fp} CCU-VROOM-WIN10@192.168.50.254:/C:/media/"
