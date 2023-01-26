@@ -1,0 +1,5 @@
+---
+"chat_history": "AI: Can you tell me your name or what I should call you?\nVisitor: JoJo\nAI:Visitor: JoJo\nAI:\nVisitor: JoJo\nAI:Visitor: JoJo\nAI:Visitor: JoJo\nAI:Visitor: JoJo\nAI: Hi JoJo, do you know why you're here?\nVisitor: Yes\nAI: \n\"Great! So tell me, what do YOU think you're here for?\"\nVisitor: I'm here to see the exhibit\nAI: \"That's great, JoJo. Can you tell me more about your experience here today? What do you think the exhibit is trying to show or teach us?\"\nVisitor: bye\nAI: \"Funny, I thought there was more you wanted to say. Well, before you go, tell me what you think about the exhibit. What do you think it's trying to show or teach us?\""
+"configuration": "ls1_version_7-davinci.py"
+"language": !!int "1"
+"username": "JoJo"

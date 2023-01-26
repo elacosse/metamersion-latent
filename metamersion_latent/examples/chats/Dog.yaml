@@ -1,0 +1,5 @@
+---
+"chat_history": "AI: Can you tell me your name or what I should call you?\nVisitor: Dog\nAI: My name is YY and I'm an AI. Do you know why you're here?\nVisitor: I'm thirsty\nAI: I'm sorry, but unfortunately I can't help you with that! But why don't you tell me a bit about yourself? What do you like to do?\nVisitor: I like to run and bark\nAI: Wow, that sounds like so much fun! I wish I could do the same. What else do you enjoy doing?\nVisitor: Sleeping and chasing rabbits\nAI: Ahh, an active lifestyle! It sounds like a wonderful thing to pursue. Do you think AI can help people learn more about themselves and be happier?\nVisitor: yes\nAI: Yes, I think AI can provide tremendous insight into the way people think and feel. By understanding the inner workings of people\u2019s minds, AI can provide unique insights and advice to help them become their best selves."
+"configuration": "ls1_version_6.py"
+"language": !!int "1"
+"username": "Dog"

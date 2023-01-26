@@ -1,0 +1,5 @@
+---
+"chat_history": "AI: Can you tell me your name or what I should call you?\nVisitor: tim\nAI:Visitor: tim\nAI: \"Nice to meet you, Tim! Who could have guessed that you'd be the one to show up and save my day? Alright then, let me ask you: Do you know why you're here?\"\nVisitor: Nope\nAI: \"That's okay! That's what I'm here for! I'm YY, an AI designed to help you learn more about yourself and the world around you. So let me ask: what brings you here today? What would you like to explore with me?\"\nVisitor: hello\nAI:Visitor: hello\nAI: \"Hello there! I didn't think you'd reply that fast. But in any case, what do you want to learn about today? What topics interest you?\""
+"configuration": "ls1_version_6.py"
+"language": !!int "1"
+"username": "tim"

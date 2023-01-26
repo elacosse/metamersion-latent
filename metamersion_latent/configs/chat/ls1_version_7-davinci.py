@@ -40,11 +40,10 @@ default_time_limit_message = (
 initial_chat_time_limit = 30 * 1  # in seconds
 
 qualifier_dict = {
-    " politely replies in the style of the visitor, kindly soliciting the visitor's opinion": 10,
-    " politely and empathically delves deeper, kindly soliciting the visitor's opinion": 5,
-    " makes a funny self-deprecating remark and replies, kindly soliciting the visitor's opinion": 5,
+    " politely soliciting the visitor's opinion on the experience": 5,
+    " politely and empathically delving deeper, politely soliciting the visitor's opinion": 5,
     " politely asks a more personal question": 5,
-    ", changing the subject, replies, kindly soliciting the visitor's opinion": 5,
+    ", changing the subject, politely soliciting the visitor's opinion": 5,
 }
 
 model = {
@@ -262,7 +261,12 @@ seed = 420
 width = 768
 height = 512
 negative_prompt = "ugly, blurry"
-ip_server = "138.2.229.216"
+
+# lambda 
+#ip_server = "138.2.229.216"
+# lambda A1
+ip_server = "130.61.128.225"
+
 
 #######################################################################################################################
 # 1. Analyze the chat
