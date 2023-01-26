@@ -223,7 +223,7 @@ class ChatGUI:
 
     def __init__(
         self,
-        fp_chat_analysis: str,
+        dp_out: str,
         fp_config: str,
         use_ai_chat: bool = True,
         verbose_ai: bool = False,
@@ -232,7 +232,8 @@ class ChatGUI:
         run_fullscreen: bool = False,
     ):
         
-        self.fp_chat_analysis = fp_chat_analysis
+        self.dp_out = dp_out
+        self.fp_chat_analysis = os.path.join(dp_out, "chat_analysis.yaml")
         pygame.init()
         self.use_ai_chat = use_ai_chat
         self.portugese_mode = portugese_mode
@@ -430,9 +431,9 @@ class ChatGUI:
         username.replace(" ", "_")
         username = "".join([c for c in username if c.isalpha() or c.isnumeric()])
         self.time_start = time.time()
-        self.dp_out = os.path.join(
-            "/mnt/ls1_data/test_sessions/", f"{get_time('second')}_{username}"
-        )
+        # self.dp_out = os.path.join(
+        #     "/mnt/ls1_data/test_sessions/", f"{get_time('second')}_{username}"
+        # )
         self.username = username
         try:
             os.makedirs(self.dp_out)
@@ -795,7 +796,7 @@ if __name__ == "__main__":
     dn = user_choice(list_dns, sort=False, suggestion=list_dns[0])
     
     dp_session = f'{dp_base}/{dn}'
-    fp_chat_analysis = os.path.join(dp_session, "chat_analysis.yaml")
+    # fp_chat_analysis = os.path.join(dp_session, "chat_analysis.yaml")
     
 
     # fp_config = "../configs/chat/ls1_version_4_exp.py"
@@ -807,7 +808,7 @@ if __name__ == "__main__":
 
     # Let's instantiate the ChatGUI object and conveniantly name it self...
     self = ChatGUI(
-        fp_chat_analysis,
+        dp_session,
         fp_config=args.fp_config,
         use_ai_chat=args.use_ai_chat,
         verbose_ai=args.verbose_ai,
