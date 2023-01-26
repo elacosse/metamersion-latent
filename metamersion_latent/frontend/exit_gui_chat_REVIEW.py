@@ -407,7 +407,7 @@ class ChatGUI:
         config.model = config.exit_model
         # config.qualifier_dict = config.exit_qualifier_dict
         config.template = config.exit_template.format(
-            initial_bot_message=config.exit_initial_bot_message.format(
+            initial_bot_message=config.initial_exit_bot_message.format(
                 username=username
             ),
             scene_object_output=scene_object_output,
@@ -489,7 +489,7 @@ class ChatGUI:
 
     def wrap_up_and_save(self):
         output = self.chat(
-            self.last_text_human + self.config.last_bot_pre_message_injection
+            self.last_text_human + self.config.last_exit_bot_pre_message_injection
         )
         self.chat_active = False
         self.time_finish = time.time()
