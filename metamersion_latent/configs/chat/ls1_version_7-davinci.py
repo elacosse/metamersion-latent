@@ -100,7 +100,7 @@ First_chat_directions = f"""In this chat, first {AI_name} asks the vistitor thei
 Next it asks about who the visitor is.
 """
 
-template = """{Exhibit_background}
+template = f"""{Exhibit_background}
 {LSI_background}
 {AI_background}
 {First_chat_directions}
