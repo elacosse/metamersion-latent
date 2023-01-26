@@ -660,7 +660,7 @@ while True:
 
 
             # DEFINE SOME STUFF...
-            audio_duration = (len(list_prompts)+1)*duration_single_trans
+            audio_duration = len(list_prompts)*duration_single_trans + 2*duration_fade
 
 
             # VOICE
@@ -684,11 +684,7 @@ while True:
                 # segment_duration = generate_tts_audio_from_list_onsets(narration_list, start_times, audio_duration, tts_model, speaker_indx, fp_voice)
                 preset = "fast"
                 voice = "train_dreams"
-                if use_multi_gpu:
-                    num_gpus = 8
-                else:
-                    num_gpus = 1
-                devices = [f"cuda:{i}" for i in range(num_gpus)]
+                devices = ["cuda:0"]
                 assemble_tts_for_video(narration_list, audio_duration, start_times, fp_voice, preset, voice, devices)
 
             except Exception as e:
@@ -809,7 +805,7 @@ while True:
                 # save fade out
                 ms = MovieSaver(fp_movie_fadeout, fps=fps)
                 for fract in np.linspace(0,1,nmb_frames_fade):
-                    img_mix = interpolate_linear(img_last, img_black, fract)
+                    img_mix = interpolate_linear(img_last, img_last, fract)
                     ms.write_frame(img_mix)
                 ms.finalize()
 
