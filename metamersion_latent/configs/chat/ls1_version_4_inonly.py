@@ -94,8 +94,8 @@ silence_begin = -3
 quality = "medium"
 depth_strength = 0.5
 seed = 420
-width = 768
-height = 512
+width = 1280
+height = 768
 negative_prompt = "ugly, blurry"
 
 
