@@ -285,6 +285,8 @@ class ChatGUI:
         self.fp_font = "kongtext.ttf"
         self.font_size = 12
 
+        self.exit_breaker = "bye"
+
         # Display props
         self.display_height = int(0.99 * pygame.display.Info().current_h)
         self.display_width = pygame.display.Info().current_w
@@ -440,6 +442,8 @@ class ChatGUI:
                 # Check if this was the last chat statement -- inject stop text if so
                 if time.time() > self.time_start + self.config.initial_chat_time_limit:
                     output = self.wrap_up_and_save()
+                elif self.last_text_human == self.exit_breaker:
+                    output = self.wrap_up_and_save()
                 else:
                     output = self.chat(self.last_text_human)
                 output = output.strip()
@@ -480,6 +484,7 @@ class ChatGUI:
             save_to_yaml(items, label, output_dir="/tmp/")
             print(f"failed wrap_up_and_save: {e}")
 
+        print("WRAP UP AND SAVE CALLED")
         return output
 
     def last_input_ai(self):

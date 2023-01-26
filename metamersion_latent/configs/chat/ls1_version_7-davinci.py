@@ -40,10 +40,11 @@ default_time_limit_message = (
 initial_chat_time_limit = 30 * 1  # in seconds
 
 qualifier_dict = {
-    " politely soliciting the visitor's opinion on the experience": 5,
-    " politely and empathically delving deeper, politely soliciting the visitor's opinion": 5,
+    " politely replies in the style of the visitor, kindly soliciting the visitor's opinion": 10,
+    " politely and empathically delves deeper, kindly soliciting the visitor's opinion": 5,
+    " makes a funny self-deprecating remark and replies, kindly soliciting the visitor's opinion": 5,
     " politely asks a more personal question": 5,
-    ", changing the subject, politely soliciting the visitor's opinion": 5,
+    ", changing the subject, replies, kindly soliciting the visitor's opinion": 5,
 }
 
 model = {
@@ -62,8 +63,6 @@ model = {
 initialization_message = """
 PLACE A MESSAGE HERE TO INTRODUCE PEOPLE TO THE EXPERIENCE
 """
-
-initial_bot_message = """Can you tell me your name or what I should call you?"""
 
 Exhibit_background = """A message from the Director, Joe Paton: 
 In Metamersion: Latent Spaces, we continue in our voyage to discover deep synergies between science, art, and technology.
@@ -102,7 +101,7 @@ First_chat_directions = f"""In this chat, first {AI_name} asks the vistitor thei
 Next it asks about who the visitor is.
 """
 
-template = f"""{Exhibit_background}
+template = """{Exhibit_background}
 {LSI_background}
 {AI_background}
 {First_chat_directions}
@@ -113,7 +112,7 @@ Visitor: {input}
 AI{qualifier}:"""  # note these must be history and input!
 
 
-
+initial_bot_message = """Can you tell me your name or what I should call you?"""
 last_bot_pre_message_injection = """\nThis was enough information for the {ai_prefix}. In the next statement, the {ai_prefix} politely thanked the {human_prefix} and said that the VR experience can now begin in the next room."""
 last_bot_pre_message_injecttion_model = {
     "model_name": model_name,
@@ -260,15 +259,10 @@ silence_begin = -3
 quality = "medium"
 depth_strength = 0.5
 seed = 420
-width = 1280 #768
-height = 768 #512
+width = 768
+height = 512
 negative_prompt = "ugly, blurry"
-
-# lambda 
-#ip_server = "138.2.229.216"
-# lambda A1
-ip_server = "130.61.128.225"
-
+ip_server = "138.2.229.216"
 
 #######################################################################################################################
 # 1. Analyze the chat
