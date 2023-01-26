@@ -442,7 +442,7 @@ class ChatGUI:
                 # Check if this was the last chat statement -- inject stop text if so
                 if time.time() > self.time_start + self.config.initial_chat_time_limit:
                     output = self.wrap_up_and_save()
-                elif self.text_last_human == self.exit_breaker:
+                elif self.last_text_human == self.exit_breaker:
                     output = self.wrap_up_and_save()
                 else:
                     output = self.chat(self.last_text_human)
