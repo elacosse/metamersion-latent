@@ -23,6 +23,9 @@ mkdir movies
 # Get latent blending
 git clone https://github.com/lunarring/latentblending.git
 cd latentblending
+# Get diffusion weights
+#wget https://huggingface.co/stabilityai/stable-diffusion-2-1-base/resolve/main/v2-1_512-ema-pruned.ckpt v2-1_512-ema-pruned.ckpt
+wget https://huggingface.co/stabilityai/stable-diffusion-2-1/resolve/main/v2-1_768-ema-pruned.ckpt v2-1_768-ema-pruned.ckpt 
 
 # VARIANT B: AUTO INSTALL
 pip install -r requirements.txt
@@ -44,10 +47,7 @@ pip install wget
 # Vimeo
 pip install PyVimeo
 
-# Get diffusion weights
-#wget https://huggingface.co/stabilityai/stable-diffusion-2-1-base/resolve/main/v2-1_512-ema-pruned.ckpt v2-1_512-ema-pruned.ckpt
-wget https://huggingface.co/stabilityai/stable-diffusion-2-1/resolve/main/v2-1_768-ema-pruned.ckpt v2-1_768-ema-pruned.ckpt 
 
-cd ..
+
 
 python first_run.py
