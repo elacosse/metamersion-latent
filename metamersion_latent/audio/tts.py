@@ -31,7 +31,7 @@ def create_tts_from_text(
         preset=preset,
     )
     data = gen.squeeze(0).cpu()
-    torchaudio.save(output_path, data, 441000, format="wav")
+    torchaudio.save(output_path, data, 24000, format="wav")
 
 
 def assemble_tts_for_video(
