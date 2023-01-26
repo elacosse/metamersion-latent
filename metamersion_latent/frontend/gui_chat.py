@@ -451,9 +451,7 @@ class ChatGUI:
                 self.check_if_init_ai_typing()
 
     def wrap_up_and_save(self):
-        output = self.chat(
-            self.last_text_human + self.config.last_bot_pre_message_injection
-        )
+        output = self.chat(self.last_text_human + self.config.last_bot_pre_message_injection)
         self.chat_active = False
         self.time_finish = time.time()
 
@@ -733,7 +731,7 @@ if __name__ == "__main__":
     # Change Parameters below
 
     parser = argparse.ArgumentParser(description="ChatGUI")
-    parser.add_argument("--fp_config", type=str, default="../configs/chat/ls1_version_4_exp.py")
+    parser.add_argument("--fp_config", type=str, default="../configs/chat/ls1_version_7-davinci.py")
     parser.add_argument("--verbose_ai", type=bool, default=True)
     parser.add_argument("--portugese_mode", type=bool, default=False)
     parser.add_argument("--ai_fake_typing", type=bool, default=True)
