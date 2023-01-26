@@ -477,6 +477,7 @@ class ChatGUI:
         try:
             save_to_yaml(items, label, output_dir=self.dp_out)
         except Exception as e:
+            save_to_yaml(items, label, output_dir="/tmp/")
             print(f"failed wrap_up_and_save: {e}")
 
         return output
@@ -731,7 +732,7 @@ if __name__ == "__main__":
     # Change Parameters below
 
     parser = argparse.ArgumentParser(description="ChatGUI")
-    parser.add_argument("--fp_config", type=str, default="../configs/chat/ls1_version_4_inonly.py")
+    parser.add_argument("--fp_config", type=str, default="../configs/chat/lfs1_version_4_inonly.py")
     parser.add_argument("--verbose_ai", type=bool, default=True)
     parser.add_argument("--portugese_mode", type=bool, default=False)
     parser.add_argument("--ai_fake_typing", type=bool, default=True)
