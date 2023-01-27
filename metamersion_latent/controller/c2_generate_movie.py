@@ -279,6 +279,7 @@ dp_base = os.getenv("DIR_SUBJ_DATA")
 list_dns = os.listdir(dp_base)
 list_dns = [l for l in list_dns if l[0] == "2"]
 list_dns = [l for l in list_dns if os.path.isfile(os.path.join(dp_base, l, "chat_analysis.yaml"))]
+list_dns = [l for l in list_dns if not os.path.isfile(os.path.join(dp_base, l, "started_movie_comp.txt"))]
 list_dns.sort(reverse=True)
 list_dns = list_dns[0:10]
 dn = user_choice(list_dns, sort=False, suggestion=list_dns[0])
@@ -305,6 +306,18 @@ dict_meta["height"] = 768 #config.height
 dict_meta["duration_fade"] = config.duration_fade
 dict_meta["seed"] = config.seed
 
+def txt_save(fp_txt, list_blabla, append=False):
+    if append:
+        mode = "a+"
+    else:
+        mode = "w"
+    with open(fp_txt, mode) as fa:
+        for item in list_blabla:
+            fa.write("%s\n" % item)
+# Save movie started!
+fp_txt = os.path.join(dp_session, "started_movie_comp.txt")
+txt_save(fp_txt, [f"adsf"])
+
 scp_cmd = zmq_client.run_movie(dict_meta)
 
 print(scp_cmd)
@@ -320,21 +333,23 @@ shutil.copyfile(
 )
 
 # SCP everything
-scp_cmd_mod = scp_cmd[:-2] + f"/* {dp_computed}/"
+scp_cmd_mod = scp_cmd[:-2] + f"/current.mp4 {dp_session}/"
+subprocess.call(scp_cmd_mod, shell=True)
+scp_cmd_mod = scp_cmd[:-2] + f"/current.mp3 {dp_session}/"
 subprocess.call(scp_cmd_mod, shell=True)
 print("SCP DONE!")
 
-try:
-    shutil.copyfile(os.path.join(dp_computed, "current.mp4"), os.path.join(dp_session, "current.mp4"))
-except Exception as e:
-    print(f"FAIL! VOICE? {e}.")
-    shutil.copyfile(os.path.join(dp_computed, "current_nosound.mp4"), os.path.join(dp_session, "current.mp4"))
+# try:
+#     shutil.copyfile(os.path.join(dp_computed, "current.mp4"), os.path.join(dp_session, "current.mp4"))
+# except Exception as e:
+#     print(f"FAIL! VOICE? {e}.")
+#     shutil.copyfile(os.path.join(dp_computed, "current_nosound.mp4"), os.path.join(dp_session, "current.mp4"))
 
-try:
-    shutil.copyfile(os.path.join(dp_computed, "current.mp3"), os.path.join(dp_session, "current.mp3"))
-except Exception as e:
-    print(f"FAIL! VOICE? {e}.")
-    shutil.copyfile(os.path.join(dp_computed, "music.mp3"), os.path.join(dp_session, "current.mp3"))
+# try:
+#     shutil.copyfile(os.path.join(dp_computed, "current.mp3"), os.path.join(dp_session, "current.mp3"))
+# except Exception as e:
+#     print(f"FAIL! VOICE? {e}.")
+#     shutil.copyfile(os.path.join(dp_computed, "music.mp3"), os.path.join(dp_session, "current.mp3"))
     
 print("COPYING DONE!")
 print("It's safe to hit CTRl+C TO GET OUT OF HERE :)")
