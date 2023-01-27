@@ -15,11 +15,13 @@ sys.path.append("../..")
 sys.path.append("..")
 from metamersion_latent.llm.config import Config
 from metamersion_latent.utils import save_to_yaml, load_yaml, user_choice
+from dotenv import find_dotenv, load_dotenv
 import os
 import subprocess
 import shutil
 import ftplib
-
+import vimeo #pip3 uninstall PyVimeo - if also https://stackoverflow.com/questions/44031471/importerror-cannot-import-name-urlencode-when-trying-to-install-flask-ext-sto
+import requests
 
 #%% SCP to windows computer
 load_dotenv(find_dotenv(), verbose=False) 
@@ -124,3 +126,52 @@ fp_txt = os.path.join(dp_session, "injected.txt")
 txt_save(fp_txt, [f"injected at {get_time('second')}"])
 
 print("ALL COPIED SUCCESSFULLY!")
+
+# VIMEO UPLOAD
+print("STARTING VIMEO UPLOAD")
+load_dotenv(find_dotenv(), verbose=False) 
+
+ACCESS_TOKEN = os.getenv("VIMEO_ACCESS_TOKEN")
+SECRET = os.getenv("VIMEO_ACCESS_TOKEN")
+CLIENT_ID = os.getenv("VIMEO_ACCESS_TOKEN")
+
+v = vimeo.VimeoClient(
+    token=ACCESS_TOKEN,
+    key=CLIENT_ID,
+    secret=SECRET
+)
+
+# Make the request to the server for the "/me" endpoint.
+about_me = v.get('/me')
+
+# Make sure we got back a successful response.
+assert about_me.status_code == 200
+
+fp_movie = os.path.join(dp_session, "current.mp4")
+video_uri = v.upload(
+    fp_movie,
+    data={'name': dn[0:13], 'description': 'latent space 1', 'chunk_size': 512 * 1024, 'privacy':{'view':'anybody', 'embed':'public'}, "content_rating":["safe"]}
+)
+
+#%% verify
+video_id = video_uri.split("/")[-1] 
+video_url = "https://vimeo.com/{}".format(video_id)
+while True:
+    status_code = requests.get(video_url).status_code
+    if status_code == 200:
+        break
+    else:
+        time.sleep(10)
+        
+#%% 
+import qrcode
+import qrcode.image.svg
+img = qrcode.make(video_url)
+
+#, image_factory=qrcode.image.svg.SvgImage)
+with open('qr.svg', 'wb') as qr:
+    img.save(qr)
+
+
+
+
