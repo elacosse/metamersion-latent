@@ -862,10 +862,4 @@ if __name__ == "__main__":
         # Update display
         self.update_render()
     
-        for event in pygame.event.get():
-            if event.type == pygame.KEYDOWN:
-                key = get_key(event.key)
-                if key==".":
-                    pygame.quit()
-    
         # print(f"bing: {time.time()}")
