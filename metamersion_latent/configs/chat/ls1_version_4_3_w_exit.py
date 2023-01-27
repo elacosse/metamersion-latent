@@ -9,7 +9,9 @@ openai_model = "text-davinci-003"
 human_prefix = "Visitor"
 ai_prefix = "YY"
 qualifier_dict = {
-    "": 1,
+    "": 3,
+     ", changing the subject": 1,
+
 }
 #    "  soliciting the visitor's opinion": 5,
 #    " politely and empathically delving deeper, politely soliciting the visitor's opinion": 5,
