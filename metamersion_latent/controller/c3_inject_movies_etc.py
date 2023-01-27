@@ -66,11 +66,7 @@ def get_time(resolution=None):
 
 #%%
 
-
-
-
-
-# OCTI COPYING
+# OCTI part
 try:
 	dp_top_projection = os.path.join(dp_session, "top_projection")
 	os.makedirs(dp_top_projection, exist_ok=True)
