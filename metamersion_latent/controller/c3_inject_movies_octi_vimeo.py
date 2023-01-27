@@ -22,7 +22,7 @@ import shutil
 import ftplib
 import vimeo #pip3 uninstall PyVimeo - if also https://stackoverflow.com/questions/44031471/importerror-cannot-import-name-urlencode-when-trying-to-install-flask-ext-sto
 import requests
-
+import qrcode
 #%% SCP to windows computer
 load_dotenv(find_dotenv(), verbose=False) 
 dp_base = os.getenv("DIR_SUBJ_DATA") # to .env add  DIR_SUBJ_DATA='/Volumes/LXS/test_sessions/'
@@ -121,7 +121,7 @@ session.quit()
 fp_txt = os.path.join(dp_session, "injected.txt")
 txt_save(fp_txt, [f"injected at {get_time('second')}"])
 
-print("ALL COPIED SUCCESSFULLY!")
+print("\n\n ALL COPIED SUCCESSFULLY! \nSTART THE EXPERIENCE NOW AND GIVE THE GUIDE A THUMBS UP!\n")
 
 # VIMEO UPLOAD
 print("STARTING VIMEO UPLOAD")
@@ -146,9 +146,9 @@ assert about_me.status_code == 200
 fp_movie = os.path.join(dp_session, "current.mp4")
 video_uri = v.upload(
     fp_movie,
-    data={'name': dn[0:13], 'description': 'latent space 1', 'chunk_size': 512 * 1024, 'privacy':{'view':'anybody', 'embed':'public'}, "content_rating":["safe"]}
+    data={'name': dn[0:13], 'description': 'Latent Space I. Metamersion. Champalimaud Centre for the Unknown.', 'chunk_size': 512 * 1024, 'privacy':{'view':'anybody', 'embed':'public'}, "content_rating":["safe"]}
 )
-
+print("Vimeo upload completed. Verifying now...")
 #%% verify
 video_id = video_uri.split("/")[-1] 
 video_url = "https://vimeo.com/{}".format(video_id)
@@ -157,17 +157,13 @@ while True:
     if status_code == 200:
         break
     else:
-        time.sleep(10)
-        
+        time.sleep(2)
+print(f"Got the video url verified: {video_url}")   
 #%% 
-import qrcode
-import qrcode.image.svg
+fp_qr = os.path.join(dp_session, "qrcode.png")
 img = qrcode.make(video_url)
-
-#, image_factory=qrcode.image.svg.SvgImage)
-with open('qr.svg', 'wb') as qr:
-    img.save(qr)
-
+img.save(fp_qr)
+print(f"LAST STEP DONE. SAVED QR CODE: {fp_qr}")
 
 
 
