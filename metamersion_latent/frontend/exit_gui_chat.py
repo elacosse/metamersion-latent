@@ -15,6 +15,7 @@ from dotenv import find_dotenv, load_dotenv
 from metamersion_latent.llm.chat import Chat
 from metamersion_latent.llm.config import Config
 from metamersion_latent.utils import save_to_yaml, load_yaml, user_choice
+from PIL import Image
 
 """
 TODO: 
@@ -312,6 +313,11 @@ class ChatGUI:
         self.x_fract_img = 0.5
         self.fp_img_human = "img_human.png"
         self.fp_img_ai = "img_ai.png"
+        
+        fp_qr = os.path.join(self.dp_out, "qrcode.png")
+        # img_qr = np.asarray(Image.open(fp_qr)).astype(np.uint8)*255
+        # self.img_qr = np.repeat(np.expand_dims(img_qr, 2), 3, 2) 
+        self.img_qr = pygame.image.load(fp_qr)
 
         # Fonts
         if not os.path.isfile(self.fp_font):
@@ -491,9 +497,8 @@ class ChatGUI:
                 self.check_if_init_ai_typing()
 
     def wrap_up_and_save(self):
-        output = self.chat(
-            self.last_text_human + self.config.last_exit_bot_pre_message_injection
-        )
+        print("WRAP UP AND SAVE CALLED")
+        output = self.chat(self.last_text_human + self.config.last_exit_bot_pre_message_injection)
         self.chat_active = False
         self.time_finish = time.time()
 
@@ -522,7 +527,6 @@ class ChatGUI:
             save_to_yaml(items, label, output_dir="/tmp/")
             print(f"failed wrap_up_and_save: {e}")
 
-        print("WRAP UP AND SAVE CALLED")
         return output
 
     def last_input_ai(self):
@@ -835,10 +839,19 @@ if __name__ == "__main__":
             self.render_cursor_human()
             self.send_message_check()
 
+        if not self.chat_active:
+            if time.time() > self.time_finish + 2:
+                xxx
+                
+        if True:
+            # SHOW QR CODE
+            self.screen.fill(self.background_color)
+            y_qr = self.display_height//2 - self.img_qr.get_size()[0]//2
+            x_qr = self.display_width//2 - self.img_qr.get_size()[1]//2
+            self.screen.blit(self.img_qr, (x_qr, y_qr))
+            
+
         # Update display
         self.update_render()
-
-        if not self.chat_active:
-            if time.time() > self.time_finish + 20:
-                break
+                
         # print(f"bing: {time.time()}")
