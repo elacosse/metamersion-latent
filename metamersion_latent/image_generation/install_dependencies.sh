@@ -37,6 +37,7 @@ cd ..
 git clone https://github.com/elacosse/metamersion-latent
 mv metamersion-latent metamersion_latent
 pip install git+https://github.com/neonbjb/tortoise-tts
+pip install git+https://github.com/elacosse/tortoise-tts@watts
 pip install TTS
 sudo apt-get -y install espeak-ng
 
