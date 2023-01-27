@@ -164,6 +164,7 @@ fp_qr = os.path.join(dp_session, "qrcode.png")
 img = qrcode.make(video_url)
 img.save(fp_qr)
 print(f"LAST STEP DONE. SAVED QR CODE: {fp_qr}")
+print("ALL IS GOOD. IT WAS A SUCCESS. DON'T FORGET TO KEEP AN EYE ON THE OUT TERMINAL.")
 
 
 
