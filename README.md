@@ -24,7 +24,8 @@ STABILITY_KEY=""
 ##### Run the chatbot with a configuration file and save the conversation to examples in repository
 Configuration file (required): ```-c  metamersion_latent/configs/chat/ls1_version_5.py```
 Verbose mode flag: ```-v```
-Save to example flag: ```metamersion_latent/examples/chats/{user-name}.py```
+Save to example flag: ```-s```
+will save to metamersion_latent/examples/chats/{user-name}.py```
 To run chatbot with these flags, run
 ```bash 
 python metamersion_latent/tools/chatbot.py -c metamersion_latent/configs/chat/ls1_version_5.py -v -s
