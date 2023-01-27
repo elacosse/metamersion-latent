@@ -840,16 +840,16 @@ if __name__ == "__main__":
             self.send_message_check()
 
         if not self.chat_active:
-            if time.time() > self.time_finish + 2:
-                xxx
-                
-        if True:
-            # SHOW QR CODE
-            self.screen.fill(self.background_color)
-            y_qr = self.display_height//2 - self.img_qr.get_size()[0]//2
-            x_qr = self.display_width//2 - self.img_qr.get_size()[1]//2
-            self.screen.blit(self.img_qr, (x_qr, y_qr))
-            
+            t_now = time.time()
+            if t_now > self.time_finish + 2 and t_now < self.time_finish + 25: #put to config w defaults 
+                    
+                # SHOW QR CODE
+                self.screen.fill(self.background_color)
+                y_qr = self.display_height//2 - self.img_qr.get_size()[0]//2
+                x_qr = self.display_width//2 - self.img_qr.get_size()[1]//2
+                self.screen.blit(self.img_qr, (x_qr, y_qr))
+            else:
+                self.screen.fill(self.background_color)
 
         # Update display
         self.update_render()
