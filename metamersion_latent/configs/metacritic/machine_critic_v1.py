@@ -1,9 +1,5 @@
-# FewShot GPT-3 - is it a goodbye?
-
-openai_model = "text-ada-001"
-
-model = {
-    "model_name": openai_model,
+embedding_model = {
+    "model_name": "text-ada-001",
     "temperature": 0.7,
     "max_tokens": 1024,
     "top_p": 1.0,
@@ -15,6 +11,25 @@ model = {
     "_type": "openai",
 }
 
+sentiment_model = {
+    "model_name": "text-davinci-003",
+    "temperature": 0.7,
+    "max_tokens": 1024,
+    "top_p": 1.0,
+    "frequency_penalty": 0.0,
+    "presence_penalty": 0.0,
+    "n": 1,
+    "best_of": 1,
+    "request_timeout": None,
+    "_type": "openai",
+}
+
+sentiment_template = """Extract the sentiment from the following sentence as either "Positive", "Negative", or "Neutral".
+
+Sentence: {input}
+Sentiment:"""
+
+
 goodbye_examples = [
     "Bye",
     "Goodbye",
@@ -22,11 +37,4 @@ goodbye_examples = [
     "Catch you later",
     "OK Ciao",
     "See you soon",
-]
-
-examples = [
-    {"statement": "Goodbye!", "answer": "True"},
-    {"statment": "See you later!", "answer": "True"},
-    {"statment": "No", "answer": "False"},
-    {"question": "Yes", "answer": "No"},
 ]

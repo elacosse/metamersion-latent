@@ -1,10 +1,11 @@
 import re
 
 import numpy as np
+from langchain.chains import LLMChain
 from langchain.embeddings import OpenAIEmbeddings
+from langchain.llms.loading import load_llm_from_config
+from langchain.prompts import PromptTemplate
 
-# from langchain.chains import ConversationChain, LLMChain
-# from langchain.llms.loading import load_llm_from_config
 from metamersion_latent.llm.config import Config
 
 
@@ -25,6 +26,13 @@ class Critic:
         self.outputs = []
 
         self.embeddings = OpenAIEmbeddings()
+
+        self.llm_sentiment = load_llm_from_config(self.config.sentiment_model)
+
+        self.sentiment_prompt = PromptTemplate(
+            input_variables=["input"],
+            template=self.config.sentiment_template,
+        )
 
         self.goodbye_examples = config.goodbye_examples
 
@@ -72,6 +80,17 @@ class Critic:
         array_b_result = np.array(self.embeddings.embed_query(norm_text_b))
         distance = np.linalg.norm(array_a_result - array_b_result)
         return distance
+
+    def _get_sentiment_label_of_text(self, text: str) -> str:
+        """Get the sentiment of a text.
+        Args:
+            text (str): The text to check.
+        Returns:
+            str: The sentiment of the text as label
+        """
+        chain = LLMChain(llm=self.llm_sentiment, prompt=self.sentiment_prompt)
+        output = chain.run(text)
+        return output
 
     def _get_metric_goodbye(self, message: str) -> float:
         """Get a measure that the user is saying goodbye.
@@ -140,5 +159,8 @@ class HumanCritic(Critic):
 
         # Check if the user is saying goodbye
         self.dict_result["metric_goodbye"] = self._get_metric_goodbye(message)
+
+        # Determine sentiment of the user's message
+        self.dict_result["sentiment"] = self._get_sentiment_label_of_text(message)
 
         return self.dict_result
