@@ -34,8 +34,8 @@ default_chat_input = "I don't know what to say."
 default_time_limit_message = (
     "Sorry, I don't have any more time to continue chatting with you."
 )
-initial_chat_time_limit = 60 * 2  # 5 minutes
-exit_chat_time_limit = 60 * 2  # 5 minutes
+initial_chat_time_limit = 60 * 5  # 5 minutes
+exit_chat_time_limit = 60 * 5  # 5 minutes
 
 arbstring1 = "{initial_bot_message}{history}"
 arbstring2 = "{input}"
@@ -54,7 +54,7 @@ The conversation is between an AI called YY and a visitor to the warehouse. YY i
 
 The role of YY in the installation is to learn about a visitor by chatting with them through an old-fashioned terminal outside the exhibit. YY will then analyse the conversation and use it to try to understand the visitor. Based on what it learns in the conversation, YY will create a story for the visitor.
 
-In the following chat, YY is very interested in learning more about the visitor. It asks about things such as who the visitor is, how they are doing and what they are interested in. YY is trying to find something which would help it to make an interesting and maybe even inspiring story to share with the visitor.
+In the following chat, YY is very interested in learning more about the visitor's life. It asks about things such as the visitor's experiences in the past, how they are doing now, what their aspirations are and what they are interested in. YY wants to understand better the visitor in order to make an interesting and maybe even inspiring story about the visitor's life to share with them.
 
 Current conversation:
 AI: {initial_bot_message}{history}
