@@ -7,7 +7,7 @@ qualifier_dict = {
 }
 openai_model = "text-davinci-003"
 human_prefix = "Visitor"
-ai_prefix = "AI"
+ai_prefix = "YY"
 qualifier_dict = {
     "": 1,
 }
@@ -62,7 +62,7 @@ Visitor: {input}
 AI{qualifier}:"""  # note these must be history and input!
 conversation_stop_list = [f"\n{ai_prefix[0]}: ", f"\n{human_prefix[0]}: "]
 initial_bot_message = """Can you tell me your name or what I should call you?"""
-last_bot_pre_message_injection = f"""\nThis was enough information for the {ai_prefix}. In the next statement, the {ai_prefix} politely thanked the {human_prefix} and said that the VR experience can now begin in the next room."""
+last_bot_pre_message_injection = f"""\nIn the next statement, YY wrapped up, politely thanking the visitor for their time, telling them that YY is going to consider the chat and to create a story based on its understanding of them, and that it is sorry if there is some wait while that happens."""
 
 
 scene_object_template = """
