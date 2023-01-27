@@ -272,9 +272,9 @@ if id_server == 0:
 elif id_server == 1:
     ip_server = "129.146.180.99"
 elif id_server == 2:
-    ip_server = "129.154.230.126"
+    ip_server = "104.171.203.52"
 elif id_server == 3:
-    ip_server = "141.148.204.52"
+    ip_server = "129.213.91.125"
 
 load_dotenv(find_dotenv(), verbose=False)
 dp_base = os.getenv("DIR_SUBJ_DATA")
