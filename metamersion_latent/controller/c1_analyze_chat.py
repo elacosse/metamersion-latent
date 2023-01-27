@@ -36,6 +36,7 @@ while True:
     else:
         if len(list_dns) == 0:
             time.sleep(10)
+            print("automatic mode...nothing new...")
             continue
         else:
             dn = list_dns[0]

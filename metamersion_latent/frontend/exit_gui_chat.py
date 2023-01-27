@@ -317,7 +317,10 @@ class ChatGUI:
         fp_qr = os.path.join(self.dp_out, "qrcode.png")
         # img_qr = np.asarray(Image.open(fp_qr)).astype(np.uint8)*255
         # self.img_qr = np.repeat(np.expand_dims(img_qr, 2), 3, 2) 
-        self.img_qr = pygame.image.load(fp_qr)
+        try:
+            self.img_qr = pygame.image.load(fp_qr)
+        except Exception as e:
+            self.img_qr = None
 
         # Fonts
         if not os.path.isfile(self.fp_font):
@@ -844,10 +847,11 @@ if __name__ == "__main__":
             if t_now > self.time_finish + 2 and t_now < self.time_finish + 25: #put to config w defaults 
                     
                 # SHOW QR CODE
-                self.screen.fill(self.background_color)
-                y_qr = self.display_height//2 - self.img_qr.get_size()[0]//2
-                x_qr = self.display_width//2 - self.img_qr.get_size()[1]//2
-                self.screen.blit(self.img_qr, (x_qr, y_qr))
+                if self.img_qr is not None:
+                    self.screen.fill(self.background_color)
+                    y_qr = self.display_height//2 - self.img_qr.get_size()[0]//2
+                    x_qr = self.display_width//2 - self.img_qr.get_size()[1]//2
+                    self.screen.blit(self.img_qr, (x_qr, y_qr))
             else:
                 self.screen.fill(self.background_color)
                 for event in pygame.event.get():
