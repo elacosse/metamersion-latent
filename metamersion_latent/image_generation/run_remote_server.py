@@ -625,7 +625,7 @@ while True:
             print("GOT MESSAGE")
             # Output files
             code_subject = safe_dict_read(dict_meta, 'code_subject', 'NONAME')
-            name_base = f"{get_time('second')}_{code_subject}"
+            name_base = f"comp_{get_time('second')}_chat_{code_subject}"
             dp_subj = f"/home/ubuntu/movies/{name_base}"
             os.makedirs(dp_subj)
 
@@ -832,7 +832,6 @@ while True:
             print("DONE SAVING INFO FILE")
 
 
-
             print("ALL DONE! SENDING BACK SCP COMMANDS")
             # str_base = f"/home/ubuntu/movies/{name_base}"
             scp_cmd = f"scp -r ubuntu@{server_ip}:/{dp_subj} ."
@@ -845,9 +844,6 @@ while True:
             meta["code_sending"] = str(uuid.uuid4())[:5]
             meta["scp_cmd"] = scp_cmd
             server.publish_thread(meta, img)
-
-
-
 
 
 

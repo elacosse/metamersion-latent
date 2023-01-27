@@ -305,6 +305,7 @@ dict_meta["width"] = 1280#config.width
 dict_meta["height"] = 768 #config.height
 dict_meta["duration_fade"] = config.duration_fade
 dict_meta["seed"] = config.seed
+dict_meta["code_subject"] = dn
 
 def txt_save(fp_txt, list_blabla, append=False):
     if append:
