@@ -18,7 +18,7 @@ from metamersion_latent.utils import save_to_yaml, load_yaml, user_choice
 import os
 import subprocess
 import shutil
-
+import ftplib
 
 
 #%% SCP to windows computer
@@ -64,6 +64,12 @@ def get_time(resolution=None):
     return t
 
 
+#%%
+
+
+
+
+
 # OCTI COPYING
 try:
 	dp_top_projection = os.path.join(dp_session, "top_projection")
@@ -96,20 +102,25 @@ try:
 
 	# upload the video to raspberrypi14 in the /home/pi/LS1 using scp
 	p = subprocess.Popen(['scp', fp_cropped, 'pi@'+host+':/home/pi/LS1'], cwd=dp_top_projection)
+	p.wait()
 	p = subprocess.Popen(['scp', fp_chat_analysis, 'pi@'+host+':/home/pi/LS1'], cwd=dp_top_projection)
-    
-    
-
-	# wait for the process to finish
 	p.wait()
 except Exception as e:
 	print(f"Bad Octi / Johannes: {e}")
     
+
+# SEND OVER TO WINDOWS VR PC
+print("STARTING FTP COPY TO VR PC...")
+list_transfer = ['current.mp4', 'current.mp3']
+session = ftplib.FTP('192.168.50.254','vr','vr420')
+for fn in list_transfer:
+    fp = os.path.join(dp_session, fn)
+    file = open(fp,'rb')
+    session.storbinary(f'STOR {fn}', file)     
+    file.close()    
+session.quit()    
+    
 fp_txt = os.path.join(dp_session, "injected.txt")
 txt_save(fp_txt, [f"injected at {get_time('second')}"])
 
-fp = os.path.join(dp_session, 'current.mp*')
-scp_cmd = f"scp {fp} CCU-VROOM-WIN10@192.168.50.254:/C:/media/"
-print("RUN THE FOLLOWING COMMAND:\n")
-print(scp_cmd)
-print("\nHint: If this doesnt work: did you start openssh server on windows")
+print("ALL COPIED SUCCESSFULLY!")
