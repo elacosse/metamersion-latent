@@ -382,6 +382,7 @@ class ChatGUI:
         self.idx_render = 0
         self.idx_render_lastsend = 0
         self.y_text_top_ai = 0
+        self.time_finish = 0
         # self.history_sham()
 
     def init_ai_chat(self, fp_config, verbose=False):
@@ -822,7 +823,7 @@ if __name__ == "__main__":
     )
 
     while True:
-
+        self.chat_active=False
         # Set clock speedim
         self.clock.tick(30)
 
@@ -850,8 +851,21 @@ if __name__ == "__main__":
                 self.screen.blit(self.img_qr, (x_qr, y_qr))
             else:
                 self.screen.fill(self.background_color)
+                for event in pygame.event.get():
+                    if event.type == pygame.KEYDOWN:
+                        key = get_key(event.key)
+                        if key==".":
+                            pygame.quit()
+                                
+        
 
         # Update display
         self.update_render()
-                
+    
+        for event in pygame.event.get():
+            if event.type == pygame.KEYDOWN:
+                key = get_key(event.key)
+                if key==".":
+                    pygame.quit()
+    
         # print(f"bing: {time.time()}")
