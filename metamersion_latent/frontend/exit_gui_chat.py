@@ -823,7 +823,6 @@ if __name__ == "__main__":
     )
 
     while True:
-        self.chat_active=False
         # Set clock speedim
         self.clock.tick(30)
 
