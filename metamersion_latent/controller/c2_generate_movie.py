@@ -268,13 +268,13 @@ args = parser.parse_args()
 
 id_server = args.id_server
 if id_server == 0:
-    ip_server = "129.146.2.114"
+    ip_server = "129.146.109.171"
 elif id_server == 1:
-    ip_server = "129.146.180.99"
+    ip_server = "129.146.3.236" #b
 elif id_server == 2:
-    ip_server = "104.171.203.52"
+    ip_server = "129.146.110.17"
 elif id_server == 3:
-    ip_server = "129.213.91.125"
+    ip_server = "129.213.23.33"
 
 load_dotenv(find_dotenv(), verbose=False)
 dp_base = os.getenv("DIR_SUBJ_DATA")
