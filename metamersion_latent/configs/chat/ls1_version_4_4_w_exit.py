@@ -10,11 +10,12 @@ human_prefix = "Visitor"
 ai_prefix = "Alan"
 qualifier_dict = {
     "": 1,
-    ", in the style of Alan Watts": 1,
-    "sharing something about himself and asking for affirmation": 1,
-     ", changing the subject": 1,
-
+     ", sharing personal information": 1,
 }
+#     ", making a joke": 1,
+#     ", changing the subject": 1,
+
+
 #    "  soliciting the visitor's opinion": 5,
 #    " politely and empathically delving deeper, politely soliciting the visitor's opinion": 5,
 #    " politely asks a more personal question": 5,
