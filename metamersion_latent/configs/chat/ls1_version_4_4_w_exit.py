@@ -39,7 +39,7 @@ default_chat_input = "I don't know what to say."
 default_time_limit_message = (
     "Sorry, I don't have any more time to continue chatting with you."
 )
-initial_chat_time_limit = 60 * 5  # 5 minutes
+initial_chat_time_limit = 60 * 7  # 5 minutes
 exit_chat_time_limit = 60 * 5  # 5 minutes
 
 arbstring1 = "{initial_bot_message}{history}"
