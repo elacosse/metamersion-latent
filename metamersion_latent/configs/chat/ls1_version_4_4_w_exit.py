@@ -95,7 +95,7 @@ scene_object_model = {
 last_exit_bot_pre_message_injection = (
     f"""\n{ai_prefix} thanks the {human_prefix} for their time and says goodbye."""
 )
-initial_exit_bot_message = "Hi, {username}! How was was your experience?"
+initial_exit_bot_message = "Hi, {username}, I'm glad you came back. Let me start by asking: How was was your experience? But rememer, you can ask me about anything you want as well."
 exit_template = """
 A visitor is chatting with an Alan Watts, the British popularizer of Eastern philosophy, in a warehouse. 
 
