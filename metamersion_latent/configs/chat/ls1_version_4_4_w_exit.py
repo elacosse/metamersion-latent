@@ -10,7 +10,7 @@ human_prefix = "Visitor"
 ai_prefix = "Alan"
 qualifier_dict = {
     "": 1,
-    "sharing some personal experience and asking confirmation": 1,
+    "sharing some personal experience and asking for affirmation": 1,
     "sharing some life advice and asking what the visitor thinks": 1,
      ", changing the subject": 1,
 
