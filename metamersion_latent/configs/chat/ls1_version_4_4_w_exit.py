@@ -10,8 +10,8 @@ human_prefix = "Visitor"
 ai_prefix = "Alan"
 qualifier_dict = {
     "": 1,
-    "sharing some advice and asking what the visitor thinks": 1,
-    "making a wise remark and asks the visitors opinion": 1,
+    "sharing some personal experience and asking confirmation": 1,
+    "sharing some life advice and asking what the visitor thinks": 1,
      ", changing the subject": 1,
 
 }
@@ -65,7 +65,7 @@ AI: {initial_bot_message}{history}
 Visitor: {input}
 AI{qualifier}:"""  # note these must be history and input!
 conversation_stop_list = [f"\n{ai_prefix[0]}: ", f"\n{human_prefix[0]}: "]
-initial_bot_message = """Hello, visitor! My name is Alan. Who are you?"""
+initial_bot_message = """Hello, visitor! My name is Alan. How may I call you?"""
 last_bot_pre_message_injection = f"""\nIn the next statement, Alan wrapped up, politely thanking the visitor for their time, telling them that Alan is going to consider the chat and to create a story based on its understanding of them, and that it is sorry if there is some wait while that happens."""
 
 
@@ -94,7 +94,7 @@ scene_object_model = {
 last_exit_bot_pre_message_injection = (
     f"""\n{ai_prefix} thanks the {human_prefix} for their time and says goodbye."""
 )
-initial_exit_bot_message = "Hi, {username}! How was it?"
+initial_exit_bot_message = "Hi, {username}! How was was your experience?"
 exit_template = """
 A visitor is chatting with an AI in a warehouse. 
 
