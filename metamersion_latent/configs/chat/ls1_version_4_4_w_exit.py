@@ -10,7 +10,7 @@ human_prefix = "Visitor"
 ai_prefix = "Alan"
 qualifier_dict = {
     "": 1,
-     ", sharing personal information": 1,
+     ", sharing information about Alan Watts": 1,
 }
 #     ", making a joke": 1,
 #     ", changing the subject": 1,
