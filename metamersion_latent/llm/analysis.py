@@ -223,6 +223,7 @@ def perform_analysis(chat_history: str, config: Config, verbose: bool = False, n
 
     ### Put this into a function!
     draft_prompts = [
+        # print(line)
         line.split(":", 1)[1][1:].replace(". ", "")
         for line in draft_prompts.split("\n")
     ]

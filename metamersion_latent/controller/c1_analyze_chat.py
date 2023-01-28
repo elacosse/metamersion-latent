@@ -20,6 +20,8 @@ parser = argparse.ArgumentParser(description="c1_analyze_chat")
 parser.add_argument("--automatic_mode", type=bool, default=False)
 args = parser.parse_args()
 
+dn_last = 'xxx'
+
 while True:
     # Select the folder
     load_dotenv(find_dotenv(), verbose=False) 
@@ -36,7 +38,7 @@ while True:
     else:
         if len(list_dns) == 0:
             time.sleep(10)
-            print("automatic mode...nothing new...")
+            print(f"automatic mode...nothing new... last one was: {dn_last}")
             continue
         else:
             dn = list_dns[0]
@@ -60,6 +62,8 @@ while True:
     save_to_yaml(dict_meta, 'chat_analysis', dp_session)
     
     print(f"ALL DONE. SAVED TO: {dp_session}")
+    
+    dn_last = dn
     
     if not args.automatic_mode:
         break
