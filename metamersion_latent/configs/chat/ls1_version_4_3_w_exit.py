@@ -63,7 +63,7 @@ AI: {initial_bot_message}{history}
 Visitor: {input}
 AI{qualifier}:"""  # note these must be history and input!
 conversation_stop_list = [f"\n{ai_prefix[0]}: ", f"\n{human_prefix[0]}: "]
-initial_bot_message = """Can you tell me your name or what I should call you?"""
+initial_bot_message = """Hello, visitor! My name is YY. Who are you?"""
 last_bot_pre_message_injection = f"""\nIn the next statement, YY wrapped up, politely thanking the visitor for their time, telling them that YY is going to consider the chat and to create a story based on its understanding of them, and that it is sorry if there is some wait while that happens."""
 
 
