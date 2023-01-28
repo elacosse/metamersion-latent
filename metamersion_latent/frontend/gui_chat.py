@@ -793,6 +793,7 @@ if __name__ == "__main__":
             self.update_render()
     
             if not self.chat_active:
+                self.screen.fill(self.background_color)
                 if time.time() > self.time_finish + 20:
                     break
         # print(f"bing: {time.time()}")
