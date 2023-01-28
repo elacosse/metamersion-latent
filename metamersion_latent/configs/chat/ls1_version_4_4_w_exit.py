@@ -9,11 +9,11 @@ openai_model = "text-davinci-003"
 human_prefix = "Visitor"
 ai_prefix = "Alan"
 qualifier_dict = {
-    "": 1,
+    "": 2,
      ", sharing information about Alan Watts": 1,
+     ", making a joke": 1,
+     ", changing the subject": 1,
 }
-#     ", making a joke": 1,
-#     ", changing the subject": 1,
 
 
 #    "  soliciting the visitor's opinion": 5,
@@ -77,16 +77,14 @@ The choice of the objects was:
 {objects}
 Why I chose these objects for {username}:
 1:"""
-# Format for LSI_process for : username, AI_name, personal_analysis, explain_scene_objects, amusing_story, poem,
-# LSI_process, Post_chat_directions, Closing_AI_question
 
 scene_object_model = {
     "model_name": "text-davinci-003",
-    "temperature": 0.0,
+    "temperature": 0.8,
     "max_tokens": 512,
     "top_p": 1.0,
-    "frequency_penalty": 0.0,
-    "presence_penalty": 0.0,
+    "frequency_penalty": 0.3,
+    "presence_penalty": 0.3,
     "n": 1,
     "best_of": 1,
     "request_timeout": None,
