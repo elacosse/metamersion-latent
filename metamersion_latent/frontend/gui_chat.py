@@ -760,38 +760,39 @@ if __name__ == "__main__":
     # run_fullscreen = True
 
     # Let's instantiate the ChatGUI object and conveniantly name it self...
-    self = ChatGUI(
-        fp_config=args.fp_config,
-        use_ai_chat=args.use_ai_chat,
-        verbose_ai=args.verbose_ai,
-        portugese_mode=args.portugese_mode,
-        ai_fake_typing=args.ai_fake_typing,
-        run_fullscreen=args.run_fullscreen,
-    )
-
-
     while True:
-
-        # Set clock speedim
-        self.clock.tick(30)
-
-        # Fill screen with background color
-        self.screen.fill(self.background_color)
-
-        # In case we have not done the fake ai tpying, lets do it now!
-        if self.show_ai_fake_typing:
-            self.render_ai_fake_typing()
-        self.render_text_history()
-
-        if not self.active_ai_fake_typing and self.chat_active:
-            self.render_text_typing()
-            self.render_cursor_human()
-            self.send_message_check()
-
-        # Update display
-        self.update_render()
-
-        if not self.chat_active:
-            if time.time() > self.time_finish + 20:
-                break
+        self = ChatGUI(
+            fp_config=args.fp_config,
+            use_ai_chat=args.use_ai_chat,
+            verbose_ai=args.verbose_ai,
+            portugese_mode=args.portugese_mode,
+            ai_fake_typing=args.ai_fake_typing,
+            run_fullscreen=args.run_fullscreen,
+        )
+    
+    
+        while True:
+    
+            # Set clock speedim
+            self.clock.tick(30)
+    
+            # Fill screen with background color
+            self.screen.fill(self.background_color)
+    
+            # In case we have not done the fake ai tpying, lets do it now!
+            if self.show_ai_fake_typing:
+                self.render_ai_fake_typing()
+            self.render_text_history()
+    
+            if not self.active_ai_fake_typing and self.chat_active:
+                self.render_text_typing()
+                self.render_cursor_human()
+                self.send_message_check()
+    
+            # Update display
+            self.update_render()
+    
+            if not self.chat_active:
+                if time.time() > self.time_finish + 20:
+                    break
         # print(f"bing: {time.time()}")
