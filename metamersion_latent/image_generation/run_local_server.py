@@ -626,6 +626,12 @@ for i in range(len(list_prompts) - 1):
     # Save movie
     lb.write_movie_transition(fp_movie_part, duration_single_trans)
     list_movie_parts.append(fp_movie_part)
+    
+    if i == 0:
+        multi_transition_img_first = lb.tree_final_imgs[0]
+    elif i == len(list_prompts) - 2:
+        multi_transition_img_last = lb.tree_final_imgs[-1]
+        
 
 # Finally, concatente the result
 concatenate_movies(fp_movie, list_movie_parts)
@@ -636,8 +642,8 @@ print("STARTING FADING...")
     # Fading: black -> first image in the beginning, last_image -> black in the end
 
 nmb_frames_fade = int(duration_fade * fps)
-img_first = lb.multi_transition_img_first0
-img_last = lb.multi_transition_img_last
+img_first = multi_transition_img_first
+img_last = multi_transition_img_last
 img_black = np.zeros_like(img_first)
 
 # save fade in
