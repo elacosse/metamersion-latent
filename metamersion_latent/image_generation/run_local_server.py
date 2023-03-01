@@ -38,7 +38,11 @@ def txt_save(fp_txt, list_blabla, append=False):
             fa.write("%s\n" % item)
 
 
-
+def add_sound(fp_final, fp_silentmovie, fp_sound):
+    cmd = f'ffmpeg -i {fp_silentmovie} -i {fp_sound} -c copy -map 0:v:0 -map 1:a:0 {fp_final}'
+    subprocess.call(cmd, shell=True)
+    if os.path.isfile(fp_final):
+        print(f"add_sound: success! Watch here: {fp_final}")
 
 def download_music():
     filename = "Silence.mp3"
@@ -523,6 +527,7 @@ fp_movie_fadeout = f"{dp_subj}/tmp_fadeout.mp4"
 fp_voice = f"{dp_subj}/voice.wav"
 fp_music = f"{dp_subj}/music.mp3"
 fp_mixed = f"{dp_subj}/current.mp3"
+fp_final = f"{dp_subj}/current.mp4"
 fp_yml = f"{dp_subj}/info.txt"
 
 # %% VIDEO
@@ -662,3 +667,8 @@ ms.finalize()
 
 # Concatente
 concatenate_movies(fp_movie_wfading, [fp_movie_fadein, fp_movie, fp_movie_fadeout])
+
+# add sound!
+add_sound(fp_final, fp_movie_wfading, fp_mixed)
+
+print(f"ALL GOOD! CHECK IT OUT: {fp_final}")
