@@ -626,7 +626,8 @@ for i in range(len(list_prompts) - 1):
     # Run latent blending
     lb.run_transition(
         depth_strength=depth_strength,
-        t_compute_max_allowed=t_compute_max_allowed)
+        t_compute_max_allowed=t_compute_max_allowed,
+        fixed_seeds=[420, 420])
 
     # Save movie
     lb.write_movie_transition(fp_movie_part, duration_single_trans)
