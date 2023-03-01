@@ -172,7 +172,7 @@ def generate_soundtrack_new(fp_music, fp_voice, soundtrack_duration=180, segment
       chosen_set2 = random.randint(1, 14) 
     print(f"Chosen Set is {chosen_set} + {chosen_set2}")
     
-    list_sets = [d for d in glob.glob('/home/ubuntu/wavs/**') if os.path.isdir(d)]
+    list_sets = [d for d in glob.glob('wavs/**') if os.path.isdir(d)]
     list_sets = sorted(list_sets, key=lambda x:int(x.split('set')[-1]))
     list_files = [glob.glob(s + '/**') for s in list_sets]
     list_nr_files = [len(s) for s in list_files]
@@ -208,7 +208,7 @@ def generate_soundtrack_new(fp_music, fp_voice, soundtrack_duration=180, segment
     # Create a list to hold the snippet samples
     samples = []
     # wav file with 90 seconds of silence to be the mix placeholder
-    silence = AudioSegment.from_mp3(file = "/home/ubuntu/wavs/Silence.mp3")
+    silence = AudioSegment.from_mp3(file = "wavs/Silence.mp3")
     silence = silence*3
     
     # Cut the audio segment to a lower length (in milliseconds)
@@ -336,26 +336,26 @@ def generate_soundtrack(fp_mp3, ChosenSet):
     #Load chosen set
     for i in range(18):
       if i == ChosenSet:
-        if i == 1: files = [AudioSegment.from_mp3(f"/home/ubuntu/wavs/set1/Orchestral_{i}.mp3") for i in range(1, 18)]
-        if i == 2: files = [AudioSegment.from_mp3(f"/home/ubuntu/wavs/set2/Mirage__RhodesMirage_{i}.mp3") for i in range(1, 18)]
-        if i == 3: files = [AudioSegment.from_mp3(f"/home/ubuntu/wavs/set3/Lx2_2_{i}.mp3") for i in range(1, 8)]
-        if i == 4: files = [AudioSegment.from_mp3(f"/home/ubuntu/wavs/set4/Lx1_1_{i}.mp3") for i in range(1, 13)]
-        if i == 5: files = [AudioSegment.from_mp3(f"/home/ubuntu/wavs/set5/LX3_2_{i}.mp3") for i in range(1, 11)]
-        if i == 6: files = [AudioSegment.from_mp3(f"/home/ubuntu/wavs/set6/BraidsCuts_{i}.mp3") for i in range(1, 9)]
-        if i == 7: files = [AudioSegment.from_mp3(f"/home/ubuntu/wavs/set7/Waldorf_{i}.mp3") for i in range(1, 7)]
-        if i == 8: files = [AudioSegment.from_mp3(f"/home/ubuntu/wavs/set8/SynthyHarp_{i}.mp3") for i in range(1, 7)]
-        if i == 9: files = [AudioSegment.from_mp3(f"/home/ubuntu/wavs/set9/synthLeads_{i}.mp3") for i in range(1, 9)]
-        if i == 10: files = [AudioSegment.from_mp3(f"/home/ubuntu/wavs/set10/SynthPad_{i}.mp3") for i in range(1, 8)]
-        if i == 11: files = [AudioSegment.from_mp3(f"/home/ubuntu/wavs/set11/SynthyDrone_{i}.mp3") for i in range(1, 13)]
-        if i == 12: files = [AudioSegment.from_mp3(f"/home/ubuntu/wavs/set12/Braga_Synthy_{i}.mp3") for i in range(1, 13)]
-        if i == 13: files = [AudioSegment.from_mp3(f"/home/ubuntu/wavs/set13/Sunshine_{i}.mp3") for i in range(1, 22)]
-        if i == 14: files = [AudioSegment.from_mp3(f"/home/ubuntu/wavs/set14/Barcelos_{i}.mp3") for i in range(1, 30)]
+        if i == 1: files = [AudioSegment.from_mp3(f"wavs/set1/Orchestral_{i}.mp3") for i in range(1, 18)]
+        if i == 2: files = [AudioSegment.from_mp3(f"wavs/set2/Mirage__RhodesMirage_{i}.mp3") for i in range(1, 18)]
+        if i == 3: files = [AudioSegment.from_mp3(f"wavs/set3/Lx2_2_{i}.mp3") for i in range(1, 8)]
+        if i == 4: files = [AudioSegment.from_mp3(f"wavs/set4/Lx1_1_{i}.mp3") for i in range(1, 13)]
+        if i == 5: files = [AudioSegment.from_mp3(f"wavs/set5/LX3_2_{i}.mp3") for i in range(1, 11)]
+        if i == 6: files = [AudioSegment.from_mp3(f"wavs/set6/BraidsCuts_{i}.mp3") for i in range(1, 9)]
+        if i == 7: files = [AudioSegment.from_mp3(f"wavs/set7/Waldorf_{i}.mp3") for i in range(1, 7)]
+        if i == 8: files = [AudioSegment.from_mp3(f"wavs/set8/SynthyHarp_{i}.mp3") for i in range(1, 7)]
+        if i == 9: files = [AudioSegment.from_mp3(f"wavs/set9/synthLeads_{i}.mp3") for i in range(1, 9)]
+        if i == 10: files = [AudioSegment.from_mp3(f"wavs/set10/SynthPad_{i}.mp3") for i in range(1, 8)]
+        if i == 11: files = [AudioSegment.from_mp3(f"wavs/set11/SynthyDrone_{i}.mp3") for i in range(1, 13)]
+        if i == 12: files = [AudioSegment.from_mp3(f"wavs/set12/Braga_Synthy_{i}.mp3") for i in range(1, 13)]
+        if i == 13: files = [AudioSegment.from_mp3(f"wavs/set13/Sunshine_{i}.mp3") for i in range(1, 22)]
+        if i == 14: files = [AudioSegment.from_mp3(f"wavs/set14/Barcelos_{i}.mp3") for i in range(1, 30)]
 
 
     # Create a list to hold the snippet samples
     samples = []
     # wav file with 90 seconds of silence to be the mix placeholder
-    silence = AudioSegment.from_mp3(file = "/home/ubuntu/wavs/Silence.mp3")
+    silence = AudioSegment.from_mp3(file = "wavs/Silence.mp3")
     silence = silence*3
      
     # Randomly iterate through files 15 times, randomly select a 15-30 second sample, and append it to the samples list
