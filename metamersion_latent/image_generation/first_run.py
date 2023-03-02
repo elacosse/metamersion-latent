@@ -2,11 +2,13 @@
 # -*- coding: utf-8 -*-
 
 import sys
-sys.path.append("/home/ubuntu/latentblending/")
-sys.path.append("/home/ubuntu/metamersion_latent/")
-from latent_blending import LatentBlending, add_frames_linear_interp, get_time
+sys.path.append("../../../latentblending/")
+sys.path.append("../audio")
+from latent_blending import LatentBlending
+from utils import interpolate_spherical, interpolate_linear, add_frames_linear_interp, yml_load, yml_save
+from movie_util import concatenate_movies
 from stable_diffusion_holder import StableDiffusionHolder
-from metamersion_latent.audio.tts import assemble_tts_for_video
+from tts import assemble_tts_for_video
 
 import time
 import zmq
@@ -14,14 +16,12 @@ import numpy as np
 from threading import Thread
 import json
 import uuid
-import vimeo 
 import random
 from pydub import AudioSegment
 import librosa
 import os
-import wget
 import requests
-
+from huggingface_hub import hf_hub_download
 
 
 
@@ -267,8 +267,6 @@ def download_file(filename, url_folder, local_folder):
         print(f"File could not be downloaded: {url} = {response.status_code}")
         return False
 
-    wget.download(url, local_folder)
-    
     if os.path.isfile(fp_target):
         print(f"Downloaded: {url}")
         return True
@@ -278,41 +276,11 @@ def download_file(filename, url_folder, local_folder):
 
 
 
-def upload_vimeo(fp_movie, name_video):
-    v = vimeo.VimeoClient(
-        token=ACCESS_TOKEN,
-        key=CLIENT_ID,
-        secret=SECRET
-    )
-
-    # Make the request to the server for the "/me" endpoint.
-    about_me = v.get('/me')
-
-    # Make sure we got back a successful response.
-    assert about_me.status_code == 200
-    video_uri = v.upload(
-        fp_movie,
-        data={'name': name_video, 'description': 'ls1', 'privacy': {'view':'unlisted'}, 'chunk_size': 512 * 1024}
-                )
-
-    return video_uri
-
-
 # LATENT BLENDING
-# LATENT BLENDING
-model_512 = False
-if model_512:
-    fp_ckpt = "latentblending/v2-1_512-ema-pruned.ckpt"
-    fp_config = 'latentblending/configs/v2-inference.yaml'
-
-# 768
-if not model_512:
-    fp_ckpt = "latentblending/v2-1_768-ema-pruned.ckpt"
-    fp_config = 'latentblending/configs/v2-inference-v.yaml'
-
+fp_ckpt = hf_hub_download(repo_id="stabilityai/stable-diffusion-2-1", filename="v2-1_768-ema-pruned.ckpt")
+fp_config = "../../../latentblending/configs/v2-inference-v.yaml"
 sdh = StableDiffusionHolder(fp_ckpt, fp_config)
 lb = LatentBlending(sdh)
-
 
 list_prompts = ["painting of a super nice house", "painting of a hell landscape, terrible"]
 neg_prompt = ""
@@ -320,13 +288,12 @@ width = 768
 height = 768
 duration_single_trans = 10
 depth_strength = 0.5
-quality = 'medium'
+t_compute_max_allowed = 45 # seconds per segment
 code_subject = 'STARTX'
 
 lb.set_width(width)
 lb.set_height(height)
 
-lb.load_branching_profile(quality=quality, depth_strength=depth_strength)
 fps = 30
 
 # Specify a list of prompts below
@@ -334,17 +301,42 @@ list_prompts = [l for l in list_prompts if len(l) > 10]
 print(f"found {len(list_prompts)} prompts. generating movie now")
 
 # You can optionally specify the seeds
-list_seeds = None
 name_video = "test_video.mp4"
-fp_movie = f"/home/ubuntu/{name_video}.mp4"
+fp_movie = f"{name_video}"
 
-lb.run_multi_transition(
-        fp_movie, 
-        list_prompts, 
-        list_seeds=None, 
-        fps=fps, 
-        duration_single_trans=duration_single_trans
-    )
+list_movie_parts = []
+for i in range(len(list_prompts) - 1):
+    # For a multi transition we can save some computation time and recycle the latents
+    if i == 0:
+        lb.set_prompt1(list_prompts[i])
+        lb.set_prompt2(list_prompts[i + 1])
+        recycle_img1 = False
+    else:
+        lb.swap_forward()
+        lb.set_prompt2(list_prompts[i + 1])
+        recycle_img1 = True
+
+    fp_movie_part = f"tmp_part_{str(i).zfill(3)}.mp4"
+    # Run latent blending
+    lb.run_transition(
+        depth_strength=depth_strength,
+        t_compute_max_allowed=t_compute_max_allowed)
+
+    # Save movie
+    lb.write_movie_transition(fp_movie_part, duration_single_trans)
+    list_movie_parts.append(fp_movie_part)
+
+# Finally, concatente the result
+concatenate_movies(fp_movie, list_movie_parts)
+
+
+# lb.run_multi_transition(
+#         fp_movie, 
+#         list_prompts, 
+#         list_seeds=None, 
+#         fps=fps, 
+#         duration_single_trans=duration_single_trans
+#     )
 
 
 
@@ -354,12 +346,8 @@ lb.run_multi_transition(
 
 # VOICE TEST
 narration_list = []
-narration_list.append("Alan is walking around the warehouse, admiring the art pieces, when he is suddenly approached by an AI. Alan is initially taken aback, but the AI quickly explains that it is here to help him learn something about himself.")
-narration_list.append("Alan is intrigued and agrees to hear what the AI has to say. After some conversation, the AI reveals a secret to Alan - the warehouse is actually a portal to another world.")
-narration_list.append("Alan is amazed and hesitant, but the AI encourages him to try it and assures him that the portal will return him to the warehouse in the same condition as he left.")
-narration_list.append("Alan steps through the portal and finds himself in a bustling ancient city full of people from all over the world. He notices something strange - the people all seem to be behaving differently than normal; they are all speaking in kind and gentle tones, helping each other out, and smiling at one another. ")
-narration_list.append("After exploring the city for a while, Alan realizes why this is - the AI has been using AI technology to spread kindness and compassion through the people of the city. Alan smiles and is humbled by the AI’s efforts.")
-narration_list.append("Alan decides to take a piece of what he has learned back to the real world with him, vowing to take the time to be kind to himself and others. He steps back through the portal, grateful for the unexpected experience.    ")
+narration_list.append("hello hello")
+narration_list.append("oh hello again")
 silence_begin = 3
 transition_duration = 10
 start_times = list(np.arange(0,transition_duration*len(narration_list),transition_duration)+silence_begin)

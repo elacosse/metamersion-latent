@@ -26,7 +26,7 @@ import glob
 import pydub
 import wget  # pip install wget
 from huggingface_hub import hf_hub_download
-
+import soundfile as sf
 
 def txt_save(fp_txt, list_blabla, append=False):
     if append:
@@ -166,7 +166,7 @@ def segment_voice(audio_file, frame_rate=1000, thresh_vol=0.1, thresh_len_second
     return list_voice_start, list_voice_duration#, array_is_voice
 
 
-def generate_soundtrack_new(fp_music, fp_voice, soundtrack_duration=180, segments=5):
+def generate_soundtrack_new(fp_music, fp_voice, soundtrack_duration=180, segments=5, voice_volume_reduction=5):
     
     length_earlyStop = 0 
     length_overlap_float = 0.8
@@ -308,8 +308,10 @@ def generate_soundtrack_new(fp_music, fp_voice, soundtrack_duration=180, segment
         mixed = mixed.overlay(sample.pan(pan).apply_gain(volume_change), position=start_position*1000)
     
     print(f"Sample lengths: {sample_lengths}")
-    
+
+    voice = voice - voice_volume_reduction
     mixed = mixed.overlay(voice)
+    print(f"saving music and voice together. applied voice_volume_reduction {voice_volume_reduction}")
     
     # Save the mixed file
     mixed.export(fp_music, format="mp3")
@@ -490,12 +492,12 @@ def load_yaml(filepath):
 
 
 
-
 # %% IMPORTANT PARAMETERS
 fp_chat_analysis = "/tmp/chat_analysis.yaml"
 name_base = f"video_{get_time('second')}"
 dp_subj = f"{name_base}" # prepend here, e.g. "/mnt/ls1_data/redbitches/"
 t_compute_max_allowed = 45 # how much compute time (waiting time!) we grant each segment. 
+# voice_multiplier = 0.3
 
 # less important ones
 width = 1280
@@ -511,6 +513,7 @@ sdh = StableDiffusionHolder(fp_ckpt, fp_config)
 lb = LatentBlending(sdh)
 neg_prompt = ""
 depth_strength = 0.5
+voice_volume_reduction = 8
 
 lb.set_width(width)
 lb.set_height(height)
@@ -538,11 +541,6 @@ fps = 30
 
 seed = safe_dict_read(dict_meta, 'seed', 420)
 duration_fade = safe_dict_read(dict_meta, 'duration_fade', 10)
-if seed is None:
-    list_seeds = len(list_prompts)*[np.random.randint(999999999999)]
-else:
-    list_seeds = len(list_prompts)*[seed]
-
 # DEFINE SOME STUFF...
 audio_duration = len(list_prompts)*duration_single_trans + 2*duration_fade
 
@@ -582,31 +580,19 @@ print("GENERATING MUSIC...")
 
 try:
     if os.path.isfile(fp_voice):
-        generate_soundtrack_new(fp_music, fp_voice, soundtrack_duration=audio_duration, segments=len(list_prompts)-1)
+        generate_soundtrack_new(fp_mixed, fp_voice, soundtrack_duration=audio_duration, segments=len(list_prompts)-1, voice_volume_reduction=voice_volume_reduction)
     else:
         ChosenSet = np.random.randint(1, 13)
         if ChosenSet < 1 or ChosenSet > 14:
             print("WARNING! BAD ChosenSet! FORCING ChosenSet=1")
             ChosenSet=1
-        generate_soundtrack(fp_music, ChosenSet)
+        generate_soundtrack(fp_mixed, ChosenSet)
 
 except Exception as e:
     print(f"EXCEPTION! {e}")
 print("DONE GENERATING MUSIC")
 
-# %% MIX MUSIC AND VOICE
-# Load the audio tracks
-print("GENERATING MIX...")
-try:
-    x = AudioSegment.from_mp3(fp_music)
-    y = AudioSegment.from_wav(fp_voice)
-    # Mix the tracks together
-    mix = y.overlay(x)
-    # Export the mixed audio to a new file
-    mix.export(fp_mixed, format="mp3")
-except Exception as e:
-    print(f"EXCEPTION! {e}")
-print("DONE GENERATING MIX")
+
 
 # %% Latent blendig movie
 print("STARTING LATENT BLENDING...")
