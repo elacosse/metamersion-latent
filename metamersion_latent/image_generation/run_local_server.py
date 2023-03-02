@@ -27,6 +27,7 @@ import pydub
 import wget  # pip install wget
 from huggingface_hub import hf_hub_download
 import soundfile as sf
+import argparse
 
 def txt_save(fp_txt, list_blabla, append=False):
     if append:
@@ -493,9 +494,20 @@ def load_yaml(filepath):
 
 
 # %% IMPORTANT PARAMETERS
-fp_chat_analysis = "/tmp/chat_analysis.yaml"
-name_base = f"video_{get_time('second')}"
+parser = argparse.ArgumentParser(description="run_local_server")
+parser.add_argument("--fp_chat_analysis", type=str, required=True, help="file pointer to the chat analysis yaml")
+parser.add_argument("--out_dir", type=str, required=True, help="output directory, where the movie will be saved")
+parser.add_argument("--mode", type=str, default='single', help="choose between single, only_sound, only_video")
+args = parser.parse_args()
+
+# parse the mode
+mode = args.mode
+assert mode == "single" or mode == "only_sound" or mode == "only_video", "mode needs to be 'single', 'only_sound', 'only_video'"
+
+fp_chat_analysis = args.fp_chat_analysis
+name_base = args.out_dir
 dp_subj = f"{name_base}" # prepend here, e.g. "/mnt/ls1_data/redbitches/"
+
 t_compute_max_allowed = 45 # how much compute time (waiting time!) we grant each segment. 
 # voice_multiplier = 0.3
 
@@ -504,21 +516,21 @@ width = 1280
 height = 768
 duration_single_trans = 20
 depth_strength = 0.3
+voice_volume_reduction = 8
+neg_prompt = "blurry, ugly"
+
+# %% spawn latent blending
+if mode != "only_sound":
+    fp_ckpt = hf_hub_download(repo_id="stabilityai/stable-diffusion-2-1", filename="v2-1_768-ema-pruned.ckpt")
+    fp_config = "../../../latentblending/configs/v2-inference-v.yaml"
+    sdh = StableDiffusionHolder(fp_ckpt, fp_config)
+    lb = LatentBlending(sdh)
+
+    lb.set_width(width)
+    lb.set_height(height)
+
 
 # %% inits load chat analysis. 
-
-fp_ckpt = hf_hub_download(repo_id="stabilityai/stable-diffusion-2-1", filename="v2-1_768-ema-pruned.ckpt")
-fp_config = "../../../latentblending/configs/v2-inference-v.yaml"
-sdh = StableDiffusionHolder(fp_ckpt, fp_config)
-lb = LatentBlending(sdh)
-neg_prompt = ""
-depth_strength = 0.5
-voice_volume_reduction = 8
-
-lb.set_width(width)
-lb.set_height(height)
-
-
 dict_meta = load_yaml(fp_chat_analysis)
 
 os.makedirs(dp_subj, exist_ok=True)
@@ -544,58 +556,61 @@ duration_fade = safe_dict_read(dict_meta, 'duration_fade', 10)
 # DEFINE SOME STUFF...
 audio_duration = len(list_prompts)*duration_single_trans + 2*duration_fade
 
-
 # VOICE
-print("GENERATING VOICE...")
-try:
-    silence_begin = safe_dict_read(dict_meta, 'silence_begin', 1)
-    speaker_indx = safe_dict_read(dict_meta, 'speaker_indx', 1)
-    narration_list = safe_dict_read(dict_meta, 'narration_list', len(list_prompts)*["nothing to say"])
-    tts_length_scale = safe_dict_read(dict_meta, 'tts_length_scale', 1.0)
-    tts_model = 'tts_models/en/vctk/vits'
+if mode != "only_video":
+    print("GENERATING VOICE...")
+    try:
+        silence_begin = safe_dict_read(dict_meta, 'silence_begin', 1)
+        speaker_indx = safe_dict_read(dict_meta, 'speaker_indx', 1)
+        narration_list = safe_dict_read(dict_meta, 'narration_list', len(list_prompts)*["nothing to say"])
+        tts_length_scale = safe_dict_read(dict_meta, 'tts_length_scale', 1.0)
+        tts_model = 'tts_models/en/vctk/vits'
+        
+        offset = duration_fade
+        start_times = list(np.arange(0,duration_single_trans*len(narration_list),duration_single_trans)+silence_begin+offset)
+        print(f"audio_duration={audio_duration} start_times={start_times}")
     
-    offset = duration_fade
-    start_times = list(np.arange(0,duration_single_trans*len(narration_list),duration_single_trans)+silence_begin+offset)
-    print(f"audio_duration={audio_duration} start_times={start_times}")
+        print("BEFORE STARTING TTS:")
+        print(f"narration_list {narration_list}")
+        print(f"duration_single_trans {duration_single_trans}")
+        print(f"start_times {start_times}")
+        print(f"tts_length_scale {tts_length_scale}")
+        # segment_duration = generate_tts_audio_from_list_onsets(narration_list, start_times, audio_duration, tts_model, speaker_indx, fp_voice)
+        preset = "fast"
+        voice = "train_dreams"
+        devices = ["cuda:0"]
+        assemble_tts_for_video(narration_list, audio_duration, start_times, fp_voice, preset, voice, devices)
+    
+    except Exception as e:
+        print(f"EXCEPTION! {e}")
+    
+    print("DONE GENERATING VOICE")
+    
+    
+    # %% MUSIC
+    print("GENERATING MUSIC...")
+    
+    try:
+        if os.path.isfile(fp_voice):
+            generate_soundtrack_new(fp_mixed, fp_voice, soundtrack_duration=audio_duration, segments=len(list_prompts)-1, voice_volume_reduction=voice_volume_reduction)
+        else:
+            ChosenSet = np.random.randint(1, 13)
+            if ChosenSet < 1 or ChosenSet > 14:
+                print("WARNING! BAD ChosenSet! FORCING ChosenSet=1")
+                ChosenSet=1
+            generate_soundtrack(fp_mixed, ChosenSet)
+    
+    except Exception as e:
+        print(f"EXCEPTION! {e}")
+    print("DONE GENERATING MUSIC")
 
-    print("BEFORE STARTING TTS:")
-    print(f"narration_list {narration_list}")
-    print(f"duration_single_trans {duration_single_trans}")
-    print(f"start_times {start_times}")
-    print(f"tts_length_scale {tts_length_scale}")
-    # segment_duration = generate_tts_audio_from_list_onsets(narration_list, start_times, audio_duration, tts_model, speaker_indx, fp_voice)
-    preset = "fast"
-    voice = "train_dreams"
-    devices = ["cuda:0"]
-    assemble_tts_for_video(narration_list, audio_duration, start_times, fp_voice, preset, voice, devices)
-
-except Exception as e:
-    print(f"EXCEPTION! {e}")
-
-print("DONE GENERATING VOICE")
-
-
-# %% MUSIC
-print("GENERATING MUSIC...")
-
-try:
-    if os.path.isfile(fp_voice):
-        generate_soundtrack_new(fp_mixed, fp_voice, soundtrack_duration=audio_duration, segments=len(list_prompts)-1, voice_volume_reduction=voice_volume_reduction)
-    else:
-        ChosenSet = np.random.randint(1, 13)
-        if ChosenSet < 1 or ChosenSet > 14:
-            print("WARNING! BAD ChosenSet! FORCING ChosenSet=1")
-            ChosenSet=1
-        generate_soundtrack(fp_mixed, ChosenSet)
-
-except Exception as e:
-    print(f"EXCEPTION! {e}")
-print("DONE GENERATING MUSIC")
-
-
+# Catch the only sound process and echo it is finished.
+if mode == 'only_sound':
+    print("ALL GOOD!! only_sound mode ran through! exiting...")
+    sys.exit()
 
 # %% Latent blendig movie
-print("STARTING LATENT BLENDING...")
+
 list_movie_parts = []
 for i in range(len(list_prompts) - 1):
     # For a multi transition we can save some computation time and recycle the latents
@@ -657,6 +672,10 @@ ms.finalize()
 concatenate_movies(fp_movie_wfading, [fp_movie_fadein, fp_movie, fp_movie_fadeout])
 
 # add sound!
+if mode == 'only_video':
+    while not os.path.isfile(fp_mixed):
+        print(f"waiting for music/sound file to be completed: {fp_mixed}")
+        time.sleep(10)
 add_sound(fp_final, fp_movie_wfading, fp_mixed)
 
 print(f"ALL GOOD! CHECK IT OUT: {fp_final}")
