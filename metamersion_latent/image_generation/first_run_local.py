@@ -319,6 +319,7 @@ for i in range(len(list_prompts) - 1):
     fp_movie_part = f"tmp_part_{str(i).zfill(3)}.mp4"
     # Run latent blending
     lb.run_transition(
+        recycle_img1=recycle_img1,
         depth_strength=depth_strength,
         t_compute_max_allowed=t_compute_max_allowed)
 
